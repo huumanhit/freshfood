@@ -1,6 +1,6 @@
 // ============================================================
 // Prisma Schema — FreshFood Ecommerce
-// Database: MySQL 8.0+
+// Database: PostgreSQL (Supabase)
 // ============================================================
 
 generator client {
@@ -8,8 +8,9 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ============================================================
@@ -76,7 +77,7 @@ model User {
   name          String?
   email         String    @unique
   emailVerified DateTime?
-  image         String?   @db.Text
+  image         String?
   password      String?
   phone         String?   @unique
   role          Role      @default(USER)
@@ -101,12 +102,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -140,17 +141,17 @@ model VerificationToken {
 // ============================================================
 
 model Address {
-  id         String  @id @default(cuid())
-  userId     String
-  fullName   String
-  phone      String
-  province   String
-  district   String
-  ward       String
-  street     String
-  isDefault  Boolean @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        String   @id @default(cuid())
+  userId    String
+  fullName  String
+  phone     String
+  province  String
+  district  String
+  ward      String
+  street    String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   orders Order[]
@@ -163,16 +164,16 @@ model Address {
 // ============================================================
 
 model Category {
-  id          String    @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
-  slug        String    @unique
-  description String?   @db.Text
-  image       String?   @db.Text
+  slug        String   @unique
+  description String?
+  image       String?
   parentId    String?
-  sortOrder   Int       @default(0)
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
   children Category[] @relation("CategoryTree")
@@ -186,29 +187,29 @@ model Category {
 // ============================================================
 
 model Product {
-  id              String        @id @default(cuid())
-  name            String
-  slug            String        @unique
-  description     String?       @db.LongText
-  shortDescription String?      @db.Text
-  price           Decimal       @db.Decimal(12, 2)
-  salePrice       Decimal?      @db.Decimal(12, 2)
-  sku             String?       @unique
-  stock           Int           @default(0)
-  unit            String        @default("kg")
-  weight          Decimal?      @db.Decimal(8, 3)
-  origin          String?
-  status          ProductStatus @default(ACTIVE)
-  isFeatured      Boolean       @default(false)
-  isOrganic       Boolean       @default(false)
-  categoryId      String
-  metaTitle       String?
-  metaDescription String?       @db.Text
-  tags            String?       @db.Text
-  soldCount       Int           @default(0)
-  viewCount       Int           @default(0)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id               String        @id @default(cuid())
+  name             String
+  slug             String        @unique
+  description      String?
+  shortDescription String?
+  price            Decimal       @db.Decimal(12, 2)
+  salePrice        Decimal?      @db.Decimal(12, 2)
+  sku              String?       @unique
+  stock            Int           @default(0)
+  unit             String        @default("kg")
+  weight           Decimal?      @db.Decimal(8, 3)
+  origin           String?
+  status           ProductStatus @default(ACTIVE)
+  isFeatured       Boolean       @default(false)
+  isOrganic        Boolean       @default(false)
+  categoryId       String
+  metaTitle        String?
+  metaDescription  String?
+  tags             String?
+  soldCount        Int           @default(0)
+  viewCount        Int           @default(0)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 
   category   Category       @relation(fields: [categoryId], references: [id])
   images     ProductImage[]
@@ -217,14 +218,13 @@ model Product {
   reviews    Review[]
   wishlist   Wishlist[]
 
-  @@fulltext([name, description, tags])
   @@map("products")
 }
 
 model ProductImage {
   id        String   @id @default(cuid())
   productId String
-  url       String   @db.Text
+  url       String
   alt       String?
   sortOrder Int      @default(0)
   isPrimary Boolean  @default(false)
@@ -240,10 +240,10 @@ model ProductImage {
 // ============================================================
 
 model Cart {
-  id        String     @id @default(cuid())
-  userId    String     @unique
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   items CartItem[]
@@ -271,26 +271,26 @@ model CartItem {
 // ============================================================
 
 model Order {
-  id              String        @id @default(cuid())
-  orderNumber     String        @unique
-  userId          String
-  addressId       String?
-  status          OrderStatus   @default(PENDING)
-  paymentStatus   PaymentStatus @default(PENDING)
-  paymentMethod   PaymentMethod @default(COD)
-  subtotal        Decimal       @db.Decimal(12, 2)
-  shippingFee     Decimal       @db.Decimal(12, 2) @default(0)
-  discount        Decimal       @db.Decimal(12, 2) @default(0)
-  total           Decimal       @db.Decimal(12, 2)
-  couponId        String?
-  couponCode      String?
-  note            String?       @db.Text
-  transactionId   String?
-  shippedAt       DateTime?
-  deliveredAt     DateTime?
-  cancelledAt     DateTime?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id            String        @id @default(cuid())
+  orderNumber   String        @unique
+  userId        String
+  addressId     String?
+  status        OrderStatus   @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+  paymentMethod PaymentMethod @default(COD)
+  subtotal      Decimal       @db.Decimal(12, 2)
+  shippingFee   Decimal       @db.Decimal(12, 2) @default(0)
+  discount      Decimal       @db.Decimal(12, 2) @default(0)
+  total         Decimal       @db.Decimal(12, 2)
+  couponId      String?
+  couponCode    String?
+  note          String?
+  transactionId String?
+  shippedAt     DateTime?
+  deliveredAt   DateTime?
+  cancelledAt   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   user    User        @relation(fields: [userId], references: [id])
   address Address?    @relation(fields: [addressId], references: [id])
@@ -301,14 +301,14 @@ model Order {
 }
 
 model OrderItem {
-  id          String  @id @default(cuid())
-  orderId     String
-  productId   String
-  productName String
-  productImage String? @db.Text
-  price       Decimal @db.Decimal(12, 2)
-  quantity    Int
-  subtotal    Decimal @db.Decimal(12, 2)
+  id           String  @id @default(cuid())
+  orderId      String
+  productId    String
+  productName  String
+  productImage String?
+  price        Decimal @db.Decimal(12, 2)
+  quantity     Int
+  subtotal     Decimal @db.Decimal(12, 2)
 
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id])
@@ -321,15 +321,15 @@ model OrderItem {
 // ============================================================
 
 model Review {
-  id        String   @id @default(cuid())
-  userId    String
-  productId String
-  rating    Int
-  comment   String?  @db.Text
-  isVerified Boolean @default(false)
-  isVisible  Boolean @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  userId     String
+  productId  String
+  rating     Int
+  comment    String?
+  isVerified Boolean  @default(false)
+  isVisible  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -360,19 +360,19 @@ model Wishlist {
 // ============================================================
 
 model Coupon {
-  id              String     @id @default(cuid())
-  code            String     @unique
-  type            CouponType @default(PERCENTAGE)
-  value           Decimal    @db.Decimal(10, 2)
-  minOrderAmount  Decimal?   @db.Decimal(12, 2)
-  maxDiscount     Decimal?   @db.Decimal(12, 2)
-  usageLimit      Int?
-  usageCount      Int        @default(0)
-  isActive        Boolean    @default(true)
-  startsAt        DateTime?
-  expiresAt       DateTime?
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  id             String     @id @default(cuid())
+  code           String     @unique
+  type           CouponType @default(PERCENTAGE)
+  value          Decimal    @db.Decimal(10, 2)
+  minOrderAmount Decimal?   @db.Decimal(12, 2)
+  maxDiscount    Decimal?   @db.Decimal(12, 2)
+  usageLimit     Int?
+  usageCount     Int        @default(0)
+  isActive       Boolean    @default(true)
+  startsAt       DateTime?
+  expiresAt      DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 
   orders Order[]
 
@@ -384,18 +384,18 @@ model Coupon {
 // ============================================================
 
 model Banner {
-  id          String         @id @default(cuid())
-  title       String
-  subtitle    String?
-  image       String         @db.Text
-  linkUrl     String?
-  position    BannerPosition @default(HERO)
-  sortOrder   Int            @default(0)
-  isActive    Boolean        @default(true)
-  startsAt    DateTime?
-  expiresAt   DateTime?
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id        String         @id @default(cuid())
+  title     String
+  subtitle  String?
+  image     String
+  linkUrl   String?
+  position  BannerPosition @default(HERO)
+  sortOrder Int            @default(0)
+  isActive  Boolean        @default(true)
+  startsAt  DateTime?
+  expiresAt DateTime?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
 
   @@map("banners")
 }
