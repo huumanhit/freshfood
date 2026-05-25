@@ -6,9 +6,7 @@ interface AdminProductEditPageProps {
   params: { id: string };
 }
 
-export async function generateMetadata({
-  params,
-}: AdminProductEditPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: AdminProductEditPageProps): Promise<Metadata> {
   const product = await db.product.findUnique({
     where: { id: params.id },
     select: { name: true },
@@ -16,9 +14,7 @@ export async function generateMetadata({
   return { title: product ? `Sửa: ${product.name}` : "Sản phẩm không tồn tại" };
 }
 
-export default async function AdminProductEditPage({
-  params,
-}: AdminProductEditPageProps) {
+export default async function AdminProductEditPage({ params }: AdminProductEditPageProps) {
   const product = await db.product.findUnique({
     where: { id: params.id },
     include: { images: true },
