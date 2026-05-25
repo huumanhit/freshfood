@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -48,12 +50,15 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     const existing = await db.product.findUnique({ where: { id: params.id } });
     if (!existing) throw new NotFoundError("Sản phẩm");
 
+    const updateData = {
+      ...data,
+      ...(data.name ? { slug: generateSlug(data.name) } : {}),
+    };
+
     const product = await db.product.update({
       where: { id: params.id },
-      data: {
-        ...data,
-        ...(data.name && { slug: generateSlug(data.name) }),
-      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      data: updateData as any,
       include: { images: true, category: true },
     });
 
