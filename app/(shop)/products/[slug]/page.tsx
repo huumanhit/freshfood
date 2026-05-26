@@ -54,7 +54,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
       sku: true, stock: true, unit: true, weight: true,
       origin: true, status: true,
       isFeatured: true, isOrganic: true,
-      categoryId: true,
+      categoryId: true, soldCount: true,
       metaTitle: true, metaDescription: true, tags: true,
       createdAt: true, updatedAt: true,
       images: { orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }] },

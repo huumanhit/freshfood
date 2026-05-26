@@ -21,7 +21,7 @@ interface ProductInfoProps {
 }
 
 export function ProductInfo({ product }: ProductInfoProps) {
-  const { addItem, openCart, isInCart, getItemQuantity, updateQuantity } = useCart();
+  const { addItem, openCart, isInCart, getItemQuantity } = useCart();
   const [qty, setQty] = useState(1);
   const [justAdded, setJustAdded] = useState(false);
 
@@ -124,7 +124,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
           </span>
           <span className="text-sm text-gray-400">•</span>
           <span className="text-sm text-gray-400">
-            Đã bán {product.soldCount.toLocaleString("vi-VN")}
+            Đã bán {(product.soldCount ?? 0).toLocaleString("vi-VN")}
           </span>
         </div>
       )}
