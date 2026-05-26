@@ -115,7 +115,7 @@ export function ProductsClient({ initialSearchParams, initialProducts, initialPa
     });
   }
 
-  if (isError) {
+  if (isError && !products.length) {
     return (
       <div className="container py-8">
         <div className="flex flex-col items-center justify-center py-32 text-center gap-4">

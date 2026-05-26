@@ -9,7 +9,7 @@ import { CACHE_KEYS } from "@/constants/config";
 
 export function useProducts(
   filter: ProductFilter = {},
-  initialData?: ApiResponse<Product[]>
+  placeholderData?: ApiResponse<Product[]>
 ) {
   return useQuery({
     queryKey: [CACHE_KEYS.PRODUCTS, filter],
@@ -18,10 +18,11 @@ export function useProducts(
       const { data } = await axios.get<ApiResponse<Product[]>>(`/api/products?${params}`);
       return data;
     },
-    staleTime: 30 * 1000,
-    // initialData shows immediately without loading state; gcTime keeps it
-    // alive so the first filter change doesn't flash an empty skeleton
-    ...(initialData ? { initialData, initialDataUpdatedAt: Date.now() } : {}),
+    staleTime: 60 * 1000,
+    // placeholderData: show SSR-prefetched data immediately; on refetch
+    // failure it stays visible (unlike initialData which clears on error)
+    placeholderData,
+    retry: 1,
   });
 }
 
