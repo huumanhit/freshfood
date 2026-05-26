@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { successResponse } from "@/lib/api-response";
 import { handleApiError, UnauthorizedError, ForbiddenError, NotFoundError } from "@/lib/api-error";
 import { updateOrderStatusSchema } from "@/lib/validations/order";
+import { notifyOrderStatus } from "@/lib/zalo-zns";
 
 interface RouteParams {
   params: { id: string };
@@ -49,7 +50,10 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     const body = await req.json();
     const { status } = updateOrderStatusSchema.parse(body);
 
-    const order = await db.order.findUnique({ where: { id: params.id } });
+    const order = await db.order.findUnique({
+      where: { id: params.id },
+      include: { user: { select: { phone: true } }, address: { select: { phone: true } } },
+    });
     if (!order) throw new NotFoundError("Đơn hàng");
 
     const timestamps: Record<string, Date | null> = {};
@@ -64,6 +68,9 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       where: { id: params.id },
       data: { status, ...timestamps },
     });
+
+    const phone = order.user?.phone ?? order.address?.phone;
+    notifyOrderStatus(phone, status, order.orderNumber, params.id).catch(() => {});
 
     return successResponse(updated);
   } catch (error) {

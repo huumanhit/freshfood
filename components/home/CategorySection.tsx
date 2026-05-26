@@ -50,19 +50,19 @@ export function CategorySection() {
             <motion.div key={cat.id} variants={cardVariant}>
               <Link
                 href={ROUTES.CATEGORY(cat.slug)}
-                className={`group flex flex-col items-center justify-center gap-3 rounded-2xl bg-gradient-to-b ${cat.gradient} border border-white/80 p-6 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1`}
+                className={`group flex flex-col items-center justify-center gap-3.5 rounded-2xl bg-gradient-to-b ${cat.gradient} border border-white/60 p-5 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1.5`}
               >
-                <span className="text-4xl sm:text-5xl drop-shadow-sm transition-transform duration-300 group-hover:scale-110">
-                  {cat.emoji}
-                </span>
-                <div className="text-center">
-                  <p className={`font-semibold text-sm ${cat.textColor}`}>
-                    {cat.name}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    {cat._count?.products} sản phẩm
-                  </p>
+                {/* Icon circle */}
+                <div className="relative flex items-center justify-center w-16 h-16 rounded-full bg-white/70 shadow-sm ring-1 ring-white/80 group-hover:bg-white/90 transition-colors duration-300">
+                  <span className="text-3xl leading-none transition-transform duration-300 group-hover:scale-110 drop-shadow-sm">
+                    {cat.emoji}
+                  </span>
                 </div>
+
+                {/* Name only */}
+                <p className={`font-semibold text-sm text-center leading-tight ${cat.textColor}`}>
+                  {cat.name}
+                </p>
               </Link>
             </motion.div>
           ))}

@@ -4,6 +4,7 @@ import { AuthProvider } from "@/components/providers/AuthProvider";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { APP_CONFIG } from "@/constants/config";
+import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 
 const inter = Inter({
@@ -69,9 +70,12 @@ export default function RootLayout({ children }: RootLayoutProps) {
       className={`${inter.variable} ${plusJakarta.variable}`}
     >
       <body>
-        <ThemeProvider defaultTheme="system">
+        <ThemeProvider defaultTheme="light">
           <AuthProvider>
-            <QueryProvider>{children}</QueryProvider>
+            <QueryProvider>
+              {children}
+              <Toaster />
+            </QueryProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

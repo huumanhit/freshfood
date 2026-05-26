@@ -3,10 +3,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowRight, CheckCircle2, ShieldCheck, Truck, Leaf } from "lucide-react";
+import { ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
-import { HERO_STATS } from "@/lib/mock-data";
 
 const HERO_IMAGES = [
   {
@@ -31,11 +30,6 @@ const HERO_IMAGES = [
   },
 ];
 
-const TRUST_ITEMS = [
-  { icon: Leaf, text: "100% hữu cơ, không hóa chất" },
-  { icon: Truck, text: "Giao hàng trong 2–3 giờ" },
-  { icon: ShieldCheck, text: "Cam kết hoàn tiền nếu không tươi" },
-];
 
 const container = {
   hidden: { opacity: 0 },
@@ -119,18 +113,6 @@ export function HeroBanner() {
               </Button>
             </motion.div>
 
-            {/* Trust items */}
-            <motion.ul variants={item} className="space-y-2">
-              {TRUST_ITEMS.map(({ icon: Icon, text }) => (
-                <li
-                  key={text}
-                  className="flex items-center gap-2 text-sm text-gray-600 justify-center lg:justify-start"
-                >
-                  <Icon className="h-4 w-4 text-[#22c55e] shrink-0" />
-                  {text}
-                </li>
-              ))}
-            </motion.ul>
           </motion.div>
 
           {/* ── Right: food image grid ── */}
@@ -190,25 +172,6 @@ export function HeroBanner() {
           </motion.div>
         </div>
 
-        {/* ── Stats bar ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-          className="mt-14 grid grid-cols-2 sm:grid-cols-4 gap-4"
-        >
-          {HERO_STATS.map((stat) => (
-            <div
-              key={stat.label}
-              className="flex flex-col items-center justify-center rounded-2xl bg-white/70 border border-green-100 backdrop-blur-sm py-4 px-2 shadow-sm"
-            >
-              <span className="text-2xl sm:text-3xl font-bold font-display text-[#22c55e]">
-                {stat.value}
-              </span>
-              <span className="text-xs text-gray-500 mt-0.5">{stat.label}</span>
-            </div>
-          ))}
-        </motion.div>
       </div>
     </section>
   );

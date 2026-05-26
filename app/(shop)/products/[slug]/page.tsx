@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { db } from "@/lib/db";
-import { APP_CONFIG, REVALIDATE } from "@/constants/config";
+import { APP_CONFIG } from "@/constants/config";
 import { ROUTES } from "@/constants/routes";
 import { ProductImageGallery } from "@/components/products/ProductImageGallery";
 import { ProductInfo } from "@/components/products/ProductInfo";
@@ -12,7 +12,7 @@ import { RelatedProducts } from "@/components/products/RelatedProducts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 
-export const revalidate = REVALIDATE.PRODUCTS;
+export const dynamic = "force-dynamic";
 
 interface ProductDetailPageProps {
   params: { slug: string };
@@ -43,18 +43,6 @@ export async function generateMetadata({ params }: ProductDetailPageProps): Prom
   };
 }
 
-export async function generateStaticParams() {
-  try {
-    const products = await db.product.findMany({
-      where: { status: "ACTIVE" },
-      select: { slug: true },
-      take: 200,
-    });
-    return products.map(({ slug }) => ({ slug }));
-  } catch {
-    return [];
-  }
-}
 
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
   const product = await db.product.findUnique({

@@ -34,9 +34,8 @@ export function FeaturedProducts() {
   }
 
   return (
-    <section className="py-14 bg-[#f7fdf8]">
-      <div className="container">
-        {/* Header */}
+    <div>
+      {/* Header */}
         <div className="flex items-end justify-between mb-6">
           <div>
             <p className="text-sm font-medium text-[#22c55e] uppercase tracking-widest mb-1">
@@ -123,7 +122,6 @@ export function FeaturedProducts() {
             Xem tất cả sản phẩm <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-      </div>
-    </section>
+    </div>
   );
 }

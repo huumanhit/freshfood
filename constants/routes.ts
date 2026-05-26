@@ -17,6 +17,7 @@ export const ROUTES = {
   CHECKOUT: "/checkout",
   CHECKOUT_SUCCESS: "/checkout/success",
   ORDERS: "/orders",
+  ORDERS_TRACK: "/orders/track",
   ORDER_DETAIL: (id: string) => `/orders/${id}`,
   PROFILE: "/profile",
   PROFILE_ADDRESSES: "/profile/addresses",
@@ -31,10 +32,18 @@ export const ROUTES = {
   ADMIN_CATEGORIES: "/admin/categories",
   ADMIN_ORDERS: "/admin/orders",
   ADMIN_ORDER_DETAIL: (id: string) => `/admin/orders/${id}`,
+  ADMIN_DELIVERY: "/admin/delivery",
+  ADMIN_DELIVERY_DRIVERS: "/admin/delivery/drivers",
   ADMIN_CUSTOMERS: "/admin/customers",
+  ADMIN_CUSTOMER_DETAIL: (id: string) => `/admin/customers/${id}`,
   ADMIN_COUPONS: "/admin/coupons",
   ADMIN_BANNERS: "/admin/banners",
   ADMIN_SETTINGS: "/admin/settings",
+  // Phase 7 — Advanced Operations
+  ADMIN_MERGE_ORDERS: "/admin/merge-orders",
+  ADMIN_SHOPPING_LIST: "/admin/shopping-list",
+  ADMIN_REFERRALS: "/admin/referrals",
+  ADMIN_TRACEABILITY: "/admin/traceability",
 } as const;
 
 export const AUTH_ROUTES = [ROUTES.LOGIN, ROUTES.REGISTER] as const;

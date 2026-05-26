@@ -8,6 +8,37 @@ export const createOrderSchema = z.object({
   note: z.string().max(500).optional(),
 });
 
+export const DELIVERY_SLOTS = [
+  { value: "06:00-07:00", label: "6:00 – 7:00" },
+  { value: "07:00-08:00", label: "7:00 – 8:00" },
+  { value: "16:00-17:00", label: "16:00 – 17:00" },
+  { value: "18:00-19:00", label: "18:00 – 19:00" },
+  { value: "19:00-20:00", label: "19:00 – 20:00" },
+] as const;
+
+export type DeliverySlotValue = (typeof DELIVERY_SLOTS)[number]["value"];
+
+const phoneRegex = /^(0|\+84)[3-9]\d{8}$/;
+
+export const checkoutSchema = z.object({
+  fullName: z.string().min(2, "Họ tên tối thiểu 2 ký tự").max(100),
+  phone: z.string().regex(phoneRegex, "Số điện thoại không hợp lệ"),
+  province: z.string().min(1, "Vui lòng nhập tỉnh/thành"),
+  district: z.string().min(1, "Vui lòng nhập quận/huyện"),
+  ward: z.string().min(1, "Vui lòng nhập phường/xã"),
+  street: z.string().min(5, "Địa chỉ tối thiểu 5 ký tự").max(255),
+  deliverySlot: z.string().min(1, "Vui lòng chọn khung giờ giao"),
+  paymentMethod: z.enum(["COD", "BANK_TRANSFER"]),
+  note: z.string().max(500).optional(),
+  referralPhone: z
+    .string()
+    .regex(phoneRegex, "Số điện thoại không hợp lệ")
+    .optional()
+    .or(z.literal("")),
+});
+
+export type CheckoutFormValues = z.infer<typeof checkoutSchema>;
+
 export const updateOrderStatusSchema = z.object({
   status: z.enum(["CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"]),
   note: z.string().optional(),

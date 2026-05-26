@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { AdminSidebar } from "@/components/admin/layout/AdminSidebar";
+import { AdminTopbar } from "@/components/admin/layout/AdminTopbar";
 
 export const metadata: Metadata = {
   title: {
@@ -22,11 +24,11 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   return (
-    <div className="flex min-h-screen">
-      {/* AdminSidebar — Phase 2 */}
-      <div className="flex flex-1 flex-col">
-        {/* AdminTopbar — Phase 2 */}
-        <main className="flex-1 p-6 bg-muted/30">{children}</main>
+    <div className="flex min-h-screen bg-gray-50">
+      <AdminSidebar />
+      <div className="flex flex-1 flex-col min-w-0">
+        <AdminTopbar />
+        <main className="flex-1 p-6 overflow-auto">{children}</main>
       </div>
     </div>
   );
