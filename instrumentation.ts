@@ -5,6 +5,19 @@ export async function register() {
     const { PrismaClient } = await import("@prisma/client");
     const prisma = new PrismaClient();
 
+    // Fast sentinel check — if costPrice already exists, all migrations have run.
+    // Avoids 30+ round-trips to Supabase on every cold start.
+    const sentinel = await prisma.$queryRaw<{ exists: boolean }[]>`
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'products' AND column_name = 'costPrice'
+      ) AS exists
+    `;
+    if (sentinel[0]?.exists) {
+      await prisma.$disconnect();
+      return;
+    }
+
     const run = async (sql: string) => {
       try {
         await prisma.$executeRawUnsafe(sql);
@@ -94,7 +107,7 @@ export async function register() {
       "checkedQty" INTEGER NOT NULL DEFAULT 0, "note" TEXT
     )`);
 
-    // FKs (safe to re-run)
+    // FKs
     await run(`DO $$ BEGIN
       ALTER TABLE "products" ADD CONSTRAINT "products_supplierId_fkey"
         FOREIGN KEY ("supplierId") REFERENCES "suppliers"("id") ON DELETE SET NULL;
