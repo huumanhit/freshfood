@@ -17,6 +17,7 @@ const nextConfig = {
   },
   experimental: {
     serverComponentsExternalPackages: ["bcryptjs"],
+    instrumentationHook: true,
   },
 };
 
