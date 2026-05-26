@@ -2,27 +2,20 @@
 
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { useDebounce } from "./use-debounce";
 import { Product, ProductFilter } from "@/types/product";
 import { ApiResponse } from "@/types/api";
 import { buildSearchParams } from "@/lib/utils";
 import { CACHE_KEYS } from "@/constants/config";
 
 export function useProducts(filter: ProductFilter = {}) {
-  const debouncedSearch = useDebounce(filter.search, 400);
-
   return useQuery({
-    queryKey: [CACHE_KEYS.PRODUCTS, { ...filter, search: debouncedSearch }],
+    queryKey: [CACHE_KEYS.PRODUCTS, filter],
     queryFn: async () => {
-      const params = buildSearchParams({
-        ...filter,
-        search: debouncedSearch,
-      } as Record<string, string | number | boolean | undefined>);
-      const { data } = await axios.get<ApiResponse<Product[]>>(
-        `/api/products?${params}`
-      );
+      const params = buildSearchParams(filter as Record<string, string | number | boolean | undefined>);
+      const { data } = await axios.get<ApiResponse<Product[]>>(`/api/products?${params}`);
       return data;
     },
+    staleTime: 30 * 1000,
   });
 }
 

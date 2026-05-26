@@ -2,10 +2,10 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest } from "next/server";
 import { db } from "@/lib/db";
-import { successResponse, paginatedResponse } from "@/lib/api-response";
+import { paginatedResponse } from "@/lib/api-response";
 import { handleApiError } from "@/lib/api-error";
 import { productFilterSchema } from "@/lib/validations/product";
-import { PAGINATION } from "@/constants/config";
+import { Prisma } from "@prisma/client";
 
 export async function GET(req: NextRequest) {
   try {
@@ -29,13 +29,13 @@ export async function GET(req: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-    const where: Parameters<typeof db.product.findMany>[0]["where"] = {
+    const where: Prisma.ProductWhereInput = {
       status: status ?? "ACTIVE",
       ...(search && {
         OR: [
-          { name: { contains: search } },
-          { description: { contains: search } },
-          { tags: { contains: search } },
+          { name: { contains: search, mode: "insensitive" } },
+          { description: { contains: search, mode: "insensitive" } },
+          { tags: { contains: search, mode: "insensitive" } },
         ],
       }),
       ...(categorySlug && { category: { slug: categorySlug } }),
