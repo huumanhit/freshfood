@@ -55,14 +55,14 @@ export function CategoryGrid({ categories }: { categories: Category[] }) {
           <motion.div key={cat.id} variants={cardVariant}>
             <Link
               href={ROUTES.CATEGORY(cat.slug)}
-              className={`group flex flex-col items-center justify-center gap-3.5 rounded-2xl bg-gradient-to-b ${style.gradient} border border-white/60 p-5 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1.5`}
+              className={`group flex flex-col items-center justify-center gap-3 rounded-2xl bg-gradient-to-b ${style.gradient} border border-white/60 p-4 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1.5 h-36`}
             >
-              <div className="relative flex items-center justify-center w-16 h-16 rounded-full bg-white/70 shadow-sm ring-1 ring-white/80 group-hover:bg-white/90 transition-colors duration-300">
+              <div className="relative flex items-center justify-center w-14 h-14 rounded-full bg-white/70 shadow-sm ring-1 ring-white/80 group-hover:bg-white/90 transition-colors duration-300 shrink-0">
                 <span className="text-3xl leading-none transition-transform duration-300 group-hover:scale-110 drop-shadow-sm">
                   {style.emoji}
                 </span>
               </div>
-              <p className={`font-semibold text-sm text-center leading-tight ${style.textColor}`}>
+              <p className={`font-semibold text-sm text-center leading-tight line-clamp-2 ${style.textColor}`}>
                 {cat.name}
               </p>
             </Link>
