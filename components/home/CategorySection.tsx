@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { unstable_cache } from "next/cache";
+import { unstable_noStore as noStore } from "next/cache";
 import { db } from "@/lib/db";
 import { ROUTES } from "@/constants/routes";
 import { CategoryGrid } from "./CategoryGrid";
 
-export async function CategorySection() {
-  let categories: { id: string; name: string; slug: string }[] = [];
-  try {
+// Cache result for 1 hour server-side — avoids repeated DB calls on every render
+const getActiveCategories = unstable_cache(
+  async () => {
     const result = await db.category.findMany({
       where: { isActive: true, parentId: null },
       select: {
@@ -17,9 +19,21 @@ export async function CategorySection() {
       },
       orderBy: { sortOrder: "asc" },
     });
-    categories = result
+    return result
       .filter((c) => c._count.products > 0)
       .map(({ id, name, slug }) => ({ id, name, slug }));
+  },
+  ["active-categories-home"],
+  { revalidate: 3600, tags: ["categories"] }
+);
+
+export async function CategorySection() {
+  // Opt out of static pre-rendering — fetch at request time, not build time
+  noStore();
+
+  let categories: { id: string; name: string; slug: string }[] = [];
+  try {
+    categories = await getActiveCategories();
   } catch {
     // fail silently
   }
