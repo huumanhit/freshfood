@@ -57,11 +57,14 @@ export async function GET(req: NextRequest) {
         orderBy,
         skip,
         take: limit,
-        include: {
-          images: {
-            where: { isPrimary: true },
-            take: 1,
-          },
+        select: {
+          id: true, name: true, slug: true,
+          price: true, salePrice: true,
+          stock: true, unit: true, origin: true,
+          status: true, isOrganic: true, isFeatured: true,
+          categoryId: true,
+          createdAt: true, updatedAt: true,
+          images: { where: { isPrimary: true }, take: 1 },
           category: { select: { id: true, name: true, slug: true } },
           _count: { select: { reviews: true } },
         },

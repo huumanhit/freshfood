@@ -107,7 +107,7 @@ export function FeaturedProducts() {
               className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5"
             >
               {filtered.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard key={product.id} product={product} className="h-full" />
               ))}
             </motion.div>
           )}

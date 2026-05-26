@@ -47,7 +47,16 @@ export async function generateMetadata({ params }: ProductDetailPageProps): Prom
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
   const product = await db.product.findUnique({
     where: { slug: params.slug },
-    include: {
+    select: {
+      id: true, name: true, slug: true,
+      description: true, shortDescription: true,
+      price: true, salePrice: true,
+      sku: true, stock: true, unit: true, weight: true,
+      origin: true, status: true,
+      isFeatured: true, isOrganic: true,
+      categoryId: true,
+      metaTitle: true, metaDescription: true, tags: true,
+      createdAt: true, updatedAt: true,
       images: { orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }] },
       category: { select: { id: true, name: true, slug: true } },
       _count: { select: { reviews: true } },
@@ -73,19 +82,25 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
       id: { not: product.id },
       status: "ACTIVE",
     },
-    include: {
+    select: {
+      id: true, name: true, slug: true,
+      price: true, salePrice: true,
+      stock: true, unit: true, origin: true,
+      isOrganic: true, isFeatured: true,
+      categoryId: true,
       images: { where: { isPrimary: true }, take: 1 },
       category: { select: { id: true, name: true, slug: true } },
       _count: { select: { reviews: true } },
     },
-    orderBy: { soldCount: "desc" },
+    orderBy: { createdAt: "desc" },
     take: 4,
   });
 
-  // Increment view count (fire-and-forget)
-  db.product
-    .update({ where: { id: product.id }, data: { viewCount: { increment: 1 } } })
-    .catch(() => {});
+  // Increment view count (fire-and-forget — silently skipped if column not yet migrated)
+  db.$executeRawUnsafe(
+    `UPDATE "products" SET "viewCount" = "viewCount" + 1 WHERE "id" = $1`,
+    product.id
+  ).catch(() => {});
 
   const productWithRating = {
     ...product,

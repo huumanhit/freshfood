@@ -138,16 +138,16 @@ export function ProductCard({ product, className }: ProductCardProps) {
         {/* Price + button — pinned to bottom */}
         <div className="mt-auto space-y-2">
         {/* Price */}
-        <div className="flex items-baseline gap-1.5">
-          <span className="font-bold text-[#22c55e]">
+        <div className="flex items-baseline gap-1 min-w-0">
+          <span className="font-bold text-[#22c55e] shrink-0">
             {formatCurrency(currentPrice)}
           </span>
           {hasDiscount && (
-            <span className="text-xs text-gray-400 line-through">
+            <span className="text-xs text-gray-400 line-through shrink-0">
               {formatCurrency(product.price)}
             </span>
           )}
-          <span className="text-xs text-gray-400 ml-auto">/{product.unit}</span>
+          <span className="text-xs text-gray-400 truncate ml-1">/{product.unit}</span>
         </div>
 
         {/* Add to cart / quantity control */}
