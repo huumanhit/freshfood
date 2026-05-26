@@ -7,7 +7,10 @@ import { ApiResponse } from "@/types/api";
 import { buildSearchParams } from "@/lib/utils";
 import { CACHE_KEYS } from "@/constants/config";
 
-export function useProducts(filter: ProductFilter = {}) {
+export function useProducts(
+  filter: ProductFilter = {},
+  placeholderData?: ApiResponse<Product[]>
+) {
   return useQuery({
     queryKey: [CACHE_KEYS.PRODUCTS, filter],
     queryFn: async () => {
@@ -16,6 +19,7 @@ export function useProducts(filter: ProductFilter = {}) {
       return data;
     },
     staleTime: 30 * 1000,
+    placeholderData,
   });
 }
 

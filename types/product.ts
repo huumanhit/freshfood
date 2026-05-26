@@ -49,6 +49,8 @@ export interface Product {
 }
 
 export interface ProductFilter {
+  page?: number;
+  limit?: number;
   categorySlug?: string;
   minPrice?: number;
   maxPrice?: number;

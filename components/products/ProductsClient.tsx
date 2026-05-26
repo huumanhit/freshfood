@@ -13,6 +13,8 @@ import { ActiveFilters } from "@/components/products/ActiveFilters";
 import { Pagination } from "@/components/shared/Pagination";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Product } from "@/types/product";
+import { PaginationMeta } from "@/types/api";
 
 const PRICE_MAX = 1000000;
 
@@ -27,6 +29,8 @@ interface ProductsClientProps {
     sortBy?: string;
     sortOrder?: string;
   };
+  initialProducts?: Product[];
+  initialPagination?: PaginationMeta;
 }
 
 function buildInitialFilters(sp: ProductsClientProps["initialSearchParams"]): FilterState {
@@ -42,7 +46,7 @@ function buildInitialFilters(sp: ProductsClientProps["initialSearchParams"]): Fi
   };
 }
 
-export function ProductsClient({ initialSearchParams }: ProductsClientProps) {
+export function ProductsClient({ initialSearchParams, initialProducts, initialPagination }: ProductsClientProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [filters, setFilters] = useState<FilterState>(() =>
@@ -53,16 +57,27 @@ export function ProductsClient({ initialSearchParams }: ProductsClientProps) {
   const debouncedSearch = useDebounce(filters.search, 400);
   const queryFilters = { ...filters, search: debouncedSearch };
 
-  const { data, isLoading } = useProducts({
-    page: queryFilters.page,
-    search: queryFilters.search || undefined,
-    categorySlug: queryFilters.categorySlug || undefined,
-    minPrice: queryFilters.minPrice > 0 ? queryFilters.minPrice : undefined,
-    maxPrice: queryFilters.maxPrice < PRICE_MAX ? queryFilters.maxPrice : undefined,
-    isOrganic: queryFilters.isOrganic || undefined,
-    sortBy: queryFilters.sortBy as FilterState["sortBy"],
-    sortOrder: queryFilters.sortOrder as "asc" | "desc",
-  });
+  const serverPlaceholder = initialProducts && initialPagination
+    ? {
+        success: true,
+        data: initialProducts,
+        pagination: initialPagination,
+      }
+    : undefined;
+
+  const { data, isLoading } = useProducts(
+    {
+      page: queryFilters.page,
+      search: queryFilters.search || undefined,
+      categorySlug: queryFilters.categorySlug || undefined,
+      minPrice: queryFilters.minPrice > 0 ? queryFilters.minPrice : undefined,
+      maxPrice: queryFilters.maxPrice < PRICE_MAX ? queryFilters.maxPrice : undefined,
+      isOrganic: queryFilters.isOrganic || undefined,
+      sortBy: queryFilters.sortBy as "price" | "name" | "createdAt" | "soldCount" | "rating",
+      sortOrder: queryFilters.sortOrder as "asc" | "desc",
+    },
+    serverPlaceholder
+  );
 
   const products = data?.data ?? [];
   const pagination = data?.pagination;

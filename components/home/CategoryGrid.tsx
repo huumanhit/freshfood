@@ -1,0 +1,74 @@
+"use client";
+
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { ROUTES } from "@/constants/routes";
+
+const container = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08 } },
+};
+
+const cardVariant = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
+};
+
+const STYLE_MAP: { keyword: string; emoji: string; gradient: string; textColor: string }[] = [
+  { keyword: "rau", emoji: "🥬", gradient: "from-green-50 to-emerald-100", textColor: "text-emerald-700" },
+  { keyword: "trái", emoji: "🍊", gradient: "from-orange-50 to-amber-100", textColor: "text-orange-700" },
+  { keyword: "thịt", emoji: "🥩", gradient: "from-red-50 to-rose-100", textColor: "text-red-700" },
+  { keyword: "hải sản", emoji: "🦐", gradient: "from-blue-50 to-cyan-100", textColor: "text-blue-700" },
+  { keyword: "sữa", emoji: "🥛", gradient: "from-yellow-50 to-amber-100", textColor: "text-yellow-700" },
+  { keyword: "trứng", emoji: "🥚", gradient: "from-yellow-50 to-orange-100", textColor: "text-yellow-600" },
+  { keyword: "ngũ cốc", emoji: "🌾", gradient: "from-amber-50 to-yellow-100", textColor: "text-amber-700" },
+  { keyword: "hữu cơ", emoji: "🌿", gradient: "from-green-50 to-teal-100", textColor: "text-green-700" },
+  { keyword: "đồ chế biến", emoji: "🍱", gradient: "from-purple-50 to-violet-100", textColor: "text-purple-700" },
+  { keyword: "gia vị", emoji: "🧂", gradient: "from-pink-50 to-rose-100", textColor: "text-pink-700" },
+];
+
+const DEFAULT_STYLE = { emoji: "🛒", gradient: "from-gray-50 to-slate-100", textColor: "text-gray-700" };
+
+function getStyle(name: string) {
+  const lower = name.toLowerCase();
+  return STYLE_MAP.find((s) => lower.includes(s.keyword)) ?? DEFAULT_STYLE;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export function CategoryGrid({ categories }: { categories: Category[] }) {
+  return (
+    <motion.div
+      variants={container}
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, margin: "-60px" }}
+      className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4"
+    >
+      {categories.map((cat) => {
+        const style = getStyle(cat.name);
+        return (
+          <motion.div key={cat.id} variants={cardVariant}>
+            <Link
+              href={ROUTES.CATEGORY(cat.slug)}
+              className={`group flex flex-col items-center justify-center gap-3.5 rounded-2xl bg-gradient-to-b ${style.gradient} border border-white/60 p-5 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1.5`}
+            >
+              <div className="relative flex items-center justify-center w-16 h-16 rounded-full bg-white/70 shadow-sm ring-1 ring-white/80 group-hover:bg-white/90 transition-colors duration-300">
+                <span className="text-3xl leading-none transition-transform duration-300 group-hover:scale-110 drop-shadow-sm">
+                  {style.emoji}
+                </span>
+              </div>
+              <p className={`font-semibold text-sm text-center leading-tight ${style.textColor}`}>
+                {cat.name}
+              </p>
+            </Link>
+          </motion.div>
+        );
+      })}
+    </motion.div>
+  );
+}
