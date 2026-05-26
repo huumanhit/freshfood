@@ -57,7 +57,7 @@ export function ProductsClient({ initialSearchParams, initialProducts, initialPa
   const debouncedSearch = useDebounce(filters.search, 400);
   const queryFilters = { ...filters, search: debouncedSearch };
 
-  const serverPlaceholder = initialProducts && initialPagination
+  const serverInitial = initialProducts && initialPagination
     ? {
         success: true,
         data: initialProducts,
@@ -76,7 +76,7 @@ export function ProductsClient({ initialSearchParams, initialProducts, initialPa
       sortBy: queryFilters.sortBy as "price" | "name" | "createdAt" | "soldCount" | "rating",
       sortOrder: queryFilters.sortOrder as "asc" | "desc",
     },
-    serverPlaceholder
+    serverInitial
   );
 
   const products = data?.data ?? [];

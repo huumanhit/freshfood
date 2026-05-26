@@ -38,8 +38,8 @@ export interface Product {
   isFeatured: boolean;
   isOrganic: boolean;
   categoryId: string;
-  soldCount: number;
-  viewCount: number;
+  soldCount?: number;
+  viewCount?: number;
   createdAt: Date;
   updatedAt: Date;
   category?: Category;

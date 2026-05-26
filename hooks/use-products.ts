@@ -9,7 +9,7 @@ import { CACHE_KEYS } from "@/constants/config";
 
 export function useProducts(
   filter: ProductFilter = {},
-  placeholderData?: ApiResponse<Product[]>
+  initialData?: ApiResponse<Product[]>
 ) {
   return useQuery({
     queryKey: [CACHE_KEYS.PRODUCTS, filter],
@@ -19,7 +19,9 @@ export function useProducts(
       return data;
     },
     staleTime: 30 * 1000,
-    placeholderData,
+    // initialData shows immediately without loading state; gcTime keeps it
+    // alive so the first filter change doesn't flash an empty skeleton
+    ...(initialData ? { initialData, initialDataUpdatedAt: Date.now() } : {}),
   });
 }
 

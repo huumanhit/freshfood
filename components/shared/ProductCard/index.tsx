@@ -84,7 +84,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
         )}
 
         {/* Gradient overlay on hover */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
         {/* Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1">
