@@ -2,6 +2,7 @@ import { Header } from "@/components/shared/Header";
 import { Footer } from "@/components/shared/Footer";
 import { CartSidebar } from "@/components/shared/CartSidebar";
 import { MobileBottomNav } from "@/components/shared/MobileBottomNav";
+import { CartHydrator } from "@/components/shared/CartHydrator";
 
 interface ShopLayoutProps {
   children: React.ReactNode;
@@ -10,6 +11,7 @@ interface ShopLayoutProps {
 export default function ShopLayout({ children }: ShopLayoutProps) {
   return (
     <div className="flex min-h-screen flex-col">
+      <CartHydrator />
       <Header />
       <main className="flex-1 pb-16 md:pb-0">{children}</main>
       <Footer />

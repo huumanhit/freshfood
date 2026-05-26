@@ -81,6 +81,7 @@ export const useCartStore = create<CartState>()(
       name: "freshfood-cart",
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ items: state.items }),
+      skipHydration: true,
     }
   )
 );
