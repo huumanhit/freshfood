@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
   Package,
@@ -23,7 +24,7 @@ const NAV_ITEMS = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/products", label: "Sản phẩm", icon: Package },
   { href: "/admin/categories", label: "Danh mục", icon: Tag },
-  { href: "/admin/orders", label: "Đơn hàng", icon: ShoppingBag },
+  { href: "/admin/orders", label: "Đơn hàng", icon: ShoppingBag, showPending: true },
   { href: "/admin/delivery", label: "Giao hàng", icon: Truck },
   { href: "/admin/customers", label: "Khách hàng", icon: Users },
   { href: "/admin/referrals", label: "Giới thiệu", icon: Gift },
@@ -32,8 +33,30 @@ const NAV_ITEMS = [
   { href: "/admin/traceability", label: "Truy xuất", icon: Layers },
 ];
 
+const POLL_INTERVAL = 30_000; // 30 seconds
+
 export function AdminSidebar() {
   const pathname = usePathname();
+  const [pendingCount, setPendingCount] = useState(0);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchPending = async () => {
+      try {
+        const res = await fetch("/api/admin/orders/pending-count");
+        const json = await res.json();
+        if (mounted) setPendingCount(json.count ?? 0);
+      } catch {
+        // silently ignore
+      }
+    };
+    fetchPending();
+    const timer = setInterval(fetchPending, POLL_INTERVAL);
+    return () => {
+      mounted = false;
+      clearInterval(timer);
+    };
+  }, []);
 
   return (
     <aside className="w-56 shrink-0 flex flex-col bg-white border-r border-gray-200 min-h-screen">
@@ -50,8 +73,9 @@ export function AdminSidebar() {
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-0.5">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+        {NAV_ITEMS.map(({ href, label, icon: Icon, showPending }) => {
           const active = pathname === href || pathname.startsWith(href + "/");
+          const badge = showPending && pendingCount > 0 ? pendingCount : null;
           return (
             <Link
               key={href}
@@ -65,7 +89,12 @@ export function AdminSidebar() {
               )}
             >
               <Icon className={cn("h-4 w-4 shrink-0", active ? "text-[#22c55e]" : "text-gray-400")} />
-              {label}
+              <span className="flex-1">{label}</span>
+              {badge && (
+                <span className="inline-flex items-center justify-center h-5 min-w-5 rounded-full bg-red-500 text-white text-[10px] font-bold px-1">
+                  {badge > 99 ? "99+" : badge}
+                </span>
+              )}
             </Link>
           );
         })}

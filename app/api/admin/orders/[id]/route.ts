@@ -48,7 +48,13 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     requireAdmin(session.user.role);
 
     const body = await req.json();
-    const { status } = updateOrderStatusSchema.parse(body);
+
+    // Allow partial patches: status-only, paymentStatus-only, adminNote-only, or combined
+    const { status, paymentStatus, adminNote } = body as {
+      status?: string;
+      paymentStatus?: string;
+      adminNote?: string;
+    };
 
     const order = await db.order.findUnique({
       where: { id: params.id },
@@ -56,21 +62,29 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     });
     if (!order) throw new NotFoundError("Đơn hàng");
 
-    const timestamps: Record<string, Date | null> = {};
-    if (status === "SHIPPED") timestamps.shippedAt = new Date();
-    if (status === "DELIVERED") {
-      timestamps.deliveredAt = new Date();
-      timestamps.shippedAt = order.shippedAt ?? new Date();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updateData: Record<string, any> = {};
+
+    if (status) {
+      const { status: validStatus } = updateOrderStatusSchema.parse({ status });
+      updateData.status = validStatus;
+      if (validStatus === "SHIPPED") updateData.shippedAt = new Date();
+      if (validStatus === "DELIVERED") {
+        updateData.deliveredAt = new Date();
+        if (!order.shippedAt) updateData.shippedAt = new Date();
+      }
+      if (validStatus === "CANCELLED") updateData.cancelledAt = new Date();
     }
-    if (status === "CANCELLED") timestamps.cancelledAt = new Date();
 
-    const updated = await db.order.update({
-      where: { id: params.id },
-      data: { status, ...timestamps },
-    });
+    if (paymentStatus) updateData.paymentStatus = paymentStatus;
+    if (adminNote !== undefined) updateData.adminNote = adminNote || null;
 
-    const phone = order.user?.phone ?? order.address?.phone;
-    notifyOrderStatus(phone, status, order.orderNumber, params.id).catch(() => {});
+    const updated = await db.order.update({ where: { id: params.id }, data: updateData });
+
+    if (status) {
+      const phone = order.user?.phone ?? order.address?.phone;
+      notifyOrderStatus(phone, status, order.orderNumber, params.id).catch(() => {});
+    }
 
     return successResponse(updated);
   } catch (error) {

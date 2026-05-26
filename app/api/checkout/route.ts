@@ -21,8 +21,10 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const {
       fullName, phone, province, district, ward, street,
+      lat, lng, mapLink,
       deliverySlot, paymentMethod, note, referralPhone,
       cartItems, couponCode,
+      // consentGiven is validated by schema but not stored
     } = guestCheckoutSchema.parse(body);
 
     // ── 1. Find or create user by phone ──────────────────────────────────────
@@ -40,7 +42,11 @@ export async function POST(req: NextRequest) {
 
     // ── 2. Create address ─────────────────────────────────────────────────────
     const address = await db.address.create({
-      data: { userId: user.id, fullName, phone, province, district, ward, street, isDefault: false },
+      data: {
+        userId: user.id, fullName, phone, province, district, ward, street,
+        lat: lat ?? null, lng: lng ?? null, mapLink: mapLink || null,
+        isDefault: false,
+      },
     });
 
     // ── 3. Load & validate products ───────────────────────────────────────────

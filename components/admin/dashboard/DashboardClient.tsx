@@ -9,6 +9,7 @@ import { TopProductsTable } from "./TopProductsTable";
 interface DashboardStats {
   orders: { total: number; pending: number; today: number };
   revenue: { total: number; thisMonth: number; lastMonth: number };
+  profit: { total: number; thisMonth: number };
   products: number;
   customers: { total: number; newThisMonth: number };
 }
@@ -34,6 +35,7 @@ interface TopProduct {
 const EMPTY_STATS: DashboardStats = {
   orders: { total: 0, pending: 0, today: 0 },
   revenue: { total: 0, thisMonth: 0, lastMonth: 0 },
+  profit: { total: 0, thisMonth: 0 },
   products: 0,
   customers: { total: 0, newThisMonth: 0 },
 };
@@ -94,7 +96,8 @@ export function DashboardClient() {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2">
-          <RecentOrdersTable orders={recentOrders} />
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <RecentOrdersTable orders={recentOrders as any} />
         </div>
         <div>
           <TopProductsTable products={topProducts} />

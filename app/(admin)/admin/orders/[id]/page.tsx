@@ -35,9 +35,20 @@ export default async function AdminOrderDetailPage({ params }: AdminOrderDetailP
 
   if (!order) notFound();
 
-  // Cast to access Phase 7 fields (deliverySlot, referralPhone) that may not
-  // appear in IDE types until `prisma generate` output is reloaded
-  const o = order as typeof order & { deliverySlot?: string | null; referralPhone?: string | null };
+  // Check address anomaly: same phone used with different street addresses
+  const phone = order.address?.phone;
+  let hasAddressAnomaly = false;
+  if (phone) {
+    const distinctAddresses = await db.address.findMany({
+      where: { phone },
+      select: { street: true },
+      distinct: ["street"],
+    });
+    hasAddressAnomaly = distinctAddresses.length > 1;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const o = order as any;
 
   return (
     <div className="space-y-5">
@@ -66,14 +77,28 @@ export default async function AdminOrderDetailPage({ params }: AdminOrderDetailP
           discount: Number(order.discount),
           total: Number(order.total),
           note: order.note ?? null,
+          adminNote: o.adminNote ?? null,
           deliverySlot: o.deliverySlot ?? null,
           referralPhone: o.referralPhone ?? null,
+          hasAddressAnomaly,
           createdAt: order.createdAt.toISOString(),
           shippedAt: order.shippedAt?.toISOString() ?? null,
           deliveredAt: order.deliveredAt?.toISOString() ?? null,
           cancelledAt: order.cancelledAt?.toISOString() ?? null,
           user: order.user,
-          address: order.address,
+          address: order.address
+            ? {
+                fullName: order.address.fullName,
+                phone: order.address.phone,
+                province: order.address.province,
+                district: order.address.district,
+                ward: order.address.ward,
+                street: order.address.street,
+                lat: (order.address as any).lat ?? null,
+                lng: (order.address as any).lng ?? null,
+                mapLink: (order.address as any).mapLink ?? null,
+              }
+            : null,
           items: order.items.map((item) => ({
             id: item.id,
             productName: item.productName,

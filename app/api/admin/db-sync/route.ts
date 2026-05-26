@@ -195,6 +195,14 @@ export async function POST() {
         FOREIGN KEY ("mergeGroupId") REFERENCES "merge_groups"("id") ON DELETE SET NULL;
     EXCEPTION WHEN duplicate_object THEN null; END $$`);
 
+    // ── Phase 1 columns ────────────────────────────────────────────────────
+    await run("addresses.lat", `ALTER TABLE "addresses" ADD COLUMN IF NOT EXISTS "lat" DOUBLE PRECISION`);
+    await run("addresses.lng", `ALTER TABLE "addresses" ADD COLUMN IF NOT EXISTS "lng" DOUBLE PRECISION`);
+    await run("addresses.mapLink", `ALTER TABLE "addresses" ADD COLUMN IF NOT EXISTS "mapLink" TEXT`);
+    await run("products.costPrice", `ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "costPrice" DECIMAL(12,2)`);
+    await run("orders.adminNote", `ALTER TABLE "orders" ADD COLUMN IF NOT EXISTS "adminNote" TEXT`);
+    await run("users.rewardBalance", `ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "rewardBalance" DECIMAL(12,2) NOT NULL DEFAULT 0`);
+
     return NextResponse.json({ ok: true, results });
   } catch (error) {
     return NextResponse.json({ ok: false, error: String(error) }, { status: 500 });

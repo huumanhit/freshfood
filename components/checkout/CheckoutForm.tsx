@@ -4,9 +4,10 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { useState } from "react";
-import { Loader2, MapPin, User, Phone, FileText, Users } from "lucide-react";
+import { useState, useCallback } from "react";
+import { Loader2, MapPin, User, Phone, FileText, Users, Navigation, AlertCircle, ShieldCheck } from "lucide-react";
 import { checkoutSchema, CheckoutFormValues } from "@/lib/validations/order";
+import { getCutoffNotice } from "@/lib/business/ordering";
 import { useCart } from "@/hooks/use-cart";
 import { ROUTES } from "@/constants/routes";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,10 @@ export function CheckoutForm({ total }: CheckoutFormProps) {
   const router = useRouter();
   const { items, clearCart } = useCart();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [locating, setLocating] = useState(false);
+  const [locationLabel, setLocationLabel] = useState<string | null>(null);
+
+  const cutoffNotice = getCutoffNotice();
 
   const {
     register,
@@ -38,12 +43,33 @@ export function CheckoutForm({ total }: CheckoutFormProps) {
       deliverySlot: "",
       note: "",
       referralPhone: "",
+      consentGiven: false,
     },
   });
 
   const paymentMethod = watch("paymentMethod");
   const deliverySlot = watch("deliverySlot");
   const note = watch("note");
+  const consentGiven = watch("consentGiven");
+
+  const handleGetLocation = useCallback(() => {
+    if (!navigator.geolocation) return;
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        const link = `https://maps.google.com/?q=${lat},${lng}`;
+        setValue("lat", lat);
+        setValue("lng", lng);
+        setValue("mapLink", link);
+        setLocationLabel(`${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+        setLocating(false);
+      },
+      () => {
+        setLocating(false);
+      }
+    );
+  }, [setValue]);
 
   async function onSubmit(values: CheckoutFormValues) {
     setSubmitError(null);
@@ -71,6 +97,14 @@ export function CheckoutForm({ total }: CheckoutFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {/* Cutoff notice */}
+      {cutoffNotice && (
+        <div className="flex items-start gap-2 rounded-2xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-700">
+          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+          {cutoffNotice}
+        </div>
+      )}
+
       {/* Recipient info */}
       <section className="rounded-2xl border border-gray-200 bg-white p-5 space-y-4">
         <h2 className="font-bold text-gray-900 flex items-center gap-2">
@@ -113,10 +147,28 @@ export function CheckoutForm({ total }: CheckoutFormProps) {
 
       {/* Delivery address */}
       <section className="rounded-2xl border border-gray-200 bg-white p-5 space-y-4">
-        <h2 className="font-bold text-gray-900 flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-[#22c55e]" />
-          Địa chỉ giao hàng
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="font-bold text-gray-900 flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-[#22c55e]" />
+            Địa chỉ giao hàng
+          </h2>
+          <button
+            type="button"
+            onClick={handleGetLocation}
+            disabled={locating}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 disabled:opacity-50 transition-colors"
+          >
+            {locating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Navigation className="h-3.5 w-3.5" />}
+            {locating ? "Đang lấy vị trí..." : "Lấy vị trí của tôi"}
+          </button>
+        </div>
+
+        {locationLabel && (
+          <div className="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-3 py-2 text-xs text-green-700">
+            <MapPin className="h-3.5 w-3.5 shrink-0" />
+            Đã ghim vị trí: {locationLabel}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="space-y-1.5">
@@ -222,6 +274,29 @@ export function CheckoutForm({ total }: CheckoutFormProps) {
         </div>
       </section>
 
+      {/* Privacy consent */}
+      <section className="rounded-2xl border border-gray-200 bg-white p-5">
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            {...register("consentGiven")}
+            className="mt-0.5 h-4 w-4 rounded border-gray-300 text-[#22c55e] accent-[#22c55e]"
+          />
+          <span className="text-sm text-gray-600 leading-relaxed">
+            <ShieldCheck className="inline h-3.5 w-3.5 text-[#22c55e] mr-1" />
+            Tôi đồng ý với{" "}
+            <a href="/privacy" target="_blank" className="text-[#22c55e] underline underline-offset-2 hover:text-[#16a34a]">
+              Chính sách quyền riêng tư
+            </a>{" "}
+            và cho phép FreshFood lưu trữ thông tin để xử lý đơn hàng.
+            <span className="text-red-500 ml-1">*</span>
+          </span>
+        </label>
+        {errors.consentGiven && (
+          <p className="mt-2 text-xs text-red-500">{errors.consentGiven.message}</p>
+        )}
+      </section>
+
       {/* Error */}
       {submitError && (
         <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600">
@@ -232,8 +307,8 @@ export function CheckoutForm({ total }: CheckoutFormProps) {
       {/* Submit */}
       <Button
         type="submit"
-        disabled={isSubmitting || items.length === 0}
-        className="w-full h-12 rounded-xl bg-[#22c55e] hover:bg-[#16a34a] text-white font-semibold text-base"
+        disabled={isSubmitting || items.length === 0 || !consentGiven}
+        className="w-full h-12 rounded-xl bg-[#22c55e] hover:bg-[#16a34a] text-white font-semibold text-base disabled:opacity-50"
       >
         {isSubmitting ? (
           <>

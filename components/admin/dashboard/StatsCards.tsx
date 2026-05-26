@@ -1,4 +1,4 @@
-import { ShoppingBag, TrendingUp, Package, Users } from "lucide-react";
+import { ShoppingBag, TrendingUp, Package, Users, BadgeDollarSign } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
 
@@ -6,6 +6,7 @@ interface StatsCardsProps {
   stats: {
     orders: { total: number; pending: number; today: number };
     revenue: { total: number; thisMonth: number; lastMonth: number };
+    profit: { total: number; thisMonth: number };
     products: number;
     customers: { total: number; newThisMonth: number };
   };
@@ -21,7 +22,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
     {
       label: "Tổng đơn hàng",
       value: stats.orders.total.toLocaleString("vi-VN"),
-      sub: `${stats.orders.pending} chờ xác nhận`,
+      sub: `${stats.orders.pending} chờ xác nhận · ${stats.orders.today} hôm nay`,
       icon: ShoppingBag,
       color: "bg-blue-50 text-blue-600",
     },
@@ -34,6 +35,13 @@ export function StatsCards({ stats }: StatsCardsProps) {
           : "Chưa có dữ liệu so sánh",
       icon: TrendingUp,
       color: "bg-green-50 text-[#22c55e]",
+    },
+    {
+      label: "Lợi nhuận tháng này",
+      value: formatCurrency(stats.profit.thisMonth),
+      sub: `Tổng tích lũy: ${formatCurrency(stats.profit.total)}`,
+      icon: BadgeDollarSign,
+      color: "bg-emerald-50 text-emerald-600",
     },
     {
       label: "Sản phẩm đang bán",
@@ -52,7 +60,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
       {cards.map(({ label, value, sub, icon: Icon, color }) => (
         <Card key={label}>
           <CardContent className="p-5">

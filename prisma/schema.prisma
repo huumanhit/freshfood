@@ -20,6 +20,7 @@ model User {
   isActive          Boolean             @default(true)
   segment           CustomerTier        @default(BRONZE)
   referralCode      String?             @unique
+  rewardBalance     Decimal             @default(0) @db.Decimal(12, 2)
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   accounts          Account[]
@@ -86,6 +87,9 @@ model Address {
   district  String
   ward      String
   street    String
+  lat       Float?
+  lng       Float?
+  mapLink   String?
   isDefault Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -134,6 +138,7 @@ model Product {
   metaDescription  String?
   tags             String?
   supplierId       String?
+  costPrice        Decimal?       @db.Decimal(12, 2)
   soldCount        Int            @default(0)
   viewCount        Int            @default(0)
   createdAt        DateTime       @default(now())
@@ -204,6 +209,7 @@ model Order {
   couponId      String?
   couponCode    String?
   note          String?
+  adminNote     String?
   deliverySlot  String?
   referralPhone String?
   transactionId String?

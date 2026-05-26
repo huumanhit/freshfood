@@ -4,13 +4,14 @@ import { useState } from "react";
 import Image from "next/image";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { MapPin, Phone, Clock, User, Package, Navigation, Loader2, Printer } from "lucide-react";
+import { MapPin, Phone, Clock, User, Package, Navigation, Loader2, Printer, StickyNote, AlertTriangle, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { OrderStatus, PaymentMethod, PaymentStatus } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import { OrderStatusBadge, PaymentStatusBadge } from "@/components/orders/OrderStatusBadge";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -45,6 +46,13 @@ const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   MOMO: "MoMo",
 };
 
+const PAYMENT_STATUS_OPTIONS: { value: PaymentStatus; label: string }[] = [
+  { value: "PENDING", label: "Chờ thanh toán" },
+  { value: "PAID", label: "Đã thanh toán" },
+  { value: "FAILED", label: "Thanh toán thất bại" },
+  { value: "REFUNDED", label: "Đã hoàn tiền" },
+];
+
 interface OrderDetailData {
   id: string;
   orderNumber: string;
@@ -56,8 +64,10 @@ interface OrderDetailData {
   discount: number | string;
   total: number | string;
   note: string | null;
+  adminNote?: string | null;
   deliverySlot?: string | null;
   referralPhone?: string | null;
+  hasAddressAnomaly?: boolean;
   createdAt: string | Date;
   shippedAt: string | Date | null;
   deliveredAt: string | Date | null;
@@ -70,6 +80,9 @@ interface OrderDetailData {
     district: string;
     ward: string;
     street: string;
+    lat?: number | null;
+    lng?: number | null;
+    mapLink?: string | null;
   } | null;
   items: {
     id: string;
@@ -78,10 +91,7 @@ interface OrderDetailData {
     price: number | string;
     quantity: number;
     subtotal: number | string;
-    product: {
-      id: string;
-      images: { url: string }[];
-    } | null;
+    product: { id: string; images: { url: string }[] } | null;
   }[];
   coupon: { code: string; type: string; value: number | string } | null;
 }
@@ -94,33 +104,74 @@ export function AdminOrderDetail({ order }: AdminOrderDetailProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [nextStatus, setNextStatus] = useState<string>("");
+  const [nextPaymentStatus, setNextPaymentStatus] = useState<string>("");
+  const [adminNoteText, setAdminNoteText] = useState(order.adminNote ?? "");
+  const [savingNote, setSavingNote] = useState(false);
 
   const allowedTransitions = STATUS_TRANSITIONS[order.status];
 
   const updateMutation = useMutation({
-    mutationFn: async (status: string) => {
-      await axios.patch(`/api/admin/orders/${order.id}`, { status });
+    mutationFn: async (data: { status?: string; paymentStatus?: string; adminNote?: string }) => {
+      await axios.patch(`/api/admin/orders/${order.id}`, data);
     },
-    onSuccess: () => {
+    onSuccess: (_d, vars) => {
       queryClient.invalidateQueries({ queryKey: ["admin-order", order.id] });
-      toast({ title: "Đã cập nhật trạng thái đơn hàng", variant: "success" });
-      setNextStatus("");
+      if (vars.status) {
+        toast({ title: "Đã cập nhật trạng thái đơn hàng", variant: "success" });
+        setNextStatus("");
+      }
+      if (vars.paymentStatus) {
+        toast({ title: "Đã cập nhật trạng thái thanh toán", variant: "success" });
+        setNextPaymentStatus("");
+      }
+      if (vars.adminNote !== undefined) {
+        toast({ title: "Đã lưu ghi chú nội bộ", variant: "success" });
+      }
     },
-    onError: () => toast({ title: "Lỗi cập nhật trạng thái", variant: "destructive" }),
+    onError: () => toast({ title: "Lỗi cập nhật", variant: "destructive" }),
   });
 
-  const fullAddress = order.address
-    ? `${order.address.street}, ${order.address.ward}, ${order.address.district}, ${order.address.province}`
-    : null;
+  const handleSaveNote = async () => {
+    setSavingNote(true);
+    try {
+      await axios.patch(`/api/admin/orders/${order.id}`, { adminNote: adminNoteText });
+      toast({ title: "Đã lưu ghi chú nội bộ", variant: "success" });
+    } catch {
+      toast({ title: "Lỗi lưu ghi chú", variant: "destructive" });
+    } finally {
+      setSavingNote(false);
+    }
+  };
 
-  const mapsUrl = fullAddress
-    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`
-    : null;
+  // Prefer stored mapLink, fall back to text-based Google Maps search
+  const mapsUrl =
+    order.address?.mapLink ||
+    (order.address
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+          `${order.address.street}, ${order.address.ward}, ${order.address.district}, ${order.address.province}`
+        )}`
+      : null);
+
+  const coordsMapsUrl =
+    order.address?.lat && order.address?.lng
+      ? `https://maps.google.com/?q=${order.address.lat},${order.address.lng}`
+      : null;
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-      {/* Left: items + totals */}
+      {/* Left: items + totals + status actions */}
       <div className="xl:col-span-2 space-y-5">
+        {/* Address anomaly warning */}
+        {order.hasAddressAnomaly && (
+          <div className="flex items-start gap-2.5 rounded-xl bg-amber-50 border border-amber-300 px-4 py-3 text-sm text-amber-800">
+            <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5 text-amber-500" />
+            <div>
+              <p className="font-semibold">Cảnh báo địa chỉ bất thường</p>
+              <p className="text-xs mt-0.5">Số điện thoại này đã đặt hàng với nhiều địa chỉ khác nhau. Vui lòng xác nhận trước khi giao.</p>
+            </div>
+          </div>
+        )}
+
         {/* Items */}
         <Card>
           <CardHeader>
@@ -184,7 +235,7 @@ export function AdminOrderDetail({ order }: AdminOrderDetailProps) {
         {allowedTransitions.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Cập nhật trạng thái</CardTitle>
+              <CardTitle>Cập nhật trạng thái đơn</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex gap-3">
@@ -200,7 +251,7 @@ export function AdminOrderDetail({ order }: AdminOrderDetailProps) {
                 </Select>
                 <Button
                   disabled={!nextStatus || updateMutation.isPending}
-                  onClick={() => nextStatus && updateMutation.mutate(nextStatus)}
+                  onClick={() => nextStatus && updateMutation.mutate({ status: nextStatus })}
                   className="rounded-xl bg-[#22c55e] hover:bg-[#16a34a] shrink-0"
                 >
                   {updateMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
@@ -210,11 +261,77 @@ export function AdminOrderDetail({ order }: AdminOrderDetailProps) {
             </CardContent>
           </Card>
         )}
+
+        {/* Payment status update */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <CreditCard className="h-4 w-4 text-[#22c55e]" />
+              Cập nhật thanh toán
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-3">
+              <Select
+                value={nextPaymentStatus || order.paymentStatus}
+                onValueChange={setNextPaymentStatus}
+              >
+                <SelectTrigger className="flex-1 rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PAYMENT_STATUS_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                disabled={!nextPaymentStatus || nextPaymentStatus === order.paymentStatus || updateMutation.isPending}
+                onClick={() => nextPaymentStatus && updateMutation.mutate({ paymentStatus: nextPaymentStatus })}
+                variant="outline"
+                className="rounded-xl shrink-0"
+              >
+                {updateMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Lưu
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Admin note (internal) */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <StickyNote className="h-4 w-4 text-amber-500" />
+              Ghi chú nội bộ
+              <span className="text-xs font-normal text-gray-400">(chỉ admin thấy)</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Textarea
+              value={adminNoteText}
+              onChange={(e) => setAdminNoteText(e.target.value)}
+              placeholder="Ghi chú nội bộ về đơn hàng này..."
+              className="rounded-xl resize-none text-sm"
+              rows={3}
+            />
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={savingNote}
+              onClick={handleSaveNote}
+              className="rounded-lg"
+            >
+              {savingNote && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
+              Lưu ghi chú
+            </Button>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Right: customer + delivery */}
       <div className="space-y-5">
-        {/* Status */}
+        {/* Status overview */}
         <Card>
           <CardContent className="p-5 space-y-3">
             <div className="flex items-center justify-between">
@@ -286,15 +403,15 @@ export function AdminOrderDetail({ order }: AdminOrderDetailProps) {
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-[#22c55e]" /> Địa chỉ giao hàng
               </div>
-              {mapsUrl && (
+              {coordsMapsUrl && (
                 <a
-                  href={mapsUrl}
+                  href={coordsMapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs font-medium text-blue-500 hover:text-blue-600 transition-colors"
+                  className="inline-flex items-center gap-1 text-xs font-medium text-blue-500 hover:text-blue-600"
                 >
                   <Navigation className="h-3 w-3" />
-                  Maps
+                  GPS
                 </a>
               )}
             </CardTitle>
@@ -328,7 +445,7 @@ export function AdminOrderDetail({ order }: AdminOrderDetailProps) {
         </Card>
 
         {/* Delivery info */}
-        {(order.deliverySlot || order.note) && (
+        {(order.deliverySlot || order.note || order.referralPhone) && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-sm">
@@ -344,7 +461,7 @@ export function AdminOrderDetail({ order }: AdminOrderDetailProps) {
               )}
               {order.note && (
                 <div>
-                  <p className="text-xs text-gray-400">Ghi chú</p>
+                  <p className="text-xs text-gray-400">Ghi chú khách</p>
                   <p className="text-gray-700 bg-gray-50 rounded-lg px-3 py-2 text-xs leading-relaxed mt-1">{order.note}</p>
                 </div>
               )}

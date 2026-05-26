@@ -43,6 +43,34 @@ export async function GET() {
       }), []),
     ]);
 
+    // Profit via raw SQL — works before and after costPrice column exists
+    const totalProfit = await safe(async () => {
+      const rows = await db.$queryRaw<{ profit: number }[]>`
+        SELECT COALESCE(SUM(
+          (oi.price - COALESCE(p."costPrice", 0)) * oi.quantity
+        ), 0)::float AS profit
+        FROM "order_items" oi
+        JOIN "orders" o ON o.id = oi."orderId"
+        JOIN "products" p ON p.id = oi."productId"
+        WHERE o."paymentStatus" = 'PAID'
+      `;
+      return Number(rows[0]?.profit ?? 0);
+    }, 0);
+
+    const profitThisMonth = await safe(async () => {
+      const rows = await db.$queryRaw<{ profit: number }[]>`
+        SELECT COALESCE(SUM(
+          (oi.price - COALESCE(p."costPrice", 0)) * oi.quantity
+        ), 0)::float AS profit
+        FROM "order_items" oi
+        JOIN "orders" o ON o.id = oi."orderId"
+        JOIN "products" p ON p.id = oi."productId"
+        WHERE o."paymentStatus" = 'PAID'
+          AND o."createdAt" >= ${startThisMonth}
+      `;
+      return Number(rows[0]?.profit ?? 0);
+    }, 0);
+
     return NextResponse.json({
       success: true,
       data: {
@@ -53,6 +81,7 @@ export async function GET() {
             thisMonth: Number(revenueThisMonth._sum.total ?? 0),
             lastMonth: Number(revenueLastMonth._sum.total ?? 0),
           },
+          profit: { total: totalProfit, thisMonth: profitThisMonth },
           products: totalProducts,
           customers: { total: totalCustomers, newThisMonth: newCustomersThisMonth },
         },
