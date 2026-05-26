@@ -80,9 +80,7 @@ export function LoginForm() {
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <Label className="text-sm font-medium text-gray-700">Mật khẩu</Label>
-            <Link href="/forgot-password" className="text-xs text-[#22c55e] hover:text-[#15803d] transition-colors">
-              Quên mật khẩu?
-            </Link>
+            <span className="text-xs text-gray-400">Quên mật khẩu? Liên hệ admin</span>
           </div>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />

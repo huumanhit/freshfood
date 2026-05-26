@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Loader2, MapPin, User, Phone, FileText, Users, Navigation, AlertCircle, ShieldCheck } from "lucide-react";
 import { checkoutSchema, CheckoutFormValues } from "@/lib/validations/order";
 import { getCutoffNotice } from "@/lib/business/ordering";
@@ -28,7 +28,9 @@ export function CheckoutForm({ total }: CheckoutFormProps) {
   const [locating, setLocating] = useState(false);
   const [locationLabel, setLocationLabel] = useState<string | null>(null);
 
-  const cutoffNotice = getCutoffNotice();
+  const [cutoffNotice, setCutoffNotice] = useState<string | null>(null);
+  // Only compute server-time-dependent value on client to avoid hydration mismatch
+  useEffect(() => { setCutoffNotice(getCutoffNotice()); }, []);
 
   const {
     register,

@@ -3,7 +3,7 @@ export const ROUTES = {
   HOME: "/",
   PRODUCTS: "/products",
   PRODUCT_DETAIL: (slug: string) => `/products/${slug}`,
-  CATEGORY: (slug: string) => `/category/${slug}`,
+  CATEGORY: (slug: string) => `/products?categorySlug=${slug}`,
   SEARCH: "/search",
 
   // Auth

@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Clock, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DELIVERY_SLOTS } from "@/lib/validations/order";
 import { getAvailableSlots, getCutoffNotice } from "@/lib/business/ordering";
 
 interface DeliverySlotPickerProps {
@@ -11,8 +13,16 @@ interface DeliverySlotPickerProps {
 }
 
 export function DeliverySlotPicker({ value, onChange, error }: DeliverySlotPickerProps) {
-  const slots = getAvailableSlots();
-  const notice = getCutoffNotice();
+  const [slots, setSlots] = useState(
+    DELIVERY_SLOTS.map((s) => ({ ...s, disabled: false }))
+  );
+  const [notice, setNotice] = useState<string | null>(null);
+
+  // Compute time-based availability only on the client to avoid hydration mismatch
+  useEffect(() => {
+    setSlots(getAvailableSlots());
+    setNotice(getCutoffNotice());
+  }, []);
 
   return (
     <div className="space-y-2">
