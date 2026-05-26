@@ -1,13 +1,16 @@
 export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
 
+  const { PrismaClient } = await import("@prisma/client");
+  // Use DIRECT_URL to bypass the connection pooler — DDL requires a direct
+  // connection; pgBouncer/Supavisor transaction mode rejects DDL.
+  // connection_limit=1 so this one-shot client never opens more than 1 socket.
+  const directUrl = process.env.DIRECT_URL ?? process.env.DATABASE_URL ?? "";
+  const prisma = new PrismaClient({
+    datasources: { db: { url: directUrl + (directUrl.includes("?") ? "&" : "?") + "connection_limit=1" } },
+  });
+
   try {
-    const { PrismaClient } = await import("@prisma/client");
-    // Use DIRECT_URL to bypass the connection pooler — DDL (ALTER TABLE, CREATE TABLE)
-    // requires a direct connection; Supabase's pgBouncer transaction mode rejects DDL.
-    const prisma = new PrismaClient({
-      datasources: { db: { url: process.env.DIRECT_URL ?? process.env.DATABASE_URL } },
-    });
 
     // Fast sentinel check — if costPrice already exists, all migrations have run.
     // Avoids 30+ round-trips to Supabase on every cold start.
@@ -17,10 +20,7 @@ export async function register() {
         WHERE table_name = 'products' AND column_name = 'costPrice'
       ) AS exists
     `;
-    if (sentinel[0]?.exists) {
-      await prisma.$disconnect();
-      return;
-    }
+    if (sentinel[0]?.exists) return;
 
     const run = async (sql: string) => {
       try {
@@ -122,8 +122,9 @@ export async function register() {
         FOREIGN KEY ("mergeGroupId") REFERENCES "merge_groups"("id") ON DELETE SET NULL;
     EXCEPTION WHEN duplicate_object THEN null; END $$`);
 
-    await prisma.$disconnect();
   } catch {
     // Never crash the server on migration failure
+  } finally {
+    await prisma.$disconnect().catch(() => {});
   }
 }
