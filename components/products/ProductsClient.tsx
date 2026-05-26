@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Search, X } from "lucide-react";
+import { Search, X, AlertCircle, RefreshCw } from "lucide-react";
 import { useProducts } from "@/hooks/use-products";
 import { useDebounce } from "@/hooks/use-debounce";
 import { buildSearchParams } from "@/lib/utils";
@@ -65,7 +65,7 @@ export function ProductsClient({ initialSearchParams, initialProducts, initialPa
       }
     : undefined;
 
-  const { data, isLoading } = useProducts(
+  const { data, isLoading, isError, refetch } = useProducts(
     {
       page: queryFilters.page,
       search: queryFilters.search || undefined,
@@ -115,30 +115,54 @@ export function ProductsClient({ initialSearchParams, initialProducts, initialPa
     });
   }
 
+  if (isError) {
+    return (
+      <div className="container py-8">
+        <div className="flex flex-col items-center justify-center py-32 text-center gap-4">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-50">
+            <AlertCircle className="h-10 w-10 text-red-400" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-800 text-lg">Không thể tải sản phẩm</h3>
+            <p className="text-sm text-gray-400 mt-1">Vui lòng kiểm tra kết nối và thử lại.</p>
+          </div>
+          <button
+            onClick={() => refetch()}
+            className="inline-flex items-center gap-2 rounded-xl bg-[#22c55e] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#16a34a] transition-colors"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Thử lại
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container py-8">
       {/* Page heading */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold font-display text-gray-900">Tất cả sản phẩm</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-xs font-semibold uppercase tracking-widest text-[#22c55e] mb-1">Cửa hàng</p>
+        <h1 className="text-3xl font-bold font-display text-gray-900">Tất cả sản phẩm</h1>
+        <p className="text-sm text-gray-400 mt-1">
           Thực phẩm sạch, tươi ngon — giao tận nhà trong 2–3h
         </p>
       </div>
 
       {/* Search bar */}
-      <div className="relative mb-6 max-w-lg">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+      <div className="relative mb-6 max-w-xl">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
         <input
           type="text"
           placeholder="Tìm sản phẩm (cải bó xôi, cá hồi, thịt bò...)"
           value={filters.search}
           onChange={(e) => handleChange({ search: e.target.value, page: 1 })}
-          className="w-full rounded-2xl border border-gray-200 bg-white pl-10 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#22c55e] focus:border-transparent placeholder:text-gray-400 shadow-sm"
+          className="w-full rounded-2xl border border-gray-200 bg-white pl-11 pr-11 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#22c55e] focus:border-transparent placeholder:text-gray-400 shadow-sm transition-shadow hover:shadow-md"
         />
         {filters.search && (
           <button
             onClick={() => handleChange({ search: "", page: 1 })}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
           >
             <X className="h-4 w-4" />
           </button>

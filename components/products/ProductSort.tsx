@@ -37,13 +37,13 @@ export function ProductSort({ total, isLoading, filters, onChange, onOpenMobileF
   return (
     <div className="flex items-center justify-between gap-3 pb-4 border-b border-gray-100">
       {/* Results count */}
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-gray-500 whitespace-nowrap">
         {isLoading ? (
-          <span className="animate-pulse">Đang tải...</span>
+          <span className="inline-block h-4 w-28 animate-pulse rounded bg-gray-200" />
         ) : (
           <>
             <span className="font-semibold text-gray-800">{total.toLocaleString("vi-VN")}</span>
-            {" "}sản phẩm tìm thấy
+            {" "}sản phẩm
           </>
         )}
       </p>

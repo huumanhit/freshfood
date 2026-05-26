@@ -33,14 +33,14 @@ export function ProductGrid({ products, isLoading, columns = 4 }: ProductGridPro
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="col-span-full flex flex-col items-center justify-center py-24 text-center"
+        className="col-span-full flex flex-col items-center justify-center py-28 text-center"
       >
-        <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gray-100">
-          <PackageSearch className="h-10 w-10 text-gray-400" />
+        <div className="mb-5 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-gray-50 to-gray-100 shadow-inner">
+          <PackageSearch className="h-12 w-12 text-gray-300" />
         </div>
-        <h3 className="font-semibold text-gray-700 text-lg">Không tìm thấy sản phẩm</h3>
-        <p className="text-sm text-gray-400 mt-1 max-w-xs">
-          Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm để xem thêm sản phẩm.
+        <h3 className="font-bold text-gray-700 text-xl">Không tìm thấy sản phẩm</h3>
+        <p className="text-sm text-gray-400 mt-2 max-w-sm leading-relaxed">
+          Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm để tìm sản phẩm phù hợp hơn.
         </p>
       </motion.div>
     );

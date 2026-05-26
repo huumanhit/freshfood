@@ -62,7 +62,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
       whileHover={{ y: -4 }}
       transition={{ duration: 0.2 }}
       className={cn(
-        "group relative rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden",
+        "group relative rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden flex flex-col",
         className
       )}
     >
@@ -113,7 +113,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
       </Link>
 
       {/* Info */}
-      <div className="p-3 space-y-2">
+      <div className="p-3 flex flex-col flex-1 gap-2">
         <Link href={ROUTES.PRODUCT_DETAIL(product.slug)}>
           <h3 className="text-sm font-medium leading-tight line-clamp-2 hover:text-[#22c55e] transition-colors">
             {product.name}
@@ -135,6 +135,8 @@ export function ProductCard({ product, className }: ProductCardProps) {
           </div>
         )}
 
+        {/* Price + button — pinned to bottom */}
+        <div className="mt-auto space-y-2">
         {/* Price */}
         <div className="flex items-baseline gap-1.5">
           <span className="font-bold text-[#22c55e]">
@@ -214,6 +216,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
             </motion.div>
           )}
         </AnimatePresence>
+        </div>
       </div>
     </motion.div>
   );

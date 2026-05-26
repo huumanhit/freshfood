@@ -3,7 +3,11 @@ export async function register() {
 
   try {
     const { PrismaClient } = await import("@prisma/client");
-    const prisma = new PrismaClient();
+    // Use DIRECT_URL to bypass the connection pooler — DDL (ALTER TABLE, CREATE TABLE)
+    // requires a direct connection; Supabase's pgBouncer transaction mode rejects DDL.
+    const prisma = new PrismaClient({
+      datasources: { db: { url: process.env.DIRECT_URL ?? process.env.DATABASE_URL } },
+    });
 
     // Fast sentinel check — if costPrice already exists, all migrations have run.
     // Avoids 30+ round-trips to Supabase on every cold start.
