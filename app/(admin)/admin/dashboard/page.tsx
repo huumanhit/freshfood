@@ -1,114 +1,33 @@
 import type { Metadata } from "next";
-import { db } from "@/lib/db";
-import { startOfDay, startOfMonth, subMonths } from "date-fns";
-import { StatsCards } from "@/components/admin/dashboard/StatsCards";
-import { RecentOrdersTable } from "@/components/admin/dashboard/RecentOrdersTable";
-import { TopProductsTable } from "@/components/admin/dashboard/TopProductsTable";
+import { Suspense } from "react";
+import { DashboardClient } from "@/components/admin/dashboard/DashboardClient";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Dashboard" };
 
-async function safeQuery<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
-  try {
-    return await fn();
-  } catch {
-    return fallback;
-  }
+export default function AdminDashboardPage() {
+  return (
+    <Suspense fallback={<DashboardSkeleton />}>
+      <DashboardClient />
+    </Suspense>
+  );
 }
 
-export default async function AdminDashboardPage() {
-  const now = new Date();
-  const startThisMonth = startOfMonth(now);
-  const startLastMonth = startOfMonth(subMonths(now, 1));
-  const startToday = startOfDay(now);
-
-  const [
-    totalOrders,
-    pendingOrders,
-    todayOrders,
-    totalRevenue,
-    revenueThisMonth,
-    revenueLastMonth,
-    totalProducts,
-    totalCustomers,
-    newCustomersThisMonth,
-    topProducts,
-    recentOrders,
-  ] = await Promise.all([
-    safeQuery(() => db.order.count({ where: { status: { not: "CANCELLED" } } }), 0),
-    safeQuery(() => db.order.count({ where: { status: "PENDING" } }), 0),
-    safeQuery(() => db.order.count({ where: { createdAt: { gte: startToday } } }), 0),
-    safeQuery(() => db.order.aggregate({ _sum: { total: true }, where: { paymentStatus: "PAID" } }), { _sum: { total: null } }),
-    safeQuery(() => db.order.aggregate({ _sum: { total: true }, where: { paymentStatus: "PAID", createdAt: { gte: startThisMonth } } }), { _sum: { total: null } }),
-    safeQuery(() => db.order.aggregate({ _sum: { total: true }, where: { paymentStatus: "PAID", createdAt: { gte: startLastMonth, lt: startThisMonth } } }), { _sum: { total: null } }),
-    safeQuery(() => db.product.count({ where: { status: "ACTIVE" } }), 0),
-    safeQuery(() => db.user.count({ where: { role: "USER" } }), 0),
-    safeQuery(() => db.user.count({ where: { role: "USER", createdAt: { gte: startThisMonth } } }), 0),
-    safeQuery(() => db.product.findMany({
-      where: { status: "ACTIVE" },
-      orderBy: { soldCount: "desc" },
-      take: 5,
-      select: {
-        id: true,
-        name: true,
-        soldCount: true,
-        price: true,
-        images: { where: { isPrimary: true }, take: 1, select: { url: true } },
-      },
-    }), []),
-    safeQuery(() => db.order.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 8,
-      select: {
-        id: true,
-        orderNumber: true,
-        status: true,
-        paymentMethod: true,
-        total: true,
-        createdAt: true,
-        user: { select: { name: true, email: true } },
-      },
-    }), []),
-  ]);
-
-  const stats = {
-    orders: { total: totalOrders, pending: pendingOrders, today: todayOrders },
-    revenue: {
-      total: Number(totalRevenue._sum.total ?? 0),
-      thisMonth: Number(revenueThisMonth._sum.total ?? 0),
-      lastMonth: Number(revenueLastMonth._sum.total ?? 0),
-    },
-    products: totalProducts,
-    customers: { total: totalCustomers, newThisMonth: newCustomersThisMonth },
-  };
-
+function DashboardSkeleton() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-pulse">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Tổng quan hoạt động cửa hàng</p>
+        <div className="h-8 w-40 bg-gray-200 rounded mb-1" />
+        <div className="h-4 w-64 bg-gray-100 rounded" />
       </div>
-
-      <StatsCards stats={stats} />
-
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="rounded-2xl border bg-white p-5 h-28" />
+        ))}
+      </div>
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2">
-          <RecentOrdersTable
-            orders={recentOrders.map((o) => ({
-              ...o,
-              total: Number(o.total),
-              createdAt: o.createdAt.toISOString(),
-            }))}
-          />
-        </div>
-        <div>
-          <TopProductsTable
-            products={topProducts.map((p) => ({
-              ...p,
-              price: Number(p.price),
-            }))}
-          />
-        </div>
+        <div className="xl:col-span-2 rounded-2xl border bg-white h-80" />
+        <div className="rounded-2xl border bg-white h-80" />
       </div>
     </div>
   );
