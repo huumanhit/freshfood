@@ -4,7 +4,7 @@ import { formatCurrency } from "@/lib/utils";
 
 interface StatsCardsProps {
   stats: {
-    orders: { total: number; pending: number };
+    orders: { total: number; pending: number; today: number };
     revenue: { total: number; thisMonth: number; lastMonth: number };
     products: number;
     customers: { total: number; newThisMonth: number };

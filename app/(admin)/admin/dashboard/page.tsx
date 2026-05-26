@@ -8,6 +8,14 @@ import { TopProductsTable } from "@/components/admin/dashboard/TopProductsTable"
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Dashboard" };
 
+async function safeQuery<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await fn();
+  } catch {
+    return fallback;
+  }
+}
+
 export default async function AdminDashboardPage() {
   const now = new Date();
   const startThisMonth = startOfMonth(now);
@@ -27,16 +35,16 @@ export default async function AdminDashboardPage() {
     topProducts,
     recentOrders,
   ] = await Promise.all([
-    db.order.count({ where: { status: { not: "CANCELLED" } } }),
-    db.order.count({ where: { status: "PENDING" } }),
-    db.order.count({ where: { createdAt: { gte: startToday } } }),
-    db.order.aggregate({ _sum: { total: true }, where: { paymentStatus: "PAID" } }),
-    db.order.aggregate({ _sum: { total: true }, where: { paymentStatus: "PAID", createdAt: { gte: startThisMonth } } }),
-    db.order.aggregate({ _sum: { total: true }, where: { paymentStatus: "PAID", createdAt: { gte: startLastMonth, lt: startThisMonth } } }),
-    db.product.count({ where: { status: "ACTIVE" } }),
-    db.user.count({ where: { role: "USER" } }),
-    db.user.count({ where: { role: "USER", createdAt: { gte: startThisMonth } } }),
-    db.product.findMany({
+    safeQuery(() => db.order.count({ where: { status: { not: "CANCELLED" } } }), 0),
+    safeQuery(() => db.order.count({ where: { status: "PENDING" } }), 0),
+    safeQuery(() => db.order.count({ where: { createdAt: { gte: startToday } } }), 0),
+    safeQuery(() => db.order.aggregate({ _sum: { total: true }, where: { paymentStatus: "PAID" } }), { _sum: { total: null } }),
+    safeQuery(() => db.order.aggregate({ _sum: { total: true }, where: { paymentStatus: "PAID", createdAt: { gte: startThisMonth } } }), { _sum: { total: null } }),
+    safeQuery(() => db.order.aggregate({ _sum: { total: true }, where: { paymentStatus: "PAID", createdAt: { gte: startLastMonth, lt: startThisMonth } } }), { _sum: { total: null } }),
+    safeQuery(() => db.product.count({ where: { status: "ACTIVE" } }), 0),
+    safeQuery(() => db.user.count({ where: { role: "USER" } }), 0),
+    safeQuery(() => db.user.count({ where: { role: "USER", createdAt: { gte: startThisMonth } } }), 0),
+    safeQuery(() => db.product.findMany({
       where: { status: "ACTIVE" },
       orderBy: { soldCount: "desc" },
       take: 5,
@@ -47,8 +55,8 @@ export default async function AdminDashboardPage() {
         price: true,
         images: { where: { isPrimary: true }, take: 1, select: { url: true } },
       },
-    }),
-    db.order.findMany({
+    }), []),
+    safeQuery(() => db.order.findMany({
       orderBy: { createdAt: "desc" },
       take: 8,
       select: {
@@ -60,7 +68,7 @@ export default async function AdminDashboardPage() {
         createdAt: true,
         user: { select: { name: true, email: true } },
       },
-    }),
+    }), []),
   ]);
 
   const stats = {
@@ -89,6 +97,7 @@ export default async function AdminDashboardPage() {
             orders={recentOrders.map((o) => ({
               ...o,
               total: Number(o.total),
+              createdAt: o.createdAt.toISOString(),
             }))}
           />
         </div>
