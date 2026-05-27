@@ -13,6 +13,7 @@ const nextConfig = {
       { protocol: "https", hostname: "avatars.githubusercontent.com" },
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "picsum.photos" },
+      { protocol: "https", hostname: "img.vietqr.io" },
     ],
   },
   experimental: {
