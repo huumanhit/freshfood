@@ -56,6 +56,7 @@ export default async function AdminProductEditPage({ params }: AdminProductEditP
           status: product.status,
           isFeatured: product.isFeatured,
           isOrganic: product.isOrganic,
+          isCore: product.isCore,
           categoryId: product.categoryId,
           images: product.images.map((img) => ({ url: img.url, isPrimary: img.isPrimary })),
         }}

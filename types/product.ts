@@ -37,6 +37,7 @@ export interface Product {
   status: ProductStatus;
   isFeatured: boolean;
   isOrganic: boolean;
+  isCore: boolean;
   categoryId: string;
   soldCount?: number;
   viewCount?: number;
@@ -77,6 +78,7 @@ export interface CreateProductPayload {
   status?: ProductStatus;
   isFeatured?: boolean;
   isOrganic?: boolean;
+  isCore?: boolean;
   categoryId: string;
   metaTitle?: string;
   metaDescription?: string;

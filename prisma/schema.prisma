@@ -133,6 +133,7 @@ model Product {
   status           ProductStatus  @default(ACTIVE)
   isFeatured       Boolean        @default(false)
   isOrganic        Boolean        @default(false)
+  isCore           Boolean        @default(false)
   categoryId       String
   metaTitle        String?
   metaDescription  String?

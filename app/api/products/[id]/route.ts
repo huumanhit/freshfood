@@ -22,7 +22,7 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
         price: true, salePrice: true,
         sku: true, stock: true, unit: true, weight: true,
         origin: true, status: true,
-        isFeatured: true, isOrganic: true,
+        isFeatured: true, isOrganic: true, isCore: true,
         categoryId: true,
         metaTitle: true, metaDescription: true, tags: true,
         createdAt: true, updatedAt: true,

@@ -29,7 +29,7 @@ const queryProducts = unstable_cache(
           id: true, name: true, slug: true,
           price: true, salePrice: true,
           stock: true, unit: true, origin: true,
-          status: true, isOrganic: true, isFeatured: true,
+          status: true, isOrganic: true, isFeatured: true, isCore: true,
           categoryId: true,
           createdAt: true, updatedAt: true,
           images: { where: { isPrimary: true }, take: 1 },

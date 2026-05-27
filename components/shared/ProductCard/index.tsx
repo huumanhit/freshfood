@@ -103,6 +103,11 @@ export function ProductCard({ product, className }: ProductCardProps) {
               Organic
             </Badge>
           )}
+          {product.isCore && (
+            <Badge className="bg-blue-600 text-[11px] px-2 py-0.5 rounded-lg hover:bg-blue-700">
+              Lõi
+            </Badge>
+          )}
         </div>
 
         {/* Wishlist */}

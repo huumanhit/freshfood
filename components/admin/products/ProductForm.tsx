@@ -34,6 +34,7 @@ const productFormSchema = z.object({
   status: z.nativeEnum(ProductStatus),
   isFeatured: z.boolean(),
   isOrganic: z.boolean(),
+  isCore: z.boolean(),
   categoryId: z.string().min(1, "Vui lòng chọn danh mục"),
   imageUrl: z.string().url("URL ảnh không hợp lệ").optional().or(z.literal("")),
 });
@@ -228,6 +229,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
       status: defaultValues?.status ?? ProductStatus.ACTIVE,
       isFeatured: defaultValues?.isFeatured ?? false,
       isOrganic: defaultValues?.isOrganic ?? false,
+      isCore: defaultValues?.isCore ?? false,
       categoryId: defaultValues?.categoryId ?? "",
       imageUrl: primaryImage?.url ?? "",
     },
@@ -428,6 +430,20 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
                     <div>
                       <p className="text-sm font-medium text-gray-800">Sản phẩm Organic</p>
                       <p className="text-xs text-gray-400">Gắn nhãn "Organic"</p>
+                    </div>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </div>
+                )}
+              />
+              <Separator />
+              <Controller
+                name="isCore"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-800">Sản phẩm Lõi</p>
+                      <p className="text-xs text-gray-400">Luôn hiển thị mọi khung giờ</p>
                     </div>
                     <Switch checked={field.value} onCheckedChange={field.onChange} />
                   </div>

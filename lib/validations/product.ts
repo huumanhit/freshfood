@@ -15,6 +15,7 @@ export const createProductSchema = z.object({
   status: z.nativeEnum(ProductStatus).default(ProductStatus.ACTIVE),
   isFeatured: z.boolean().default(false),
   isOrganic: z.boolean().default(false),
+  isCore: z.boolean().default(false),
   categoryId: z.string().cuid("Category ID không hợp lệ"),
   metaTitle: z.string().max(255).optional(),
   metaDescription: z.string().max(500).optional(),

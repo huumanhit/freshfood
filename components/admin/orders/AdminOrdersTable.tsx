@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { Search, Filter, ExternalLink, TriangleAlert } from "lucide-react";
+import { Search, Filter, ExternalLink, TriangleAlert, Calendar, Clock } from "lucide-react";
 import { OrderStatus, PaymentMethod } from "@prisma/client";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { OrderStatusBadge, PaymentStatusBadge } from "@/components/orders/OrderStatusBadge";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 import { ROUTES } from "@/constants/routes";
+import { DELIVERY_SLOTS } from "@/lib/validations/order";
 
 const STATUS_OPTIONS: { value: string; label: string }[] = [
   { value: "all", label: "Tất cả" },
@@ -40,6 +41,8 @@ interface OrderRow {
   paymentMethod: PaymentMethod;
   total: number | string;
   createdAt: string;
+  deliveryDate: string | null;
+  deliverySlot: string | null;
   isNewAddress: boolean;
   user: { name: string | null; email: string } | null;
   address: { phone: string; fullName: string; province: string } | null;
@@ -49,6 +52,8 @@ interface OrderRow {
 export function AdminOrdersTable() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("");
+  const [slotFilter, setSlotFilter] = useState("all");
   const [newAddressOnly, setNewAddressOnly] = useState(false);
   const [page, setPage] = useState(1);
 
@@ -57,11 +62,13 @@ export function AdminOrdersTable() {
     limit: "20",
     ...(search && { search }),
     ...(statusFilter !== "all" && { status: statusFilter }),
+    ...(dateFilter && { date: dateFilter }),
+    ...(slotFilter !== "all" && { slot: slotFilter }),
     ...(newAddressOnly && { newAddress: "true" }),
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ["admin-orders", page, search, statusFilter, newAddressOnly],
+    queryKey: ["admin-orders", page, search, statusFilter, dateFilter, slotFilter, newAddressOnly],
     queryFn: async () => {
       const { data } = await axios.get(`/api/admin/orders?${params}`);
       return data;
@@ -80,40 +87,84 @@ export function AdminOrdersTable() {
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            placeholder="Tìm mã đơn, tên, email, SĐT..."
-            value={search}
-            onChange={handleSearchChange}
-            className="pl-9 rounded-xl"
-          />
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Tìm mã đơn, tên, email, SĐT..."
+              value={search}
+              onChange={handleSearchChange}
+              className="pl-9 rounded-xl"
+            />
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Filter className="h-4 w-4 text-gray-400 shrink-0" />
+            <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
+              <SelectTrigger className="w-40 rounded-xl">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUS_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <button
+              type="button"
+              onClick={() => { setNewAddressOnly((v) => !v); setPage(1); }}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-colors ${
+                newAddressOnly
+                  ? "bg-amber-50 border-amber-300 text-amber-700"
+                  : "bg-white border-gray-200 text-gray-500 hover:border-amber-300 hover:text-amber-600"
+              }`}
+            >
+              <TriangleAlert className="h-3.5 w-3.5" />
+              Địa chỉ mới
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-gray-400 shrink-0" />
-          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-            <SelectTrigger className="w-44 rounded-xl">
-              <SelectValue />
+        {/* Date + slot filter row */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 h-9">
+            <Calendar className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+            <input
+              type="date"
+              value={dateFilter}
+              onChange={(e) => { setDateFilter(e.target.value); setPage(1); }}
+              className="text-sm text-gray-700 bg-transparent outline-none w-36"
+            />
+            {dateFilter && (
+              <button
+                type="button"
+                onClick={() => { setDateFilter(""); setPage(1); }}
+                className="text-gray-400 hover:text-gray-600 ml-1 text-xs"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+          <Select value={slotFilter} onValueChange={(v) => { setSlotFilter(v); setPage(1); }}>
+            <SelectTrigger className="w-40 rounded-xl">
+              <Clock className="h-3.5 w-3.5 text-gray-400 mr-1.5 shrink-0" />
+              <SelectValue placeholder="Khung giờ" />
             </SelectTrigger>
             <SelectContent>
-              {STATUS_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              <SelectItem value="all">Tất cả giờ</SelectItem>
+              {DELIVERY_SLOTS.map((s) => (
+                <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <button
-            type="button"
-            onClick={() => { setNewAddressOnly((v) => !v); setPage(1); }}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-colors ${
-              newAddressOnly
-                ? "bg-amber-50 border-amber-300 text-amber-700"
-                : "bg-white border-gray-200 text-gray-500 hover:border-amber-300 hover:text-amber-600"
-            }`}
-          >
-            <TriangleAlert className="h-3.5 w-3.5" />
-            Địa chỉ mới
-          </button>
+          {(dateFilter || slotFilter !== "all") && (
+            <button
+              type="button"
+              onClick={() => { setDateFilter(""); setSlotFilter("all"); setPage(1); }}
+              className="text-xs text-gray-400 hover:text-gray-700 underline"
+            >
+              Xóa bộ lọc
+            </button>
+          )}
         </div>
       </div>
 
@@ -126,10 +177,11 @@ export function AdminOrdersTable() {
               <TableHead>Khách hàng</TableHead>
               <TableHead>SĐT</TableHead>
               <TableHead className="text-center">Số SP</TableHead>
+              <TableHead>Giao hàng</TableHead>
               <TableHead>Thanh toán</TableHead>
               <TableHead>Trạng thái</TableHead>
               <TableHead className="text-right">Tổng tiền</TableHead>
-              <TableHead>Thời gian</TableHead>
+              <TableHead>Đặt lúc</TableHead>
               <TableHead className="w-10" />
             </TableRow>
           </TableHeader>
@@ -137,7 +189,7 @@ export function AdminOrdersTable() {
             {isLoading
               ? Array.from({ length: 6 }).map((_, i) => (
                   <TableRow key={i}>
-                    {Array.from({ length: 9 }).map((_, j) => (
+                    {Array.from({ length: 10 }).map((_, j) => (
                       <TableCell key={j}><div className="h-4 bg-gray-100 rounded animate-pulse" /></TableCell>
                     ))}
                   </TableRow>
@@ -145,7 +197,7 @@ export function AdminOrdersTable() {
               : orders.length === 0
               ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-12 text-gray-400">
+                  <TableCell colSpan={10} className="text-center py-12 text-gray-400">
                     Không tìm thấy đơn hàng nào
                   </TableCell>
                 </TableRow>
@@ -177,6 +229,18 @@ export function AdminOrdersTable() {
                     </TableCell>
                     <TableCell className="text-center text-sm text-gray-600">
                       {order.items.length}
+                    </TableCell>
+                    <TableCell className="text-xs text-gray-500">
+                      {order.deliveryDate ? (
+                        <div className="space-y-0.5">
+                          <p className="font-medium text-gray-700">
+                            {order.deliveryDate.split("-").reverse().slice(0, 2).join("/")}
+                          </p>
+                          {order.deliverySlot && (
+                            <p className="text-gray-400">{order.deliverySlot}</p>
+                          )}
+                        </div>
+                      ) : "—"}
                     </TableCell>
                     <TableCell className="text-xs text-gray-500">
                       <div className="space-y-0.5">

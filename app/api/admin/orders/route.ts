@@ -22,16 +22,21 @@ export async function GET(req: NextRequest) {
     const status = req.nextUrl.searchParams.get("status") as OrderStatus | null;
     const search = req.nextUrl.searchParams.get("search") ?? "";
     const newAddress = req.nextUrl.searchParams.get("newAddress") === "true";
+    const date = req.nextUrl.searchParams.get("date") ?? "";
+    const slot = req.nextUrl.searchParams.get("slot") ?? "";
     const skip = (page - 1) * limit;
 
     const where = {
       ...(status && { status }),
       ...(newAddress && { isNewAddress: true }),
+      ...(date && { deliveryDate: date }),
+      ...(slot && { deliverySlot: slot }),
       ...(search && {
         OR: [
           { orderNumber: { contains: search } },
           { user: { name: { contains: search } } },
           { user: { email: { contains: search } } },
+          { address: { phone: { contains: search } } },
         ],
       }),
     };
