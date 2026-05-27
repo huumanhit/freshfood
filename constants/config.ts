@@ -1,7 +1,7 @@
 export const APP_CONFIG = {
-  name: "FreshFood",
-  tagline: "Thực phẩm sạch mỗi ngày",
-  description: "Cửa hàng thực phẩm sạch, tươi ngon, giao hàng nhanh tận nơi",
+  name: "Tươi Ngon Mỗi Ngày",
+  tagline: "Thực phẩm sạch, tươi ngon giao tận nhà",
+  description: "Tươi Ngon Mỗi Ngày (tuoingonmoingay.com) — cửa hàng thực phẩm sạch, rau củ quả tươi, thịt cá hải sản chất lượng cao, giao hàng nhanh trong 2–3h tại TP.HCM.",
   url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
   email: "tuoingonmoingay@outlook.com.vn",
   phone: "0932133139",

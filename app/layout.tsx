@@ -32,7 +32,12 @@ export const metadata: Metadata = {
     template: `%s | ${APP_CONFIG.name}`,
   },
   description: APP_CONFIG.description,
-  keywords: ["thực phẩm sạch", "rau củ quả", "thực phẩm hữu cơ", "giao hàng tươi ngon"],
+  keywords: [
+    "tuoingonmoingay", "tươi ngon mỗi ngày",
+    "thực phẩm sạch", "rau củ quả tươi", "thịt cá hải sản",
+    "thực phẩm hữu cơ", "giao hàng thực phẩm", "thực phẩm sạch tphcm",
+    "rau sạch tphcm", "thực phẩm tươi sống",
+  ],
   authors: [{ name: APP_CONFIG.name }],
   creator: APP_CONFIG.name,
   openGraph: {
@@ -76,6 +81,32 @@ export default function RootLayout({ children }: RootLayoutProps) {
       className={`${inter.variable} ${plusJakarta.variable} ${dancingScript.variable}`}
     >
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "Tươi Ngon Mỗi Ngày",
+              alternateName: ["tuoingonmoingay", "tuoingonmoingay.com"],
+              url: "https://tuoingonmoingay.com",
+              logo: "https://tuoingonmoingay.com/logo.png",
+              description: APP_CONFIG.description,
+              address: {
+                "@type": "PostalAddress",
+                streetAddress: APP_CONFIG.address,
+                addressLocality: "TP. Hồ Chí Minh",
+                addressCountry: "VN",
+              },
+              contactPoint: {
+                "@type": "ContactPoint",
+                telephone: APP_CONFIG.phone,
+                contactType: "customer service",
+              },
+              sameAs: Object.values(APP_CONFIG.socialLinks),
+            }),
+          }}
+        />
         <ThemeProvider defaultTheme="light">
           <AuthProvider>
             <QueryProvider>
