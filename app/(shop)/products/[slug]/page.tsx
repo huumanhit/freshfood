@@ -19,58 +19,67 @@ interface ProductDetailPageProps {
 }
 
 export async function generateMetadata({ params }: ProductDetailPageProps): Promise<Metadata> {
-  const product = await db.product.findUnique({
-    where: { slug: params.slug },
-    select: {
-      name: true,
-      shortDescription: true,
-      metaTitle: true,
-      metaDescription: true,
-      images: { where: { isPrimary: true }, take: 1 },
-    },
-  });
+  try {
+    const product = await db.product.findUnique({
+      where: { slug: params.slug },
+      select: {
+        name: true,
+        shortDescription: true,
+        metaTitle: true,
+        metaDescription: true,
+        images: { where: { isPrimary: true }, take: 1 },
+      },
+    });
 
-  if (!product) return { title: "Sản phẩm không tồn tại" };
+    if (!product) return { title: "Sản phẩm không tồn tại" };
 
-  return {
-    title: `${product.metaTitle ?? product.name} — ${APP_CONFIG.name}`,
-    description: product.metaDescription ?? product.shortDescription ?? APP_CONFIG.description,
-    openGraph: {
-      title: product.metaTitle ?? product.name,
-      description: product.metaDescription ?? product.shortDescription ?? undefined,
-      images: product.images[0] ? [{ url: product.images[0].url }] : undefined,
-    },
-  };
+    return {
+      title: `${product.metaTitle ?? product.name} — ${APP_CONFIG.name}`,
+      description: product.metaDescription ?? product.shortDescription ?? APP_CONFIG.description,
+      openGraph: {
+        title: product.metaTitle ?? product.name,
+        description: product.metaDescription ?? product.shortDescription ?? undefined,
+        images: product.images[0] ? [{ url: product.images[0].url }] : undefined,
+      },
+    };
+  } catch {
+    return { title: APP_CONFIG.name };
+  }
 }
 
-
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
-  const product = await db.product.findUnique({
-    where: { slug: params.slug },
-    select: {
-      id: true, name: true, slug: true,
-      description: true, shortDescription: true,
-      price: true, salePrice: true,
-      sku: true, stock: true, unit: true, weight: true,
-      origin: true, status: true,
-      isFeatured: true, isOrganic: true,
-      categoryId: true, soldCount: true,
-      metaTitle: true, metaDescription: true, tags: true,
-      createdAt: true, updatedAt: true,
-      images: { orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }] },
-      category: { select: { id: true, name: true, slug: true } },
-      _count: { select: { reviews: true } },
-    },
-  });
+  let product;
+  try {
+    product = await db.product.findUnique({
+      where: { slug: params.slug },
+      select: {
+        id: true, name: true, slug: true,
+        description: true, shortDescription: true,
+        price: true, salePrice: true,
+        sku: true, stock: true, unit: true, weight: true,
+        origin: true, status: true,
+        isFeatured: true, isOrganic: true,
+        categoryId: true, soldCount: true,
+        metaTitle: true, metaDescription: true, tags: true,
+        createdAt: true, updatedAt: true,
+        images: { orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }] },
+        category: { select: { id: true, name: true, slug: true } },
+        _count: { select: { reviews: true } },
+      },
+    });
+  } catch (e) {
+    console.error("[ProductDetailPage] DB error:", e);
+    notFound();
+  }
 
   if (!product || product.status === "INACTIVE") notFound();
 
-  // Compute average rating from the DB
+  // Compute average rating
   const ratingAgg = await db.review.aggregate({
     where: { productId: product.id, isVisible: true },
     _avg: { rating: true },
     _count: { rating: true },
-  });
+  }).catch(() => ({ _avg: { rating: 0 }, _count: { rating: 0 } }));
 
   const averageRating = ratingAgg._avg.rating ?? 0;
   const reviewCount = ratingAgg._count.rating;
@@ -94,9 +103,9 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
     },
     orderBy: { createdAt: "desc" },
     take: 4,
-  });
+  }).catch(() => []);
 
-  // Increment view count (fire-and-forget — silently skipped if column not yet migrated)
+  // Increment view count (fire-and-forget)
   db.$executeRawUnsafe(
     `UPDATE "products" SET "viewCount" = "viewCount" + 1 WHERE "id" = $1`,
     product.id
@@ -148,13 +157,10 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
         {/* Main product section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14">
-          {/* Gallery */}
           <ProductImageGallery
             images={product.images}
             productName={product.name}
           />
-
-          {/* Info */}
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           <ProductInfo product={productWithRating as any} />
         </div>
@@ -204,7 +210,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         </Tabs>
 
         {/* Related products */}
-        {related.length > 0 && (
+        {relatedWithTypes.length > 0 && (
           <>
             <Separator />
             <RelatedProducts
