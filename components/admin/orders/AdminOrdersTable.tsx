@@ -49,6 +49,7 @@ interface OrderRow {
 export function AdminOrdersTable() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [newAddressOnly, setNewAddressOnly] = useState(false);
   const [page, setPage] = useState(1);
 
   const params = new URLSearchParams({
@@ -56,10 +57,11 @@ export function AdminOrdersTable() {
     limit: "20",
     ...(search && { search }),
     ...(statusFilter !== "all" && { status: statusFilter }),
+    ...(newAddressOnly && { newAddress: "true" }),
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ["admin-orders", page, search, statusFilter],
+    queryKey: ["admin-orders", page, search, statusFilter, newAddressOnly],
     queryFn: async () => {
       const { data } = await axios.get(`/api/admin/orders?${params}`);
       return data;
@@ -100,6 +102,18 @@ export function AdminOrdersTable() {
               ))}
             </SelectContent>
           </Select>
+          <button
+            type="button"
+            onClick={() => { setNewAddressOnly((v) => !v); setPage(1); }}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-colors ${
+              newAddressOnly
+                ? "bg-amber-50 border-amber-300 text-amber-700"
+                : "bg-white border-gray-200 text-gray-500 hover:border-amber-300 hover:text-amber-600"
+            }`}
+          >
+            <TriangleAlert className="h-3.5 w-3.5" />
+            Địa chỉ mới
+          </button>
         </div>
       </div>
 

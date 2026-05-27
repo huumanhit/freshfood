@@ -21,10 +21,12 @@ export async function GET(req: NextRequest) {
     const limit = Number(req.nextUrl.searchParams.get("limit") ?? 20);
     const status = req.nextUrl.searchParams.get("status") as OrderStatus | null;
     const search = req.nextUrl.searchParams.get("search") ?? "";
+    const newAddress = req.nextUrl.searchParams.get("newAddress") === "true";
     const skip = (page - 1) * limit;
 
     const where = {
       ...(status && { status }),
+      ...(newAddress && { isNewAddress: true }),
       ...(search && {
         OR: [
           { orderNumber: { contains: search } },
