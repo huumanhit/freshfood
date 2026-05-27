@@ -10,13 +10,9 @@ export async function GET(req: NextRequest) {
     const phone = req.nextUrl.searchParams.get("phone")?.trim();
     if (!phone) throw new AppError("Vui lòng nhập số điện thoại", 400);
 
-    const user = await db.user.findFirst({ where: { phone } });
-    if (!user) {
-      return successResponse([], "Không tìm thấy đơn hàng");
-    }
-
-    const orders = await db.order.findMany({
-      where: { userId: user.id },
+    // Find orders by address phone (covers both registered and guest users)
+    const ordersByAddress = await db.order.findMany({
+      where: { address: { phone } },
       include: {
         items: { select: { productName: true, quantity: true, price: true, subtotal: true } },
         address: { select: { fullName: true, phone: true, street: true, district: true, province: true } },
@@ -25,7 +21,23 @@ export async function GET(req: NextRequest) {
       take: 20,
     });
 
-    const result = orders.map((o) => ({
+    // Also find orders by registered user phone (in case address phone differs)
+    const user = await db.user.findFirst({ where: { phone }, select: { id: true } });
+    const ordersByUser = user ? await db.order.findMany({
+      where: { userId: user.id, NOT: { address: { phone } } },
+      include: {
+        items: { select: { productName: true, quantity: true, price: true, subtotal: true } },
+        address: { select: { fullName: true, phone: true, street: true, district: true, province: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    }) : [];
+
+    const allOrders = [...ordersByAddress, ...ordersByUser]
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, 20);
+
+    const result = allOrders.map((o) => ({
       id: o.id,
       orderNumber: o.orderNumber,
       status: o.status,
