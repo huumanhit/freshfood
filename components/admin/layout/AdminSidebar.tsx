@@ -62,7 +62,7 @@ export function AdminSidebar() {
     <aside className="w-56 shrink-0 flex flex-col bg-white border-r border-gray-200 min-h-screen">
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 py-5 border-b border-gray-100">
-        <div className="h-8 w-8 rounded-lg bg-[#22c55e] flex items-center justify-center shrink-0">
+        <div className="h-8 w-8 rounded-lg bg-[#16a34a] flex items-center justify-center shrink-0">
           <Leaf className="h-4.5 w-4.5 text-white" />
         </div>
         <div className="leading-tight">

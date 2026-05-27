@@ -146,7 +146,7 @@ export function ReferralsTable() {
                             </>
                           )}
                           {r.status === "CONFIRMED" && (
-                            <Button size="sm" className="h-7 rounded-lg text-xs gap-1 bg-[#22c55e] hover:bg-[#16a34a] text-white"
+                            <Button size="sm" className="h-7 rounded-lg text-xs gap-1 bg-[#16a34a] hover:bg-[#16a34a] text-white"
                               onClick={() => actionMutation.mutate({ id: r.id, action: "apply" })}
                               disabled={actionMutation.isPending}>
                               <Tag className="h-3 w-3" /> Phát thưởng

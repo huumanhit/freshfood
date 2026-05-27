@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Search, X, AlertCircle, RefreshCw } from "lucide-react";
 import { useProducts } from "@/hooks/use-products";
+import { useCategories } from "@/hooks/use-categories";
 import { useDebounce } from "@/hooks/use-debounce";
 import { buildSearchParams } from "@/lib/utils";
 import { ProductFilters, FilterState } from "@/components/products/ProductFilters";
@@ -54,6 +55,16 @@ export function ProductsClient({ initialSearchParams, initialProducts, initialPa
   );
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
+  // Auto-clear invalid categorySlug when categories are loaded
+  const { data: categoriesData } = useCategories();
+  useEffect(() => {
+    if (!categoriesData || !filters.categorySlug) return;
+    const validSlugs = categoriesData.map((c) => c.slug);
+    if (!validSlugs.includes(filters.categorySlug)) {
+      setFilters((prev) => ({ ...prev, categorySlug: "", page: 1 }));
+    }
+  }, [categoriesData, filters.categorySlug]);
+
   const debouncedSearch = useDebounce(filters.search, 400);
   const queryFilters = { ...filters, search: debouncedSearch };
 
@@ -79,8 +90,15 @@ export function ProductsClient({ initialSearchParams, initialProducts, initialPa
     serverInitial
   );
 
-  const products = data?.data ?? [];
-  const pagination = data?.pagination;
+  const lastGoodDataRef = useRef<{ products: Product[]; pagination: PaginationMeta } | null>(
+    serverInitial ? { products: serverInitial.data, pagination: serverInitial.pagination! } : null
+  );
+  if (data?.data?.length) {
+    lastGoodDataRef.current = { products: data.data, pagination: data.pagination! };
+  }
+
+  const products = data?.data ?? lastGoodDataRef.current?.products ?? [];
+  const pagination = data?.pagination ?? lastGoodDataRef.current?.pagination;
 
   // Sync filters → URL (debounced)
   const debouncedFilters = useDebounce(filters, 600);
@@ -128,7 +146,7 @@ export function ProductsClient({ initialSearchParams, initialProducts, initialPa
           </div>
           <button
             onClick={() => refetch()}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#22c55e] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#16a34a] transition-colors"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#16a34a] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#16a34a] transition-colors"
           >
             <RefreshCw className="h-4 w-4" />
             Thử lại
@@ -139,18 +157,18 @@ export function ProductsClient({ initialSearchParams, initialProducts, initialPa
   }
 
   return (
-    <div className="container py-8">
+    <div className="container py-4 lg:py-8">
       {/* Page heading */}
-      <div className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-widest text-[#22c55e] mb-1">Cửa hàng</p>
-        <h1 className="text-3xl font-bold font-display text-gray-900">Tất cả sản phẩm</h1>
-        <p className="text-sm text-gray-400 mt-1">
+      <div className="mb-4 lg:mb-6">
+        <p className="text-xs font-semibold uppercase tracking-widest text-[#22c55e] mb-0.5">Cửa hàng</p>
+        <h1 className="text-2xl lg:text-3xl font-bold font-display text-gray-900">Tất cả sản phẩm</h1>
+        <p className="text-xs lg:text-sm text-gray-400 mt-0.5 hidden lg:block">
           Thực phẩm sạch, tươi ngon — giao tận nhà trong 2–3h
         </p>
       </div>
 
       {/* Search bar */}
-      <div className="relative mb-6 max-w-xl">
+      <div className="relative mb-4 max-w-xl">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
         <input
           type="text"
@@ -200,6 +218,10 @@ export function ProductsClient({ initialSearchParams, initialProducts, initialPa
               <Pagination
                 meta={pagination}
                 className="justify-center"
+                onPageChange={(p) => {
+                  handleChange({ page: p });
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
               />
             </div>
           )}

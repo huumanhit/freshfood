@@ -3,9 +3,9 @@ export const APP_CONFIG = {
   tagline: "Thực phẩm sạch mỗi ngày",
   description: "Cửa hàng thực phẩm sạch, tươi ngon, giao hàng nhanh tận nơi",
   url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
-  email: "support@freshfood.vn",
-  phone: "1800 9999",
-  address: "123 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",
+  email: "tuoingonmoingay@outlook.com.vn",
+  phone: "0932133139",
+  address: "Chung cư Thái An 1, 1/45 Nguyễn Văn Quá, P. Đông Hưng Thuận, Q.12, TP.HCM",
   socialLinks: {
     facebook: "https://facebook.com/freshfood",
     instagram: "https://instagram.com/freshfood",

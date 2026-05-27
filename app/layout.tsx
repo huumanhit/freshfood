@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { Inter, Plus_Jakarta_Sans, Dancing_Script } from "next/font/google";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
@@ -16,6 +16,12 @@ const inter = Inter({
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin", "vietnamese"],
   variable: "--font-plus-jakarta",
+  display: "swap",
+});
+
+const dancingScript = Dancing_Script({
+  subsets: ["latin"],
+  variable: "--font-dancing",
   display: "swap",
 });
 
@@ -67,7 +73,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
     <html
       lang="vi"
       suppressHydrationWarning
-      className={`${inter.variable} ${plusJakarta.variable}`}
+      className={`${inter.variable} ${plusJakarta.variable} ${dancingScript.variable}`}
     >
       <body>
         <ThemeProvider defaultTheme="light">

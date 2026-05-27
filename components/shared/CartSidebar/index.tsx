@@ -44,7 +44,7 @@ export function CartSidebar() {
             </div>
             Giỏ hàng
             {itemCount > 0 && (
-              <span className="ml-1 rounded-full bg-[#22c55e] px-2 py-0.5 text-xs font-bold text-white">
+              <span className="ml-1 rounded-full bg-[#16a34a] px-2 py-0.5 text-xs font-bold text-white">
                 {itemCount}
               </span>
             )}
@@ -64,7 +64,7 @@ export function CartSidebar() {
               </p>
             </div>
             <Button
-              className="bg-[#22c55e] hover:bg-[#16a34a] rounded-xl"
+              className="bg-[#16a34a] hover:bg-[#16a34a] rounded-xl"
               onClick={closeCart}
               asChild
             >
@@ -92,7 +92,7 @@ export function CartSidebar() {
                   </p>
                   <div className="h-1.5 rounded-full bg-green-200 overflow-hidden">
                     <motion.div
-                      className="h-full rounded-full bg-[#22c55e]"
+                      className="h-full rounded-full bg-[#16a34a]"
                       initial={{ width: 0 }}
                       animate={{ width: `${progressPct}%` }}
                       transition={{ duration: 0.4 }}
@@ -218,7 +218,7 @@ export function CartSidebar() {
               </div>
 
               <Button
-                className="w-full h-11 bg-[#22c55e] hover:bg-[#16a34a] rounded-xl font-semibold text-base shadow-md shadow-green-200"
+                className="w-full h-11 bg-[#16a34a] hover:bg-[#16a34a] rounded-xl font-semibold text-base shadow-md shadow-green-200"
                 asChild
                 onClick={closeCart}
               >

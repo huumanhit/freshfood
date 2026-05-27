@@ -252,7 +252,7 @@ export function AdminOrderDetail({ order }: AdminOrderDetailProps) {
                 <Button
                   disabled={!nextStatus || updateMutation.isPending}
                   onClick={() => nextStatus && updateMutation.mutate({ status: nextStatus })}
-                  className="rounded-xl bg-[#22c55e] hover:bg-[#16a34a] shrink-0"
+                  className="rounded-xl bg-[#16a34a] hover:bg-[#16a34a] shrink-0"
                 >
                   {updateMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                   Cập nhật

@@ -9,9 +9,10 @@ import { cn } from "@/lib/utils";
 interface PaginationProps {
   meta: PaginationMeta;
   className?: string;
+  onPageChange?: (page: number) => void;
 }
 
-export function Pagination({ meta, className }: PaginationProps) {
+export function Pagination({ meta, className, onPageChange }: PaginationProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -19,6 +20,10 @@ export function Pagination({ meta, className }: PaginationProps) {
   const { page, totalPages, hasNext, hasPrev } = meta;
 
   function goToPage(targetPage: number) {
+    if (onPageChange) {
+      onPageChange(targetPage);
+      return;
+    }
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", String(targetPage));
     router.push(`${pathname}?${params.toString()}`);

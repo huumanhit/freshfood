@@ -155,7 +155,7 @@ export function TraceabilityManager() {
           <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
             <Layers className="h-4 w-4 text-[#22c55e]" /> Lô hàng ({batches.length})
           </h2>
-          <Button size="sm" className="rounded-xl bg-[#22c55e] hover:bg-[#16a34a] text-white gap-1"
+          <Button size="sm" className="rounded-xl bg-[#16a34a] hover:bg-[#16a34a] text-white gap-1"
             onClick={() => setShowCreate(true)}>
             <Plus className="h-3.5 w-3.5" /> Thêm lô
           </Button>
@@ -249,7 +249,7 @@ export function TraceabilityManager() {
                   </SelectContent>
                 </Select>
                 <Button
-                  className="rounded-xl bg-[#22c55e] hover:bg-[#16a34a] text-white"
+                  className="rounded-xl bg-[#16a34a] hover:bg-[#16a34a] text-white"
                   onClick={() => logMutation.mutate({ batchId: selectedBatch, event: logEvent })}
                   disabled={!logEvent || logMutation.isPending}
                 >
@@ -262,7 +262,7 @@ export function TraceabilityManager() {
                 {batchDetail?.batch.traceabilityLogs.map((log, i) => (
                   <div key={log.id} className="flex gap-3">
                     <div className="flex flex-col items-center">
-                      <div className="h-2.5 w-2.5 rounded-full bg-[#22c55e] mt-1 shrink-0" />
+                      <div className="h-2.5 w-2.5 rounded-full bg-[#16a34a] mt-1 shrink-0" />
                       {i < (batchDetail.batch.traceabilityLogs.length - 1) && (
                         <div className="w-0.5 flex-1 bg-gray-200 my-1" />
                       )}
@@ -346,7 +346,7 @@ export function TraceabilityManager() {
 
             <div className="flex gap-2 pt-2">
               <Button type="button" variant="outline" className="flex-1 rounded-xl" onClick={() => setShowCreate(false)}>Huỷ</Button>
-              <Button type="submit" className="flex-1 rounded-xl bg-[#22c55e] hover:bg-[#16a34a] text-white"
+              <Button type="submit" className="flex-1 rounded-xl bg-[#16a34a] hover:bg-[#16a34a] text-white"
                 disabled={createMutation.isPending}>
                 {createMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 Tạo lô hàng

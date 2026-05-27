@@ -86,7 +86,7 @@ export function DeliveryActionModal({
       icon: <CheckCircle2 className="h-5 w-5 text-[#22c55e]" />,
       description: `Đánh dấu đơn #${orderNumber} đã giao thành công?`,
       confirmLabel: "Xác nhận đã giao",
-      confirmClass: "bg-[#22c55e] hover:bg-[#16a34a]",
+      confirmClass: "bg-[#16a34a] hover:bg-[#16a34a]",
     },
     failed: {
       title: "Báo giao hàng thất bại",

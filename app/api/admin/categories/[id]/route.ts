@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { revalidateTag } from "next/cache";
 import { successResponse, noContentResponse } from "@/lib/api-response";
 import { handleApiError, UnauthorizedError, ForbiddenError, NotFoundError, AppError } from "@/lib/api-error";
 import { z } from "zod";
@@ -46,6 +47,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       include: { _count: { select: { products: true } } },
     });
 
+    revalidateTag("categories");
     return successResponse(updated);
   } catch (error) {
     return handleApiError(error);
@@ -73,6 +75,7 @@ export async function DELETE(_req: NextRequest, { params }: RouteParams) {
 
     await db.category.delete({ where: { id: params.id } });
 
+    revalidateTag("categories");
     return noContentResponse();
   } catch (error) {
     return handleApiError(error);

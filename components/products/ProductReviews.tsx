@@ -214,7 +214,7 @@ export function ProductReviews({ productId, averageRating = 0, reviewCount = 0 }
             <Button
               type="submit"
               disabled={mutation.isPending}
-              className="rounded-xl bg-[#22c55e] hover:bg-[#16a34a]"
+              className="rounded-xl bg-[#16a34a] hover:bg-[#16a34a]"
             >
               {mutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Gửi đánh giá

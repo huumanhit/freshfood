@@ -171,7 +171,7 @@ export function RegisterForm() {
         <Button
           type="submit"
           disabled={isLoading}
-          className="w-full h-11 bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-xl font-semibold text-sm shadow-md shadow-green-100 transition-all hover:shadow-green-200 mt-1"
+          className="w-full h-11 bg-[#16a34a] hover:bg-[#16a34a] text-white rounded-xl font-semibold text-sm shadow-md shadow-green-100 transition-all hover:shadow-green-200 mt-1"
         >
           {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Tạo tài khoản"}
         </Button>

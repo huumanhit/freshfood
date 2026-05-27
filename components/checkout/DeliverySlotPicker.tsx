@@ -51,7 +51,7 @@ export function DeliverySlotPicker({ value, onChange, error }: DeliverySlotPicke
               slot.disabled
                 ? "border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed"
                 : value === slot.value
-                ? "border-[#22c55e] bg-[#22c55e]/5 text-[#22c55e] ring-1 ring-[#22c55e]"
+                ? "border-[#22c55e] bg-[#16a34a]/5 text-[#22c55e] ring-1 ring-[#22c55e]"
                 : "border-gray-200 text-gray-600 hover:border-[#22c55e]/50 hover:bg-gray-50"
             )}
           >

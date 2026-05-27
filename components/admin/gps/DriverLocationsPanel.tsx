@@ -72,7 +72,7 @@ export function DriverLocationsPanel() {
                 key={driver.userId}
                 className="flex items-start gap-3 p-3 rounded-xl border border-gray-100 hover:border-gray-200 transition-colors"
               >
-                <div className="h-9 w-9 rounded-full bg-[#22c55e]/10 flex items-center justify-center shrink-0">
+                <div className="h-9 w-9 rounded-full bg-[#16a34a]/10 flex items-center justify-center shrink-0">
                   <Navigation className="h-4 w-4 text-[#22c55e]" />
                 </div>
                 <div className="flex-1 min-w-0">

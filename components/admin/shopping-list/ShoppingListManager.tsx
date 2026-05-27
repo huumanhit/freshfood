@@ -97,7 +97,7 @@ export function ShoppingListManager() {
           )}
           <Button
             size="sm"
-            className="rounded-xl bg-[#22c55e] hover:bg-[#16a34a] text-white gap-1.5"
+            className="rounded-xl bg-[#16a34a] hover:bg-[#16a34a] text-white gap-1.5"
             onClick={() => generateMutation.mutate()}
             disabled={generateMutation.isPending}
           >
@@ -115,7 +115,7 @@ export function ShoppingListManager() {
             <ShoppingCart className="h-10 w-10 text-gray-300" />
             <p className="text-gray-500">Chưa có danh sách cho ngày {selectedDate}</p>
             <Button
-              className="rounded-xl bg-[#22c55e] hover:bg-[#16a34a] text-white mt-2"
+              className="rounded-xl bg-[#16a34a] hover:bg-[#16a34a] text-white mt-2"
               onClick={() => generateMutation.mutate()}
               disabled={generateMutation.isPending}
             >
@@ -146,7 +146,7 @@ export function ShoppingListManager() {
               </div>
               <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-[#22c55e] rounded-full transition-all"
+                  className="h-full bg-[#16a34a] rounded-full transition-all"
                   style={{ width: totalCount > 0 ? `${(purchasedCount / totalCount) * 100}%` : "0%" }}
                 />
               </div>
@@ -169,7 +169,7 @@ export function ShoppingListManager() {
                       <button
                         onClick={() => updateMutation.mutate({ itemId: item.id, isPurchased: !item.isPurchased })}
                         className={`h-5 w-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
-                          item.isPurchased ? "bg-[#22c55e] border-[#22c55e]" : "border-gray-300 hover:border-[#22c55e]"
+                          item.isPurchased ? "bg-[#16a34a] border-[#22c55e]" : "border-gray-300 hover:border-[#22c55e]"
                         }`}
                       >
                         {item.isPurchased && <Check className="h-3 w-3 text-white" />}

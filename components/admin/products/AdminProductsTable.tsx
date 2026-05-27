@@ -130,7 +130,7 @@ export function AdminProductsTable() {
           </Select>
         </div>
 
-        <Button asChild className="rounded-xl bg-[#22c55e] hover:bg-[#16a34a] shrink-0">
+        <Button asChild className="rounded-xl bg-[#16a34a] hover:bg-[#16a34a] shrink-0">
           <Link href={ROUTES.ADMIN_PRODUCT_NEW}>
             <Plus className="h-4 w-4 mr-1.5" />
             Thêm sản phẩm

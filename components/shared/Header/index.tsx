@@ -120,7 +120,7 @@ export function Header() {
             href={ROUTES.HOME}
             className="flex items-center gap-2 font-display font-bold text-xl text-[#15803d] shrink-0"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#22c55e]">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#16a34a]">
               <Leaf className="h-5 w-5 text-white" />
             </div>
             <span className="hidden sm:block">{APP_CONFIG.name}</span>
@@ -210,7 +210,7 @@ export function Header() {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
-                    className="absolute -top-0.5 -right-0.5 flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-[#22c55e] px-1 text-[10px] font-bold text-white"
+                    className="absolute -top-0.5 -right-0.5 flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-[#16a34a] px-1 text-[10px] font-bold text-white"
                   >
                     {itemCount > 99 ? "99+" : itemCount}
                   </motion.span>

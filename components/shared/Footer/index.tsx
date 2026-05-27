@@ -36,7 +36,7 @@ export function Footer() {
         {/* Brand */}
         <div className="space-y-4 sm:col-span-2 lg:col-span-1">
           <Link href={ROUTES.HOME} className="inline-flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#22c55e]">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#16a34a]">
               <Leaf className="h-5 w-5 text-white" />
             </div>
             <span className="font-display font-bold text-xl text-white">
@@ -163,7 +163,7 @@ function SocialIconRaw({
       target="_blank"
       rel="noopener noreferrer"
       aria-label={label}
-      className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-800 text-gray-400 hover:bg-[#22c55e] hover:text-white transition-all duration-200"
+      className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-800 text-gray-400 hover:bg-[#16a34a] hover:text-white transition-all duration-200"
     >
       {children}
     </a>

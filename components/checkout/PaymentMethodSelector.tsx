@@ -44,14 +44,14 @@ export function PaymentMethodSelector({ value, onChange, error }: PaymentMethodS
               className={cn(
                 "w-full flex items-center gap-3 rounded-xl border p-3.5 text-left transition-all",
                 selected
-                  ? "border-[#22c55e] bg-[#22c55e]/5 ring-1 ring-[#22c55e]"
+                  ? "border-[#22c55e] bg-[#16a34a]/5 ring-1 ring-[#22c55e]"
                   : "border-gray-200 hover:border-[#22c55e]/50 hover:bg-gray-50"
               )}
             >
               <div
                 className={cn(
                   "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
-                  selected ? "bg-[#22c55e] text-white" : "bg-gray-100 text-gray-500"
+                  selected ? "bg-[#16a34a] text-white" : "bg-gray-100 text-gray-500"
                 )}
               >
                 <Icon className="h-5 w-5" />
@@ -65,7 +65,7 @@ export function PaymentMethodSelector({ value, onChange, error }: PaymentMethodS
               <div
                 className={cn(
                   "h-4 w-4 rounded-full border-2 shrink-0 transition-colors",
-                  selected ? "border-[#22c55e] bg-[#22c55e]" : "border-gray-300"
+                  selected ? "border-[#22c55e] bg-[#16a34a]" : "border-gray-300"
                 )}
               />
             </button>

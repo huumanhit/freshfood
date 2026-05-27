@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
 import { APP_CONFIG } from "@/constants/config";
 import { ROUTES } from "@/constants/routes";
@@ -12,46 +13,15 @@ import { RelatedProducts } from "@/components/products/RelatedProducts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 
-export const dynamic = "force-dynamic";
-
 interface ProductDetailPageProps {
   params: { slug: string };
 }
 
-export async function generateMetadata({ params }: ProductDetailPageProps): Promise<Metadata> {
-  try {
-    const product = await db.product.findUnique({
-      where: { slug: params.slug },
-      select: {
-        name: true,
-        shortDescription: true,
-        metaTitle: true,
-        metaDescription: true,
-        images: { where: { isPrimary: true }, take: 1 },
-      },
-    });
-
-    if (!product) return { title: "Sản phẩm không tồn tại" };
-
-    return {
-      title: `${product.metaTitle ?? product.name} — ${APP_CONFIG.name}`,
-      description: product.metaDescription ?? product.shortDescription ?? APP_CONFIG.description,
-      openGraph: {
-        title: product.metaTitle ?? product.name,
-        description: product.metaDescription ?? product.shortDescription ?? undefined,
-        images: product.images[0] ? [{ url: product.images[0].url }] : undefined,
-      },
-    };
-  } catch {
-    return { title: APP_CONFIG.name };
-  }
-}
-
-export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
-  let product;
-  try {
-    product = await db.product.findUnique({
-      where: { slug: params.slug },
+// Cached product fetch — Decimal fields converted to numbers for JSON serialization
+const getProductBySlug = unstable_cache(
+  async (slug: string) => {
+    const p = await db.product.findUnique({
+      where: { slug },
       select: {
         id: true, name: true, slug: true,
         description: true, shortDescription: true,
@@ -67,45 +37,94 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         _count: { select: { reviews: true } },
       },
     });
-  } catch (e) {
-    console.error("[ProductDetailPage] DB error:", e);
-    notFound();
+    if (!p) return null;
+    return {
+      ...p,
+      price: Number(p.price),
+      salePrice: p.salePrice != null ? Number(p.salePrice) : null,
+      weight: p.weight != null ? Number(p.weight) : null,
+      createdAt: p.createdAt.toISOString(),
+      updatedAt: p.updatedAt.toISOString(),
+    };
+  },
+  ["product-by-slug"],
+  { revalidate: 300, tags: ["products"] }
+);
+
+const getProductRating = unstable_cache(
+  async (productId: string) => {
+    const agg = await db.review.aggregate({
+      where: { productId, isVisible: true },
+      _avg: { rating: true },
+      _count: { rating: true },
+    }).catch(() => ({ _avg: { rating: null }, _count: { rating: 0 } }));
+    return {
+      averageRating: Number(agg._avg.rating ?? 0),
+      reviewCount: Number(agg._count.rating ?? 0),
+    };
+  },
+  ["product-rating"],
+  { revalidate: 120, tags: ["reviews"] }
+);
+
+const getRelatedProducts = unstable_cache(
+  async (categoryId: string, excludeId: string) => {
+    const rows = await db.product.findMany({
+      where: { categoryId, id: { not: excludeId }, status: "ACTIVE" },
+      select: {
+        id: true, name: true, slug: true,
+        price: true, salePrice: true,
+        stock: true, unit: true, origin: true,
+        isOrganic: true, isFeatured: true,
+        categoryId: true,
+        images: { where: { isPrimary: true }, take: 1 },
+        category: { select: { id: true, name: true, slug: true } },
+        _count: { select: { reviews: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 4,
+    }).catch(() => []);
+    return rows.map((r) => ({
+      ...r,
+      price: Number(r.price),
+      salePrice: r.salePrice != null ? Number(r.salePrice) : null,
+      reviewCount: r._count.reviews,
+    }));
+  },
+  ["related-products"],
+  { revalidate: 300, tags: ["products"] }
+);
+
+export async function generateMetadata({ params }: ProductDetailPageProps): Promise<Metadata> {
+  try {
+    const product = await getProductBySlug(params.slug);
+    if (!product) return { title: "Sản phẩm không tồn tại" };
+    return {
+      title: `${product.metaTitle ?? product.name} — ${APP_CONFIG.name}`,
+      description: product.metaDescription ?? product.shortDescription ?? APP_CONFIG.description,
+      openGraph: {
+        title: product.metaTitle ?? product.name,
+        description: product.metaDescription ?? product.shortDescription ?? undefined,
+        images: product.images[0] ? [{ url: product.images[0].url }] : undefined,
+      },
+    };
+  } catch {
+    return { title: APP_CONFIG.name };
   }
+}
+
+export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
+  const product = await getProductBySlug(params.slug).catch(() => null);
 
   if (!product || product.status === "INACTIVE") notFound();
 
-  // Compute average rating
-  const ratingAgg = await db.review.aggregate({
-    where: { productId: product.id, isVisible: true },
-    _avg: { rating: true },
-    _count: { rating: true },
-  }).catch(() => ({ _avg: { rating: 0 }, _count: { rating: 0 } }));
+  // Rating + related in parallel — both cached
+  const [{ averageRating, reviewCount }, related] = await Promise.all([
+    getProductRating(product.id),
+    getRelatedProducts(product.categoryId, product.id),
+  ]);
 
-  const averageRating = ratingAgg._avg.rating ?? 0;
-  const reviewCount = ratingAgg._count.rating;
-
-  // Related products — same category, excluding current
-  const related = await db.product.findMany({
-    where: {
-      categoryId: product.categoryId,
-      id: { not: product.id },
-      status: "ACTIVE",
-    },
-    select: {
-      id: true, name: true, slug: true,
-      price: true, salePrice: true,
-      stock: true, unit: true, origin: true,
-      isOrganic: true, isFeatured: true,
-      categoryId: true,
-      images: { where: { isPrimary: true }, take: 1 },
-      category: { select: { id: true, name: true, slug: true } },
-      _count: { select: { reviews: true } },
-    },
-    orderBy: { createdAt: "desc" },
-    take: 4,
-  }).catch(() => []);
-
-  // Increment view count (fire-and-forget)
+  // Increment view count (fire-and-forget, non-blocking)
   db.$executeRawUnsafe(
     `UPDATE "products" SET "viewCount" = "viewCount" + 1 WHERE "id" = $1`,
     product.id
@@ -115,9 +134,10 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
     ...product,
     averageRating,
     reviewCount,
+    // Decimal fields already converted in cache function; keep for type compatibility
     price: Number(product.price),
-    salePrice: product.salePrice ? Number(product.salePrice) : null,
-    weight: product.weight ? Number(product.weight) : null,
+    salePrice: product.salePrice != null ? Number(product.salePrice) : null,
+    weight: product.weight != null ? Number(product.weight) : null,
   };
 
   const relatedWithTypes = related.map((p) => ({

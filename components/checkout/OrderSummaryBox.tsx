@@ -26,7 +26,7 @@ export function OrderSummaryBox() {
                 ) : (
                   <div className="h-full w-full bg-gray-100" />
                 )}
-                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-[#22c55e] text-white text-[10px] font-bold flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-[#16a34a] text-white text-[10px] font-bold flex items-center justify-center">
                   {item.quantity}
                 </span>
               </div>

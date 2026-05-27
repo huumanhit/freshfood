@@ -19,10 +19,9 @@ export function useProducts(
       return data;
     },
     staleTime: 60 * 1000,
-    // placeholderData: show SSR-prefetched data immediately; on refetch
-    // failure it stays visible (unlike initialData which clears on error)
     placeholderData,
-    retry: 1,
+    retry: 3,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000),
   });
 }
 

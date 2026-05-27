@@ -258,7 +258,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
             <Button
               onClick={handleBuyNow}
               size="lg"
-              className="flex-1 h-12 rounded-2xl bg-[#22c55e] hover:bg-[#16a34a] font-semibold shadow-md shadow-green-200"
+              className="flex-1 h-12 rounded-2xl bg-[#16a34a] hover:bg-[#16a34a] font-semibold shadow-md shadow-green-200"
             >
               <Zap className="h-4 w-4 mr-2" />
               Mua ngay

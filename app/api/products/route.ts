@@ -38,7 +38,10 @@ export async function GET(req: NextRequest) {
           { tags: { contains: search, mode: "insensitive" } },
         ],
       }),
-      ...(categorySlug && { category: { slug: categorySlug } }),
+      // Only filter by category if slug is valid and active
+      ...(categorySlug && {
+        category: { slug: categorySlug, isActive: true },
+      }),
       ...(minPrice !== undefined && { price: { gte: minPrice } }),
       ...(maxPrice !== undefined && { price: { lte: maxPrice } }),
       ...(isOrganic !== undefined && { isOrganic }),

@@ -36,18 +36,14 @@ export function FeaturedProducts() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-end justify-between mb-6">
-        <div>
-          <p className="text-sm font-medium text-[#22c55e] uppercase tracking-widest mb-1">
-            Nổi bật
-          </p>
-          <h2 className="text-2xl sm:text-3xl font-bold font-display text-gray-900">
-            Sản phẩm nổi bật
-          </h2>
-        </div>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-base font-bold text-gray-900 uppercase tracking-wide lg:text-3xl lg:normal-case lg:tracking-normal lg:font-bold lg:font-display">
+          <span className="lg:hidden">Sản phẩm nổi bật</span>
+          <span className="hidden lg:block">Sản phẩm nổi bật</span>
+        </h2>
         <Link
           href={ROUTES.PRODUCTS}
-          className="hidden sm:flex items-center gap-1 text-sm font-medium text-[#22c55e] hover:text-[#15803d] transition-colors"
+          className="flex items-center gap-1 text-sm font-medium text-[#22c55e] hover:text-[#15803d] transition-colors"
         >
           Xem tất cả <ArrowRight className="h-4 w-4" />
         </Link>
@@ -62,7 +58,7 @@ export function FeaturedProducts() {
               onClick={() => setActiveTab(tab.key)}
               className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-200 ${
                 activeTab === tab.key
-                  ? "bg-[#22c55e] text-white shadow-md shadow-green-200"
+                  ? "bg-[#16a34a] text-white shadow-md shadow-green-200"
                   : "bg-white text-gray-600 border border-gray-200 hover:border-green-300 hover:text-green-600"
               }`}
             >

@@ -1,12 +1,10 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { unstable_cache } from "next/cache";
-import { unstable_noStore as noStore } from "next/cache";
 import { db } from "@/lib/db";
 import { ROUTES } from "@/constants/routes";
 import { CategoryGrid } from "./CategoryGrid";
 
-// Cache result for 1 hour server-side — avoids repeated DB calls on every render
 const getActiveCategories = unstable_cache(
   async () => {
     const result = await db.category.findMany({
@@ -15,23 +13,21 @@ const getActiveCategories = unstable_cache(
         id: true,
         name: true,
         slug: true,
+        image: true,
         _count: { select: { products: { where: { status: "ACTIVE" } } } },
       },
       orderBy: { sortOrder: "asc" },
     });
     return result
       .filter((c) => c._count.products > 0)
-      .map(({ id, name, slug }) => ({ id, name, slug }));
+      .map(({ id, name, slug, image }) => ({ id, name, slug, image: image ?? null }));
   },
   ["active-categories-home"],
-  { revalidate: 3600, tags: ["categories"] }
+  { revalidate: 300, tags: ["categories"] } // 5 phút, clear ngay khi admin thay đổi
 );
 
 export async function CategorySection() {
-  // Opt out of static pre-rendering — fetch at request time, not build time
-  noStore();
-
-  let categories: { id: string; name: string; slug: string }[] = [];
+  let categories: { id: string; name: string; slug: string; image: string | null }[] = [];
   try {
     categories = await getActiveCategories();
   } catch {
@@ -41,9 +37,10 @@ export async function CategorySection() {
   if (categories.length === 0) return null;
 
   return (
-    <section className="py-14 bg-white">
+    <section className="bg-white py-3 lg:py-14">
       <div className="container">
-        <div className="flex items-end justify-between mb-8">
+        {/* Desktop header */}
+        <div className="hidden lg:flex items-end justify-between mb-8">
           <div>
             <p className="text-sm font-medium text-[#22c55e] uppercase tracking-widest mb-1">
               Danh mục
@@ -54,22 +51,13 @@ export async function CategorySection() {
           </div>
           <Link
             href={ROUTES.PRODUCTS}
-            className="hidden sm:flex items-center gap-1 text-sm font-medium text-[#22c55e] hover:text-[#15803d] transition-colors"
+            className="flex items-center gap-1 text-sm font-medium text-[#22c55e] hover:text-[#15803d] transition-colors"
           >
             Tất cả <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
         <CategoryGrid categories={categories} />
-
-        <div className="mt-6 text-center sm:hidden">
-          <Link
-            href={ROUTES.PRODUCTS}
-            className="inline-flex items-center gap-1 text-sm font-medium text-[#22c55e] hover:text-[#15803d]"
-          >
-            Xem tất cả danh mục <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
       </div>
     </section>
   );

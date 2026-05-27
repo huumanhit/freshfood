@@ -16,7 +16,7 @@ export function AdminTopbar() {
         </button>
 
         <div className="flex items-center gap-2.5 pl-3 border-l border-gray-200">
-          <div className="h-8 w-8 rounded-full bg-[#22c55e]/10 flex items-center justify-center">
+          <div className="h-8 w-8 rounded-full bg-[#16a34a]/10 flex items-center justify-center">
             <User className="h-4 w-4 text-[#22c55e]" />
           </div>
           <div className="leading-tight hidden sm:block">

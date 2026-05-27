@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     if (file.size > UPLOAD.MAX_FILE_SIZE) {
       throw new AppError(`File quá lớn. Tối đa ${UPLOAD.MAX_FILE_SIZE / 1024 / 1024}MB`, 400);
     }
-    if (!UPLOAD.ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+    if (!UPLOAD.ACCEPTED_IMAGE_TYPES.includes(file.type as "image/jpeg")) {
       throw new AppError("Chỉ chấp nhận file JPG, PNG, WebP", 400);
     }
 
@@ -33,7 +33,11 @@ export async function POST(req: NextRequest) {
       { method: "POST", body: cloudinaryFormData }
     );
 
-    if (!cloudinaryRes.ok) throw new AppError("Upload thất bại", 500);
+    if (!cloudinaryRes.ok) {
+      const errBody = await cloudinaryRes.json().catch(() => ({}));
+      console.error("[Cloudinary error]", cloudinaryRes.status, JSON.stringify(errBody));
+      throw new AppError(`Upload thất bại: ${errBody?.error?.message ?? cloudinaryRes.status}`, 500);
+    }
 
     const cloudinaryData = await cloudinaryRes.json();
 

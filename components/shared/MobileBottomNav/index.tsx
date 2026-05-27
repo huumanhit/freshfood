@@ -43,7 +43,7 @@ export function MobileBottomNav() {
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         exit={{ scale: 0 }}
-                        className="absolute -top-1.5 -right-1.5 h-4 min-w-[16px] flex items-center justify-center rounded-full bg-[#22c55e] text-[9px] font-bold text-white px-0.5"
+                        className="absolute -top-1.5 -right-1.5 h-4 min-w-[16px] flex items-center justify-center rounded-full bg-[#16a34a] text-[9px] font-bold text-white px-0.5"
                       >
                         {itemCount > 9 ? "9+" : itemCount}
                       </motion.span>
@@ -68,7 +68,7 @@ export function MobileBottomNav() {
               {active && (
                 <motion.div
                   layoutId="mobile-nav-indicator"
-                  className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-[#22c55e]"
+                  className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-[#16a34a]"
                 />
               )}
               <Icon className={cn("h-5 w-5", active ? "text-[#22c55e]" : "text-gray-400")} />

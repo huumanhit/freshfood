@@ -16,6 +16,7 @@
     "db:migrate:prod": "prisma migrate deploy",
     "db:generate": "prisma generate",
     "db:seed": "tsx prisma/seed.ts",
+    "db:seed-products": "tsx --env-file=.env.local prisma/seed-products.ts",
     "db:reset": "prisma migrate reset",
     "db:studio": "prisma studio"
   },

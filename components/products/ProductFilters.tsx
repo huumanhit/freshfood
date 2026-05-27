@@ -114,7 +114,7 @@ export function ProductFilters({ filters, onChange, onReset }: ProductFiltersPro
                 <Checkbox
                   checked={filters.categorySlug === ""}
                   onCheckedChange={() => onChange({ categorySlug: "", page: 1 })}
-                  className="data-[state=checked]:bg-[#22c55e] data-[state=checked]:border-[#22c55e]"
+                  className="data-[state=checked]:bg-[#16a34a] data-[state=checked]:border-[#22c55e]"
                 />
                 <span className={cn("text-sm transition-colors group-hover:text-[#22c55e]",
                   filters.categorySlug === "" ? "font-medium text-[#22c55e]" : "text-gray-600"
@@ -135,7 +135,7 @@ export function ProductFilters({ filters, onChange, onReset }: ProductFiltersPro
                           page: 1,
                         })
                       }
-                      className="data-[state=checked]:bg-[#22c55e] data-[state=checked]:border-[#22c55e]"
+                      className="data-[state=checked]:bg-[#16a34a] data-[state=checked]:border-[#22c55e]"
                     />
                     <span className={cn("text-sm transition-colors group-hover:text-[#22c55e]",
                       filters.categorySlug === cat.slug ? "font-medium text-[#22c55e]" : "text-gray-600"
@@ -165,7 +165,7 @@ export function ProductFilters({ filters, onChange, onReset }: ProductFiltersPro
             value={priceRange}
             onValueChange={setPriceRange}
             onValueCommit={handlePriceCommit}
-            className="[&_[data-slot=track]]:bg-gray-200 [&_[data-slot=range]]:bg-[#22c55e] [&_[data-slot=thumb]]:border-[#22c55e]"
+            className="[&_[data-slot=track]]:bg-gray-200 [&_[data-slot=range]]:bg-[#16a34a] [&_[data-slot=thumb]]:border-[#22c55e]"
           />
           <div className="flex items-center justify-between text-xs text-gray-500">
             <span className="rounded-lg bg-gray-50 border px-2 py-1">
@@ -187,7 +187,7 @@ export function ProductFilters({ filters, onChange, onReset }: ProductFiltersPro
           <Checkbox
             checked={filters.isOrganic}
             onCheckedChange={(v) => onChange({ isOrganic: !!v, page: 1 })}
-            className="data-[state=checked]:bg-[#22c55e] data-[state=checked]:border-[#22c55e]"
+            className="data-[state=checked]:bg-[#16a34a] data-[state=checked]:border-[#22c55e]"
           />
           <span className="flex items-center gap-1.5 text-sm text-gray-600 group-hover:text-[#22c55e] transition-colors">
             <Leaf className="h-3.5 w-3.5 text-green-500" />

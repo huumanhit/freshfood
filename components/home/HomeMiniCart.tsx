@@ -30,7 +30,7 @@ export function HomeMiniCart() {
         <ShoppingBag className="h-4 w-4 text-[#22c55e]" />
         <h3 className="font-bold text-sm text-gray-800">Đơn hàng của bạn</h3>
         {itemCount > 0 && (
-          <span className="ml-auto rounded-full bg-[#22c55e] px-2 py-0.5 text-[10px] font-bold text-white">
+          <span className="ml-auto rounded-full bg-[#16a34a] px-2 py-0.5 text-[10px] font-bold text-white">
             {itemCount} sp
           </span>
         )}
@@ -128,7 +128,7 @@ export function HomeMiniCart() {
         <Separator />
 
         <Button
-          className="w-full h-10 bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-xl font-semibold text-sm shadow-sm"
+          className="w-full h-10 bg-[#16a34a] hover:bg-[#16a34a] text-white rounded-xl font-semibold text-sm shadow-sm"
           disabled={itemCount === 0}
           asChild={itemCount > 0}
         >

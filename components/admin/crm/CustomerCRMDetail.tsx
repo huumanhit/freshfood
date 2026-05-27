@@ -259,7 +259,7 @@ export function CustomerCRMDetail({ customerId }: CustomerCRMDetailProps) {
                   <Button size="sm" variant="outline" className="rounded-xl" onClick={() => setShowNoteForm(false)}>Huỷ</Button>
                   <Button
                     size="sm"
-                    className="rounded-xl bg-[#22c55e] hover:bg-[#16a34a] text-white"
+                    className="rounded-xl bg-[#16a34a] hover:bg-[#16a34a] text-white"
                     onClick={() => addNoteMutation.mutate()}
                     disabled={!noteContent.trim() || addNoteMutation.isPending}
                   >

@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { revalidateTag } from "next/cache";
 import { createdResponse, paginatedResponse } from "@/lib/api-response";
 import { handleApiError, UnauthorizedError, ForbiddenError } from "@/lib/api-error";
 import { createProductSchema, productFilterSchema } from "@/lib/validations/product";
@@ -81,6 +82,7 @@ export async function POST(req: NextRequest) {
       include: { images: true, category: true },
     });
 
+    revalidateTag("products");
     return createdResponse(product, "Sản phẩm đã được tạo");
   } catch (error) {
     return handleApiError(error);

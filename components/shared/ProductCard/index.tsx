@@ -88,13 +88,18 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
         {/* Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1">
+          {product.isFeatured && !hasDiscount && (
+            <Badge className="bg-red-500 text-[11px] px-2 py-0.5 rounded-lg hover:bg-red-600 font-bold tracking-wide">
+              HOT
+            </Badge>
+          )}
           {hasDiscount && (
             <Badge variant="destructive" className="text-[11px] px-2 py-0.5 rounded-lg">
               -{discountPct}%
             </Badge>
           )}
           {product.isOrganic && (
-            <Badge className="bg-[#22c55e] text-[11px] px-2 py-0.5 rounded-lg hover:bg-[#16a34a]">
+            <Badge className="bg-[#16a34a] text-[11px] px-2 py-0.5 rounded-lg hover:bg-[#16a34a]">
               Organic
             </Badge>
           )}
@@ -193,7 +198,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
                   "w-full h-9 text-xs rounded-xl font-medium transition-all duration-200",
                   justAdded
                     ? "bg-green-600 text-white"
-                    : "bg-[#22c55e] hover:bg-[#16a34a] text-white shadow-sm hover:shadow-md"
+                    : "bg-[#16a34a] hover:bg-[#16a34a] text-white shadow-sm hover:shadow-md"
                 )}
                 disabled={product.stock === 0}
                 onClick={handleAddToCart}

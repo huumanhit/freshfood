@@ -98,7 +98,7 @@ export function ProductImageGallery({ images, productName }: ProductImageGallery
                 onClick={() => setActiveIndex(i)}
                 className={cn(
                   "h-1.5 rounded-full transition-all",
-                  i === activeIndex ? "w-4 bg-[#22c55e]" : "w-1.5 bg-white/70"
+                  i === activeIndex ? "w-4 bg-[#16a34a]" : "w-1.5 bg-white/70"
                 )}
                 aria-label={`Ảnh ${i + 1}`}
               />

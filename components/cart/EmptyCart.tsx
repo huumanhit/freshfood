@@ -15,7 +15,7 @@ export function EmptyCart() {
       className="flex flex-col items-center justify-center py-20 text-center"
     >
       <div className="relative mb-6">
-        <div className="h-24 w-24 rounded-full bg-[#22c55e]/10 flex items-center justify-center">
+        <div className="h-24 w-24 rounded-full bg-[#16a34a]/10 flex items-center justify-center">
           <ShoppingCart className="h-12 w-12 text-[#22c55e]/50" />
         </div>
       </div>
@@ -27,7 +27,7 @@ export function EmptyCart() {
 
       <Button
         asChild
-        className="rounded-xl bg-[#22c55e] hover:bg-[#16a34a] text-white px-8 h-11"
+        className="rounded-xl bg-[#16a34a] hover:bg-[#16a34a] text-white px-8 h-11"
       >
         <Link href={ROUTES.PRODUCTS}>Mua sắm ngay</Link>
       </Button>

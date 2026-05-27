@@ -124,7 +124,7 @@ export function DeliveryCard({ order, onAction }: DeliveryCardProps) {
           {order.status === "SHIPPED" && (
             <div className="grid grid-cols-2 gap-3">
               <Button
-                className="h-12 text-sm font-semibold rounded-xl bg-[#22c55e] hover:bg-[#16a34a] text-white"
+                className="h-12 text-sm font-semibold rounded-xl bg-[#16a34a] hover:bg-[#16a34a] text-white"
                 onClick={() => onAction(order, "delivered")}
               >
                 Đã giao

@@ -310,7 +310,7 @@ export function CheckoutForm({ total }: CheckoutFormProps) {
       <Button
         type="submit"
         disabled={isSubmitting || items.length === 0 || !consentGiven}
-        className="w-full h-12 rounded-xl bg-[#22c55e] hover:bg-[#16a34a] text-white font-semibold text-base disabled:opacity-50"
+        className="w-full h-12 rounded-xl bg-[#16a34a] hover:bg-[#16a34a] text-white font-semibold text-base disabled:opacity-50"
       >
         {isSubmitting ? (
           <>
