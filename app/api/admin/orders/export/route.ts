@@ -106,8 +106,9 @@ export async function GET(req: NextRequest) {
     });
 
     // ── Build CSV ─────────────────────────────────────────────────────────
-    // UTF-8 BOM as a proper Buffer so Excel opens in UTF-8
+    // UTF-8 BOM + sep= directive so Excel (Vietnamese locale) uses comma as delimiter
     const BOM = Buffer.from([0xef, 0xbb, 0xbf]);
+    const SEP_HINT = "sep=,\r\n"; // tells Excel: split by comma, not semicolon
 
     const header = row(
       "STT",
@@ -185,7 +186,7 @@ export async function GET(req: NextRequest) {
     const today = new Date();
     const dateStr = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, "0")}${String(today.getDate()).padStart(2, "0")}`;
 
-    const body = Buffer.concat([BOM, Buffer.from(csvContent, "utf-8")]);
+    const body = Buffer.concat([BOM, Buffer.from(SEP_HINT, "utf-8"), Buffer.from(csvContent, "utf-8")]);
 
     return new NextResponse(body, {
       headers: {
