@@ -120,7 +120,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
       {/* Info */}
       <div className="p-3 flex flex-col flex-1 gap-2">
         <Link href={ROUTES.PRODUCT_DETAIL(product.slug)}>
-          <h3 className="text-sm font-medium leading-tight line-clamp-2 hover:text-[#22c55e] transition-colors">
+          <h3 className="text-sm font-semibold leading-tight line-clamp-2 hover:text-[#22c55e] transition-colors">
             {product.name}
           </h3>
         </Link>
