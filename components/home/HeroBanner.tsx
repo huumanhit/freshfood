@@ -1,177 +1,170 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
-import { ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ShoppingCart, Leaf, ChefHat, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
 
-const HERO_IMAGES = [
+const SLIDES = [
   {
-    src: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=320&h=320&fit=crop&q=80",
-    alt: "Rau củ tươi",
-    delay: 0.1,
+    headline: "Thực phẩm",
+    cursive: "Sạch – Tươi – An toàn",
+    sub: "Rau, thịt, cá... được làm sạch sẵn,\nchọn lọc kỹ càng, giao tận nơi nhanh chóng!",
+    image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=700&h=500&fit=crop&q=80",
   },
   {
-    src: "https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?w=320&h=320&fit=crop&q=80",
-    alt: "Tôm sú tươi",
-    delay: 0.2,
+    headline: "Nông sản",
+    cursive: "Tươi từ Vườn – Đến Bàn",
+    sub: "Rau củ quả sạch VietGAP, hái sáng giao trưa,\ngiữ trọn vitamin và hương vị tự nhiên.",
+    image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=700&h=500&fit=crop&q=80",
   },
   {
-    src: "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=320&h=320&fit=crop&q=80",
-    alt: "Thịt bò tươi",
-    delay: 0.15,
-  },
-  {
-    src: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=320&h=320&fit=crop&q=80",
-    alt: "Cà chua cherry",
-    delay: 0.25,
+    headline: "Hải sản",
+    cursive: "Tươi Sống – Giao Nhanh",
+    sub: "Tôm, cá, mực tươi sống đánh bắt trong ngày,\nbảo quản lạnh, giao tận nhà trong 2–3h.",
+    image: "https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?w=700&h=500&fit=crop&q=80",
   },
 ];
 
-
-const container = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.1 } },
-};
-
-const item = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
-};
+const BADGES = [
+  { icon: Leaf,    label: "Sạch 100%",      sub: "Không hóa chất" },
+  { icon: ChefHat, label: "Chế biến",        sub: "Sạch sẽ" },
+  { icon: Truck,   label: "Giao hàng",       sub: "Nhanh chóng" },
+];
 
 export function HeroBanner() {
+  const [active, setActive] = useState(0);
+  const slide = SLIDES[active];
+
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-[#f0fdf4] via-[#f7fdf8] to-[#ecfdf5]">
+    <section className="relative overflow-hidden bg-gradient-to-br from-[#eafaf0] via-[#f4fdf6] to-[#e8f8ee]">
       {/* Decorative blobs */}
-      <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-green-200/30 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full bg-emerald-200/40 blur-3xl pointer-events-none" />
+      <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-green-200/40 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full bg-emerald-100/60 blur-3xl pointer-events-none" />
 
-      <div className="container relative z-10 py-16 md:py-24 lg:py-28">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
-          {/* ── Left content ── */}
-          <motion.div
-            variants={container}
-            initial="hidden"
-            animate="show"
-            className="space-y-6 text-center lg:text-left"
-          >
-            {/* Badge */}
-            <motion.div variants={item}>
-              <span className="inline-flex items-center gap-2 rounded-full bg-green-100 border border-green-200 px-4 py-1.5 text-sm font-medium text-green-700">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                Thực phẩm đạt chuẩn VietGAP & GlobalGAP
-              </span>
-            </motion.div>
+      <div className="container relative z-10 py-10 md:py-14">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_480px] gap-8 items-center">
 
-            {/* Headline */}
-            <motion.h1
-              variants={item}
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold font-display leading-tight tracking-tight text-gray-900"
-            >
-              Thực phẩm{" "}
-              <span className="text-[#22c55e]">sạch</span>
-              <br />
-              Tươi · An toàn
-              <br />
-              <span className="text-[#15803d]">Mỗi ngày</span>
-            </motion.h1>
-
-            {/* Subtitle */}
-            <motion.p
-              variants={item}
-              className="text-base sm:text-lg text-gray-500 max-w-md mx-auto lg:mx-0 leading-relaxed"
-            >
-              Chúng tôi kết nối trực tiếp với nông trại sạch, mang thực phẩm
-              tươi ngon đến tận tay bạn trong vòng{" "}
-              <span className="font-semibold text-gray-700">2–3 giờ</span>.
-            </motion.p>
-
-            {/* CTAs */}
+          {/* ── Left ── */}
+          <AnimatePresence mode="wait">
             <motion.div
-              variants={item}
-              className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start"
+              key={active}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.4 }}
+              className="space-y-5 text-center lg:text-left"
             >
-              <Button
-                size="lg"
-                className="bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-2xl px-8 h-12 text-base font-semibold shadow-lg shadow-green-200 transition-all hover:shadow-green-300 hover:-translate-y-0.5"
-                asChild
-              >
-                <Link href={ROUTES.PRODUCTS}>
-                  Đặt hàng ngay
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="rounded-2xl px-8 h-12 text-base border-2 border-green-200 text-green-700 hover:bg-green-50 transition-all"
-                asChild
-              >
-                <Link href={ROUTES.PRODUCTS}>Xem sản phẩm</Link>
-              </Button>
-            </motion.div>
+              {/* Headline */}
+              <div className="space-y-1">
+                <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 leading-tight tracking-tight">
+                  {slide.headline}
+                </h1>
+                <p className="text-3xl sm:text-4xl font-bold text-[#22c55e]"
+                   style={{ fontFamily: "'Dancing Script', 'Segoe Script', cursive" }}>
+                  {slide.cursive}
+                </p>
+              </div>
 
-          </motion.div>
+              {/* Sub */}
+              <p className="text-gray-500 text-sm sm:text-base leading-relaxed whitespace-pre-line max-w-sm mx-auto lg:mx-0">
+                {slide.sub}
+              </p>
 
-          {/* ── Right: food image grid ── */}
-          <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
-            className="relative hidden lg:block"
-          >
-            <div className="grid grid-cols-2 gap-4">
-              {HERO_IMAGES.map((img, i) => (
-                <motion.div
-                  key={img.src}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, delay: img.delay + 0.3 }}
-                  whileHover={{ scale: 1.04 }}
-                  className={`relative overflow-hidden rounded-2xl shadow-lg ${
-                    i === 0 ? "col-span-1 row-span-1" : ""
-                  }`}
+              {/* Feature badges */}
+              <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
+                {BADGES.map(({ icon: Icon, label, sub }) => (
+                  <div
+                    key={label}
+                    className="flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-xl px-3 py-2 shadow-sm border border-green-100"
+                  >
+                    <div className="h-8 w-8 rounded-lg bg-green-100 flex items-center justify-center shrink-0">
+                      <Icon className="h-4 w-4 text-green-600" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs font-semibold text-gray-800 leading-none">{label}</p>
+                      <p className="text-[11px] text-gray-500 leading-none mt-0.5">{sub}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* CTA */}
+              <div className="flex justify-center lg:justify-start">
+                <Button
+                  size="lg"
+                  className="bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-2xl px-7 h-12 font-semibold shadow-lg shadow-green-200 hover:shadow-green-300 hover:-translate-y-0.5 transition-all"
+                  asChild
                 >
-                  <div className="aspect-square w-full bg-green-50">
-                    <Image
-                      src={img.src}
-                      alt={img.alt}
-                      width={320}
-                      height={320}
-                      className="h-full w-full object-cover"
-                      unoptimized
-                    />
-                  </div>
-                  {/* Overlay label */}
-                  <div className="absolute bottom-2 left-2 right-2">
-                    <span className="inline-block rounded-lg bg-white/90 backdrop-blur-sm px-2 py-1 text-xs font-medium text-gray-700 shadow-sm">
-                      {img.alt}
-                    </span>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Floating badge */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: 0.8 }}
-              className="absolute -bottom-4 -left-6 bg-white rounded-2xl shadow-xl p-3 border border-green-100 flex items-center gap-3"
-            >
-              <div className="h-10 w-10 rounded-xl bg-green-100 flex items-center justify-center">
-                <ShieldCheck className="h-5 w-5 text-green-600" />
+                  <Link href={ROUTES.PRODUCTS}>
+                    <ShoppingCart className="mr-2 h-5 w-5" />
+                    Đặt hàng ngay
+                  </Link>
+                </Button>
               </div>
-              <div>
-                <p className="text-xs font-semibold text-gray-800">Cam kết tươi sạch</p>
-                <p className="text-[11px] text-gray-500">Hoàn tiền nếu không hài lòng</p>
+
+              {/* Dots */}
+              <div className="flex gap-2 justify-center lg:justify-start pt-1">
+                {SLIDES.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActive(i)}
+                    className={`rounded-full transition-all duration-300 ${
+                      i === active
+                        ? "w-6 h-2 bg-[#22c55e]"
+                        : "w-2 h-2 bg-gray-300 hover:bg-green-300"
+                    }`}
+                    aria-label={`Slide ${i + 1}`}
+                  />
+                ))}
               </div>
             </motion.div>
-          </motion.div>
-        </div>
+          </AnimatePresence>
 
+          {/* ── Right: food image ── */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={active + "-img"}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.02 }}
+              transition={{ duration: 0.4 }}
+              className="relative hidden lg:block"
+            >
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-green-200/50 aspect-[4/3]">
+                <Image
+                  src={slide.image}
+                  alt={slide.headline}
+                  fill
+                  className="object-cover"
+                  priority
+                  unoptimized
+                />
+                {/* Subtle overlay */}
+                <div className="absolute inset-0 bg-gradient-to-tl from-green-900/10 via-transparent to-transparent" />
+              </div>
+
+              {/* Floating card */}
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="absolute -bottom-4 -left-5 bg-white rounded-2xl shadow-xl border border-green-50 px-4 py-3 flex items-center gap-3"
+              >
+                <div className="h-10 w-10 rounded-xl bg-green-100 flex items-center justify-center">
+                  <Leaf className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-gray-800">Cam kết tươi sạch</p>
+                  <p className="text-[11px] text-gray-500">Hoàn tiền nếu không hài lòng</p>
+                </div>
+              </motion.div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </div>
     </section>
   );
