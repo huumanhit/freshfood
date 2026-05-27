@@ -153,6 +153,13 @@ model Product {
   reviews          Review[]
   wishlist         Wishlist[]
 
+  @@index([status])
+  @@index([categoryId])
+  @@index([status, categoryId])
+  @@index([status, createdAt])
+  @@index([status, price])
+  @@index([status, isOrganic])
+  @@index([status, isFeatured])
   @@map("products")
 }
 
