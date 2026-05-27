@@ -90,9 +90,6 @@ export function Header() {
             <span className="text-green-100">Giao hàng trong 2–3h nội thành TP.HCM</span>
           </div>
           <div className="flex items-center gap-4 text-green-100">
-            <Link href={ROUTES.ORDERS_TRACK} className="hover:text-white transition-colors">
-              Theo dõi đơn hàng
-            </Link>
             {!isAuthenticated && (
               <>
                 <Link href={ROUTES.LOGIN} className="hover:text-white transition-colors">

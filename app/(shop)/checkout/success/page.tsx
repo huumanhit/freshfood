@@ -172,8 +172,8 @@ export default async function CheckoutSuccessPage({ searchParams }: CheckoutSucc
             variant="outline"
             className="flex-1 rounded-xl border-[#22c55e] text-[#22c55e] hover:bg-green-50"
           >
-            <Link href={`${ROUTES.ORDERS_TRACK}?phone=${searchParams.phone ?? ""}`}>
-              Tra cứu đơn hàng
+            <Link href={ROUTES.LOGIN}>
+              Đăng nhập xem đơn hàng
               <ChevronRight className="ml-1 h-4 w-4" />
             </Link>
           </Button>

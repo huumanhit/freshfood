@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { Search, Filter, ExternalLink } from "lucide-react";
+import { Search, Filter, ExternalLink, TriangleAlert } from "lucide-react";
 import { OrderStatus, PaymentMethod } from "@prisma/client";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -40,6 +40,7 @@ interface OrderRow {
   paymentMethod: PaymentMethod;
   total: number | string;
   createdAt: string;
+  isNewAddress: boolean;
   user: { name: string | null; email: string } | null;
   address: { phone: string; fullName: string; province: string } | null;
   items: { id: string }[];
@@ -144,6 +145,12 @@ export function AdminOrdersTable() {
                       >
                         #{order.orderNumber}
                       </Link>
+                      {order.isNewAddress && (
+                        <div className="flex items-center gap-1 mt-1 text-amber-600">
+                          <TriangleAlert className="h-3 w-3 shrink-0" />
+                          <span className="text-[10px] font-medium">Địa chỉ mới</span>
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell>
                       <div>

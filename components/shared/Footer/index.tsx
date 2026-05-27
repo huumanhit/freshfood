@@ -23,8 +23,7 @@ const SUPPORT_LINKS = [
 const ACCOUNT_LINKS = [
   { label: "Đăng nhập", href: ROUTES.LOGIN },
   { label: "Đăng ký tài khoản", href: ROUTES.REGISTER },
-  { label: "Theo dõi đơn hàng", href: ROUTES.ORDERS_TRACK },
-  { label: "Danh sách yêu thích", href: ROUTES.WISHLIST },
+{ label: "Danh sách yêu thích", href: ROUTES.WISHLIST },
   { label: "Hồ sơ cá nhân", href: ROUTES.PROFILE },
 ];
 

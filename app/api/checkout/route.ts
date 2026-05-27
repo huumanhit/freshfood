@@ -69,7 +69,21 @@ export async function POST(req: NextRequest) {
         ? Number(p.salePrice)
         : Number(p.price);
 
-    // ── 4. Totals ─────────────────────────────────────────────────────────────
+    // ── 4. Detect new address ─────────────────────────────────────────────────
+    const lastOrder = await db.order.findFirst({
+      where: { address: { phone } },
+      orderBy: { createdAt: "desc" },
+      select: { address: { select: { province: true, district: true, ward: true, street: true } } },
+    });
+    const norm = (s: string) => s.toLowerCase().trim();
+    const isNewAddress = lastOrder?.address
+      ? norm(lastOrder.address.province) !== norm(province) ||
+        norm(lastOrder.address.district) !== norm(district) ||
+        norm(lastOrder.address.ward) !== norm(ward) ||
+        norm(lastOrder.address.street) !== norm(street)
+      : false;
+
+    // ── 5. Totals ─────────────────────────────────────────────────────────────
     const subtotal = cartItems.reduce(
       (s, ci) => s + price(products.find((x) => x.id === ci.productId)!) * ci.quantity,
       0
@@ -119,6 +133,7 @@ export async function POST(req: NextRequest) {
           note: note || null,
           referralPhone: referralPhone || null,
           deliverySlot: deliverySlot || null,
+          isNewAddress,
         },
         select: { id: true, orderNumber: true },
       });

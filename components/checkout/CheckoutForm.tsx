@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { useState, useCallback, useEffect } from "react";
-import { Loader2, MapPin, User, Phone, FileText, Users, Navigation, AlertCircle, ShieldCheck } from "lucide-react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { Loader2, MapPin, User, Phone, FileText, Users, Navigation, AlertCircle, ShieldCheck, CheckCircle2, TriangleAlert } from "lucide-react";
 import { checkoutSchema, CheckoutFormValues } from "@/lib/validations/order";
 import { getCutoffNotice } from "@/lib/business/ordering";
 import { useCart } from "@/hooks/use-cart";
@@ -28,6 +28,11 @@ export function CheckoutForm() {
   // Only compute server-time-dependent value on client to avoid hydration mismatch
   useEffect(() => { setCutoffNotice(getCutoffNotice()); }, []);
 
+  type PrefillAddress = { fullName: string; province: string; district: string; ward: string; street: string };
+  const [prefillAddress, setPrefillAddress] = useState<PrefillAddress | null>(null);
+  const [addressChanged, setAddressChanged] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -48,6 +53,49 @@ export function CheckoutForm() {
   const paymentMethod = watch("paymentMethod");
   const deliverySlot = watch("deliverySlot");
   const consentGiven = watch("consentGiven");
+  const phone = watch("phone");
+  const province = watch("province");
+  const district = watch("district");
+  const ward = watch("ward");
+  const street = watch("street");
+
+  // Debounced phone lookup → auto-fill address
+  useEffect(() => {
+    const digits = (phone ?? "").replace(/\D/g, "");
+    if (digits.length < 9) return;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await axios.get(`/api/checkout/prefill?phone=${encodeURIComponent(digits)}`);
+        if (res.data.found) {
+          const addr: PrefillAddress = res.data.address;
+          setPrefillAddress(addr);
+          setValue("fullName", addr.fullName);
+          setValue("province", addr.province);
+          setValue("district", addr.district);
+          setValue("ward", addr.ward);
+          setValue("street", addr.street);
+          setAddressChanged(false);
+        }
+      } catch {
+        // silently ignore — prefill is best-effort
+      }
+    }, 600);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phone]);
+
+  // Detect if user changed address after auto-fill
+  useEffect(() => {
+    if (!prefillAddress) return;
+    const norm = (s: string) => (s ?? "").toLowerCase().trim();
+    const changed =
+      norm(province) !== norm(prefillAddress.province) ||
+      norm(district) !== norm(prefillAddress.district) ||
+      norm(ward) !== norm(prefillAddress.ward) ||
+      norm(street) !== norm(prefillAddress.street);
+    setAddressChanged(changed);
+  }, [province, district, ward, street, prefillAddress]);
 
   const handleGetLocation = useCallback(() => {
     if (!navigator.geolocation) return;
@@ -146,6 +194,13 @@ export function CheckoutForm() {
             )}
           </div>
         </div>
+
+        {prefillAddress && (
+          <div className="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-3 py-2 text-xs text-green-700">
+            <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+            Đã điền địa chỉ từ đơn hàng trước
+          </div>
+        )}
       </section>
 
       {/* Delivery address */}
@@ -170,6 +225,13 @@ export function CheckoutForm() {
           <div className="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-3 py-2 text-xs text-green-700">
             <MapPin className="h-3.5 w-3.5 shrink-0" />
             Đã ghim vị trí: {locationLabel}
+          </div>
+        )}
+
+        {addressChanged && (
+          <div className="flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-700">
+            <TriangleAlert className="h-3.5 w-3.5 shrink-0" />
+            Địa chỉ khác với lần đặt trước — admin sẽ được thông báo để xác nhận.
           </div>
         )}
 

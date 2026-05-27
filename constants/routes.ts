@@ -17,7 +17,6 @@ export const ROUTES = {
   CHECKOUT: "/checkout",
   CHECKOUT_SUCCESS: "/checkout/success",
   ORDERS: "/orders",
-  ORDERS_TRACK: "/orders/track",
   ORDER_DETAIL: (id: string) => `/orders/${id}`,
   PROFILE: "/profile",
   PROFILE_ADDRESSES: "/profile/addresses",

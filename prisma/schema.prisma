@@ -220,6 +220,7 @@ model Order {
   deliverySlot  String?
   referralPhone String?
   transactionId String?
+  isNewAddress       Boolean       @default(false)
   mergeGroupId       String?
   isMergeParent      Boolean       @default(false)
   packingSlipPrinted Boolean       @default(false)
