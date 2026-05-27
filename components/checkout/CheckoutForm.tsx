@@ -5,9 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Loader2, MapPin, User, Phone, FileText, Users, Navigation, AlertCircle, ShieldCheck, CheckCircle2, TriangleAlert } from "lucide-react";
+import { Loader2, MapPin, User, Phone, FileText, Users, Navigation, ShieldCheck, CheckCircle2, TriangleAlert } from "lucide-react";
 import { checkoutSchema, CheckoutFormValues } from "@/lib/validations/order";
-import { getCutoffNotice } from "@/lib/business/ordering";
 import { useCart } from "@/hooks/use-cart";
 import { ROUTES } from "@/constants/routes";
 import { Button } from "@/components/ui/button";
@@ -23,10 +22,6 @@ export function CheckoutForm() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [locating, setLocating] = useState(false);
   const [locationLabel, setLocationLabel] = useState<string | null>(null);
-
-  const [cutoffNotice, setCutoffNotice] = useState<string | null>(null);
-  // Only compute server-time-dependent value on client to avoid hydration mismatch
-  useEffect(() => { setCutoffNotice(getCutoffNotice()); }, []);
 
   type PrefillAddress = { fullName: string; province: string; district: string; ward: string; street: string };
   const [prefillAddress, setPrefillAddress] = useState<PrefillAddress | null>(null);
@@ -148,14 +143,6 @@ export function CheckoutForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Cutoff notice */}
-      {cutoffNotice && (
-        <div className="flex items-start gap-2 rounded-2xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-700">
-          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-          {cutoffNotice}
-        </div>
-      )}
-
       {/* Recipient info */}
       <section className="rounded-2xl border border-gray-200 bg-white p-5 space-y-4">
         <h2 className="font-bold text-gray-900 flex items-center gap-2">

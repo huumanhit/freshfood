@@ -22,22 +22,24 @@ const PAYMENT_METHOD_LABELS: Record<string, string> = {
 export default async function CheckoutSuccessPage({ searchParams }: CheckoutSuccessPageProps) {
   const { orderId } = searchParams;
 
-  const order = orderId
-    ? await db.order.findUnique({
-        where: { id: orderId },
-        include: {
-          items: true,
-          address: true,
-        },
-      })
-    : null;
+  let order = null;
+  try {
+    order = orderId
+      ? await db.order.findUnique({
+          where: { id: orderId },
+          include: { items: true, address: true },
+        })
+      : null;
+  } catch {
+    // DB error — still show success since order was placed
+  }
 
   if (!order) {
     return (
       <div className="container py-20 text-center space-y-4">
         <CheckCircle2 className="h-16 w-16 text-[#22c55e] mx-auto" />
         <h1 className="text-2xl font-bold text-gray-900">Đặt hàng thành công!</h1>
-        <p className="text-gray-500">Cảm ơn bạn đã đặt hàng tại FreshFood.</p>
+        <p className="text-gray-500">Cảm ơn bạn đã đặt hàng. Chúng tôi sẽ liên hệ xác nhận sớm nhất.</p>
         <Button asChild className="rounded-xl bg-[#22c55e] hover:bg-[#16a34a]">
           <Link href={ROUTES.HOME}>Về trang chủ</Link>
         </Button>

@@ -7,6 +7,7 @@ import { handleApiError, AppError } from "@/lib/api-error";
 import { checkoutSchema } from "@/lib/validations/order";
 import { generateOrderNumber } from "@/lib/utils";
 import { SHIPPING } from "@/constants/config";
+import { getDeliveryDateServer, DEFAULT_CUTOFF } from "@/lib/business/ordering";
 import { z } from "zod";
 
 const guestCheckoutSchema = checkoutSchema.extend({
@@ -69,7 +70,11 @@ export async function POST(req: NextRequest) {
         ? Number(p.salePrice)
         : Number(p.price);
 
-    // ── 4. Detect new address ─────────────────────────────────────────────────
+    // ── 4. Delivery date ─────────────────────────────────────────────────────
+    const cutoffSetting = await db.setting.findUnique({ where: { key: "order_cutoff" } }).catch(() => null);
+    const deliveryDate = getDeliveryDateServer(cutoffSetting?.value ?? DEFAULT_CUTOFF);
+
+    // ── 4b. Detect new address ────────────────────────────────────────────────
     const lastOrder = await db.order.findFirst({
       where: { address: { phone } },
       orderBy: { createdAt: "desc" },
@@ -133,6 +138,7 @@ export async function POST(req: NextRequest) {
           note: note || null,
           referralPhone: referralPhone || null,
           deliverySlot: deliverySlot || null,
+          deliveryDate,
           isNewAddress,
         },
         select: { id: true, orderNumber: true },

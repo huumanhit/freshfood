@@ -16,6 +16,7 @@ import {
   ShoppingCart,
   Gift,
   Layers,
+  Settings,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
@@ -31,6 +32,7 @@ const NAV_ITEMS = [
   { href: "/admin/merge-orders", label: "Gộp đơn", icon: GitMerge },
   { href: "/admin/shopping-list", label: "Mua hàng", icon: ShoppingCart },
   { href: "/admin/traceability", label: "Truy xuất", icon: Layers },
+  { href: "/admin/settings", label: "Cài đặt", icon: Settings },
 ];
 
 const POLL_INTERVAL = 30_000; // 30 seconds

@@ -218,6 +218,7 @@ model Order {
   note          String?
   adminNote     String?
   deliverySlot  String?
+  deliveryDate  String?
   referralPhone String?
   transactionId String?
   isNewAddress       Boolean       @default(false)
@@ -508,6 +509,14 @@ model ZaloNotification {
   user       User?              @relation(fields: [userId], references: [id])
 
   @@map("zalo_notifications")
+}
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
 }
 
 model DeliveryLog {

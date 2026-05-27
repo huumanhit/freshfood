@@ -1,45 +1,57 @@
-import { DELIVERY_SLOTS } from "@/lib/validations/order";
+const VN_OFFSET_MS = 7 * 60 * 60 * 1000; // UTC+7
 
-export const ORDER_CUTOFF_HOUR = 21; // 21:00 — orders after this shift to next-day delivery
+export const DEFAULT_CUTOFF = "02:30"; // HH:MM Vietnam time
 
-// Slots available only before cutoff (afternoon/evening slots)
-const AFTERNOON_SLOT_START_HOURS = [16, 17, 18, 19];
-
-export function isAfterCutoff(nowHour?: number): boolean {
-  const h = nowHour ?? new Date().getHours();
-  return h >= ORDER_CUTOFF_HOUR;
+function cutoffToMinutes(cutoffTime: string): number {
+  const [h, m] = cutoffTime.split(":").map(Number);
+  return h * 60 + (m ?? 0);
 }
 
-/** Returns the delivery date string (YYYY-MM-DD) for a new order placed right now. */
-export function getDeliveryDate(): string {
-  const d = new Date();
-  if (isAfterCutoff(d.getHours())) {
-    d.setDate(d.getDate() + 1);
-  }
-  return d.toISOString().slice(0, 10);
+const DAY_NAMES = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+
+/**
+ * Client-side: uses browser local time (assumes user is in Vietnam UTC+7).
+ * Returns delivery date info based on cutoff.
+ */
+export function getDeliveryInfo(cutoffTime: string = DEFAULT_CUTOFF): {
+  deliveryDate: string; // YYYY-MM-DD
+  isToday: boolean;
+  label: string; // "Hôm nay, Thứ Hai (26/05)" or "Ngày mai, Thứ Ba (27/05)"
+} {
+  const cutoffMinutes = cutoffToMinutes(cutoffTime);
+  const now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+  const deliveryDate = new Date(now);
+  const isToday = currentMinutes < cutoffMinutes;
+  if (!isToday) deliveryDate.setDate(deliveryDate.getDate() + 1);
+
+  const dd = String(deliveryDate.getDate()).padStart(2, "0");
+  const mm = String(deliveryDate.getMonth() + 1).padStart(2, "0");
+  const yyyy = deliveryDate.getFullYear();
+  const dayName = DAY_NAMES[deliveryDate.getDay()];
+
+  return {
+    deliveryDate: `${yyyy}-${mm}-${dd}`,
+    isToday,
+    label: `${isToday ? "Hôm nay" : "Ngày mai"}, ${dayName} (${dd}/${mm})`,
+  };
 }
 
 /**
- * Returns which slots are available at `nowHour`.
- * After cutoff, afternoon/evening slots are hidden (can't select same-day
- * afternoon when ordering after 21:00 for next-day morning delivery).
+ * Server-side: explicitly converts UTC to UTC+7 before comparing cutoff.
  */
-export function getAvailableSlots(nowHour?: number) {
-  const h = nowHour ?? new Date().getHours();
-  const afterCutoff = h >= ORDER_CUTOFF_HOUR;
-  return DELIVERY_SLOTS.map((slot) => {
-    const slotHour = parseInt(slot.value.split(":")[0], 10);
-    const isAfternoon = AFTERNOON_SLOT_START_HOURS.includes(slotHour);
-    return {
-      ...slot,
-      // Afternoon slots hidden after cutoff (they'd be for tomorrow morning)
-      disabled: afterCutoff && isAfternoon,
-    };
-  });
-}
+export function getDeliveryDateServer(
+  cutoffTime: string = DEFAULT_CUTOFF,
+  now: Date = new Date()
+): string {
+  const cutoffMinutes = cutoffToMinutes(cutoffTime);
+  const vnDate = new Date(now.getTime() + VN_OFFSET_MS);
+  const currentMinutes = vnDate.getUTCHours() * 60 + vnDate.getUTCMinutes();
 
-/** Banner notice shown on checkout when ordering after cutoff. */
-export function getCutoffNotice(): string | null {
-  if (!isAfterCutoff()) return null;
-  return "Đơn đặt sau 21:00 sẽ được giao vào sáng hôm sau. Vui lòng chọn khung giờ buổi sáng.";
+  if (currentMinutes >= cutoffMinutes) vnDate.setUTCDate(vnDate.getUTCDate() + 1);
+
+  const dd = String(vnDate.getUTCDate()).padStart(2, "0");
+  const mm = String(vnDate.getUTCMonth() + 1).padStart(2, "0");
+  return `${vnDate.getUTCFullYear()}-${mm}-${dd}`;
 }
