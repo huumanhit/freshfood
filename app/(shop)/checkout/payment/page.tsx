@@ -40,6 +40,7 @@ function CopyButton({ value, label }: { value: string; label: string }) {
 function PaymentContent() {
   const params = useSearchParams();
   const router = useRouter();
+  const [confirmed, setConfirmed] = useState(false);
 
   const orderId = params.get("orderId") ?? "";
   const orderNumber = params.get("orderNumber") ?? "";
@@ -125,13 +126,28 @@ function PaymentContent() {
           </div>
         </div>
 
-        {/* CTA */}
-        <Button
-          onClick={handleConfirm}
-          className="w-full h-12 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-semibold text-base"
-        >
-          Tôi đã chuyển khoản xong
-        </Button>
+        {/* Confirmation checkbox + CTA */}
+        <div className="space-y-3">
+          <label className="flex items-start gap-3 cursor-pointer rounded-xl border border-gray-200 bg-white p-4">
+            <input
+              type="checkbox"
+              checked={confirmed}
+              onChange={(e) => setConfirmed(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-gray-300 accent-[#16a34a]"
+            />
+            <span className="text-sm text-gray-700 leading-relaxed">
+              Tôi xác nhận đã chuyển khoản <strong className="text-[#16a34a]">{formatCurrency(amount)}</strong> với nội dung <strong className="text-gray-800">{`TUOINGON ${orderNumber}`}</strong> đến tài khoản Techcombank trên.
+            </span>
+          </label>
+
+          <Button
+            onClick={handleConfirm}
+            disabled={!confirmed}
+            className="w-full h-12 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Xác nhận đã thanh toán
+          </Button>
+        </div>
 
         <p className="text-xs text-center text-gray-400">
           Đơn hàng sẽ được xác nhận sau khi chúng tôi kiểm tra giao dịch.
