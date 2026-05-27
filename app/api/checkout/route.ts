@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
     });
 
     return createdResponse(
-      { orderId: result.id, orderNumber: result.orderNumber, phone },
+      { orderId: result.id, orderNumber: result.orderNumber, phone, total, paymentMethod },
       "Đặt hàng thành công"
     );
   } catch (error) {

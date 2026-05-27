@@ -15,13 +15,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { DeliverySlotPicker } from "@/components/checkout/DeliverySlotPicker";
 import { PaymentMethodSelector } from "@/components/checkout/PaymentMethodSelector";
-import { VietQRDisplay } from "@/components/checkout/VietQRDisplay";
 
-interface CheckoutFormProps {
-  total: number;
-}
 
-export function CheckoutForm({ total }: CheckoutFormProps) {
+export function CheckoutForm() {
   const router = useRouter();
   const { items, clearCart } = useCart();
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -51,7 +47,6 @@ export function CheckoutForm({ total }: CheckoutFormProps) {
 
   const paymentMethod = watch("paymentMethod");
   const deliverySlot = watch("deliverySlot");
-  const note = watch("note");
   const consentGiven = watch("consentGiven");
 
   const handleGetLocation = useCallback(() => {
@@ -85,8 +80,14 @@ export function CheckoutForm({ total }: CheckoutFormProps) {
 
       if (data.success) {
         clearCart();
-        const { orderId, phone } = data.data;
-        router.push(`${ROUTES.CHECKOUT_SUCCESS}?orderId=${orderId}&phone=${encodeURIComponent(phone)}`);
+        const { orderId, orderNumber, phone, total, paymentMethod } = data.data;
+        if (paymentMethod === "BANK_TRANSFER") {
+          router.push(
+            `/checkout/payment?orderId=${orderId}&orderNumber=${encodeURIComponent(orderNumber)}&amount=${total}&phone=${encodeURIComponent(phone)}`
+          );
+        } else {
+          router.push(`${ROUTES.CHECKOUT_SUCCESS}?orderId=${orderId}&phone=${encodeURIComponent(phone)}`);
+        }
       }
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
@@ -236,9 +237,6 @@ export function CheckoutForm({ total }: CheckoutFormProps) {
           error={errors.paymentMethod?.message}
         />
 
-        {paymentMethod === "BANK_TRANSFER" && (
-          <VietQRDisplay total={total} orderNote={note} />
-        )}
       </section>
 
       {/* Note + referral */}

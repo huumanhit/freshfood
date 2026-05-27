@@ -10,7 +10,7 @@ import { EmptyCart } from "@/components/cart/EmptyCart";
 import { ROUTES } from "@/constants/routes";
 
 export default function CheckoutPage() {
-  const { itemCount, total } = useCart();
+  const { itemCount } = useCart();
 
   return (
     <div className="bg-[#f7fdf8] min-h-screen">
@@ -35,7 +35,7 @@ export default function CheckoutPage() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              <CheckoutForm total={total} />
+              <CheckoutForm />
             </div>
             <div className="lg:col-span-1">
               <OrderSummaryBox />
