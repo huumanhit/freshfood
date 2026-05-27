@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { Search, Filter, ExternalLink, TriangleAlert, Calendar, Clock } from "lucide-react";
+import { Search, Filter, ExternalLink, TriangleAlert, Calendar, Clock, Download } from "lucide-react";
 import { OrderStatus, PaymentMethod } from "@prisma/client";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -165,6 +165,19 @@ export function AdminOrdersTable() {
               Xóa bộ lọc
             </button>
           )}
+          <div className="ml-auto">
+            <a
+              href={`/api/admin/orders/export?${new URLSearchParams({
+                ...(statusFilter !== "all" && { status: statusFilter }),
+                ...(dateFilter && { date: dateFilter }),
+                ...(slotFilter !== "all" && { slot: slotFilter }),
+              })}`}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-gray-200 bg-white text-xs font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+            >
+              <Download className="h-3.5 w-3.5" />
+              Xuất CSV
+            </a>
+          </div>
         </div>
       </div>
 
