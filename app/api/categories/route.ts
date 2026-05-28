@@ -1,13 +1,12 @@
-export const dynamic = "force-dynamic";
-
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
 import { successResponse } from "@/lib/api-response";
 import { handleApiError } from "@/lib/api-error";
 
-export async function GET(_req: NextRequest) {
-  try {
-    const categories = await db.category.findMany({
+const getCategories = unstable_cache(
+  async () => {
+    return db.category.findMany({
       where: { isActive: true, parentId: null },
       include: {
         children: {
@@ -19,8 +18,17 @@ export async function GET(_req: NextRequest) {
       },
       orderBy: { sortOrder: "asc" },
     });
+  },
+  ["categories"],
+  { revalidate: 300 } // cache 5 phút
+);
 
-    return successResponse(categories);
+export async function GET(_req: NextRequest) {
+  try {
+    const categories = await getCategories();
+    const res = successResponse(categories) as NextResponse;
+    res.headers.set("Cache-Control", "public, s-maxage=300, stale-while-revalidate=60");
+    return res;
   } catch (error) {
     return handleApiError(error);
   }

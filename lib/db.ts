@@ -6,10 +6,8 @@ const globalForPrisma = globalThis as unknown as {
 
 function buildUrl(base: string | undefined): string {
   if (!base) return "";
-  // Serverless: cap each function instance to 1 connection so session-mode
-  // poolers (Supabase Supavisor, pgBouncer) are never exhausted.
   if (base.includes("connection_limit=")) return base;
-  return base + (base.includes("?") ? "&" : "?") + "connection_limit=1&pool_timeout=20";
+  return base + (base.includes("?") ? "&" : "?") + "connection_limit=3&pool_timeout=10";
 }
 
 function createPrismaClient() {
