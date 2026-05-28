@@ -54,8 +54,13 @@ export const metadata: Metadata = {
     description: APP_CONFIG.description,
   },
   icons: {
-    icon: "/icons/icon-192.png",
+    icon: [
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon.png", sizes: "48x48", type: "image/png" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
     apple: "/icons/icon-192.png",
+    shortcut: "/favicon.png",
   },
   robots: {
     index: true,
