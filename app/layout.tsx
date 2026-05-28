@@ -53,11 +53,20 @@ export const metadata: Metadata = {
     title: APP_CONFIG.name,
     description: APP_CONFIG.description,
   },
+  icons: {
+    icon: "/icons/icon-192.png",
+    apple: "/icons/icon-192.png",
+  },
   robots: {
     index: true,
     follow: true,
     googleBot: { index: true, follow: true },
   },
+  ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION && {
+    verification: {
+      google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+    },
+  }),
 };
 
 export const viewport: Viewport = {
@@ -84,27 +93,58 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              name: "Tươi Ngon Mỗi Ngày",
-              alternateName: ["tuoingonmoingay", "tuoingonmoingay.com"],
-              url: "https://tuoingonmoingay.com",
-              logo: "https://tuoingonmoingay.com/logo.png",
-              description: APP_CONFIG.description,
-              address: {
-                "@type": "PostalAddress",
-                streetAddress: APP_CONFIG.address,
-                addressLocality: "TP. Hồ Chí Minh",
-                addressCountry: "VN",
-              },
-              contactPoint: {
-                "@type": "ContactPoint",
+            __html: JSON.stringify([
+              {
+                "@context": "https://schema.org",
+                "@type": "LocalBusiness",
+                "@id": "https://tuoingonmoingay.com/#business",
+                name: "Tươi Ngon Mỗi Ngày",
+                alternateName: ["tuoingonmoingay", "Tuoi Ngon Moi Ngay"],
+                url: "https://tuoingonmoingay.com",
+                logo: "https://tuoingonmoingay.com/logo.png",
+                image: "https://tuoingonmoingay.com/logo.png",
+                description: APP_CONFIG.description,
                 telephone: APP_CONFIG.phone,
-                contactType: "customer service",
+                email: APP_CONFIG.email,
+                priceRange: "đ–đđđ",
+                address: {
+                  "@type": "PostalAddress",
+                  streetAddress: "1/45 Nguyễn Văn Quá, P. Đông Hưng Thuận, Q.12",
+                  addressLocality: "TP. Hồ Chí Minh",
+                  addressRegion: "Hồ Chí Minh",
+                  addressCountry: "VN",
+                },
+                geo: {
+                  "@type": "GeoCoordinates",
+                  latitude: 10.8628,
+                  longitude: 106.6480,
+                },
+                openingHoursSpecification: {
+                  "@type": "OpeningHoursSpecification",
+                  dayOfWeek: ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+                  opens: "06:00",
+                  closes: "21:00",
+                },
+                servesCuisine: "Thực phẩm sạch, Rau củ quả tươi, Thịt cá hải sản",
               },
-              sameAs: Object.values(APP_CONFIG.socialLinks),
-            }),
+              {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                "@id": "https://tuoingonmoingay.com/#website",
+                name: "Tươi Ngon Mỗi Ngày",
+                url: "https://tuoingonmoingay.com",
+                description: APP_CONFIG.description,
+                inLanguage: "vi",
+                potentialAction: {
+                  "@type": "SearchAction",
+                  target: {
+                    "@type": "EntryPoint",
+                    urlTemplate: "https://tuoingonmoingay.com/products?search={search_term_string}",
+                  },
+                  "query-input": "required name=search_term_string",
+                },
+              },
+            ]),
           }}
         />
         <ThemeProvider defaultTheme="light">

@@ -1,12 +1,10 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { CheckCircle2, Copy, ChevronRight } from "lucide-react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { CheckCircle2, Copy, ChevronRight, Loader2 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { ROUTES } from "@/constants/routes";
 
@@ -16,6 +14,8 @@ const BANK_INFO = {
   accountNumber: "19032907272011",
   accountName: "LE HOANG ANH",
 } as const;
+
+const POLL_INTERVAL = 3000;
 
 function CopyButton({ value, label }: { value: string; label: string }) {
   const [copied, setCopied] = useState(false);
@@ -40,7 +40,8 @@ function CopyButton({ value, label }: { value: string; label: string }) {
 function PaymentContent() {
   const params = useSearchParams();
   const router = useRouter();
-  const [confirmed, setConfirmed] = useState(false);
+  const [paymentDetected, setPaymentDetected] = useState(false);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const orderId = params.get("orderId") ?? "";
   const orderNumber = params.get("orderNumber") ?? "";
@@ -63,9 +64,36 @@ function PaymentContent() {
     { label: "Nội dung CK", value: transferContent, key: "content" },
   ];
 
-  function handleConfirm() {
-    router.push(`${ROUTES.CHECKOUT_SUCCESS}?orderId=${orderId}&phone=${encodeURIComponent(phone)}`);
-  }
+  useEffect(() => {
+    if (!orderId || !phone) return;
+
+    async function checkPayment() {
+      try {
+        const res = await fetch(
+          `/api/orders/${orderId}/payment-status?phone=${encodeURIComponent(phone)}`
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.paymentStatus === "PAID") {
+          setPaymentDetected(true);
+          if (pollRef.current) clearInterval(pollRef.current);
+          setTimeout(() => {
+            router.push(
+              `${ROUTES.CHECKOUT_SUCCESS}?orderId=${orderId}&phone=${encodeURIComponent(phone)}`
+            );
+          }, 1500);
+        }
+      } catch {
+        // ignore network errors — keep polling
+      }
+    }
+
+    checkPayment();
+    pollRef.current = setInterval(checkPayment, POLL_INTERVAL);
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [orderId, phone, router]);
 
   return (
     <div className="bg-[#f7fdf8] min-h-screen py-8">
@@ -86,6 +114,26 @@ function PaymentContent() {
             Đơn hàng <span className="font-semibold text-gray-800">#{orderNumber}</span> — {formatCurrency(amount)}
           </p>
         </div>
+
+        {/* Payment detected banner */}
+        {paymentDetected && (
+          <div className="rounded-2xl bg-green-50 border border-green-200 px-4 py-3 flex items-center gap-3">
+            <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-green-800">Đã nhận thanh toán!</p>
+              <p className="text-xs text-green-600">Đang chuyển về trang xác nhận đơn hàng...</p>
+            </div>
+            <Loader2 className="h-4 w-4 text-green-500 animate-spin ml-auto shrink-0" />
+          </div>
+        )}
+
+        {/* Polling status */}
+        {!paymentDetected && orderId && phone && (
+          <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            <span>Đang chờ xác nhận thanh toán tự động...</span>
+          </div>
+        )}
 
         {/* QR Code */}
         <div className="rounded-2xl border border-gray-100 bg-white shadow-sm p-5 space-y-4">
@@ -124,29 +172,6 @@ function PaymentContent() {
           <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-700 text-center">
             Vui lòng chuyển khoản đúng <strong>số tiền</strong> và <strong>nội dung</strong> để đơn được xác nhận tự động.
           </div>
-        </div>
-
-        {/* Confirmation checkbox + CTA */}
-        <div className="space-y-3">
-          <label className="flex items-start gap-3 cursor-pointer rounded-xl border border-gray-200 bg-white p-4">
-            <input
-              type="checkbox"
-              checked={confirmed}
-              onChange={(e) => setConfirmed(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-gray-300 accent-[#16a34a]"
-            />
-            <span className="text-sm text-gray-700 leading-relaxed">
-              Tôi xác nhận đã chuyển khoản <strong className="text-[#16a34a]">{formatCurrency(amount)}</strong> với nội dung <strong className="text-gray-800">{`TUOINGON ${orderNumber}`}</strong> đến tài khoản Techcombank trên.
-            </span>
-          </label>
-
-          <Button
-            onClick={handleConfirm}
-            disabled={!confirmed}
-            className="w-full h-12 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            Xác nhận đã thanh toán
-          </Button>
         </div>
 
         <p className="text-xs text-center text-gray-400">

@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
 
     const {
       page, limit, search, categorySlug,
-      minPrice, maxPrice, isOrganic, isFeatured,
+      minPrice, maxPrice, isOrganic, isFeatured, isCore,
       status, sortBy, sortOrder,
     } = filter;
 
@@ -82,6 +82,7 @@ export async function GET(req: NextRequest) {
       ...(maxPrice !== undefined && { price: { lte: maxPrice } }),
       ...(isOrganic !== undefined && { isOrganic }),
       ...(isFeatured !== undefined && { isFeatured }),
+      ...(isCore !== undefined && { isCore }),
     };
 
     const orderBy = sortBy === "rating" ? undefined : { [sortBy]: sortOrder };

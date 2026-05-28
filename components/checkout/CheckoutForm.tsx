@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Loader2, MapPin, User, Phone, FileText, Users, Navigation, ShieldCheck, CheckCircle2, TriangleAlert } from "lucide-react";
+import { Loader2, MapPin, User, Phone, FileText, Users, Navigation, ShieldCheck, CheckCircle2, Plus } from "lucide-react";
 import { checkoutSchema, CheckoutFormValues } from "@/lib/validations/order";
 import { useCart } from "@/hooks/use-cart";
 import { ROUTES } from "@/constants/routes";
@@ -25,7 +25,7 @@ export function CheckoutForm() {
 
   type PrefillAddress = { fullName: string; province: string; district: string; ward: string; street: string };
   const [prefillAddress, setPrefillAddress] = useState<PrefillAddress | null>(null);
-  const [addressChanged, setAddressChanged] = useState(false);
+  const [useOldAddress, setUseOldAddress] = useState(true);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const {
@@ -49,10 +49,6 @@ export function CheckoutForm() {
   const deliverySlot = watch("deliverySlot");
   const consentGiven = watch("consentGiven");
   const phone = watch("phone");
-  const province = watch("province");
-  const district = watch("district");
-  const ward = watch("ward");
-  const street = watch("street");
 
   // Debounced phone lookup → auto-fill address
   useEffect(() => {
@@ -70,7 +66,7 @@ export function CheckoutForm() {
           setValue("district", addr.district);
           setValue("ward", addr.ward);
           setValue("street", addr.street);
-          setAddressChanged(false);
+          setUseOldAddress(true);
         }
       } catch {
         // silently ignore — prefill is best-effort
@@ -80,17 +76,6 @@ export function CheckoutForm() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phone]);
 
-  // Detect if user changed address after auto-fill
-  useEffect(() => {
-    if (!prefillAddress) return;
-    const norm = (s: string) => (s ?? "").toLowerCase().trim();
-    const changed =
-      norm(province) !== norm(prefillAddress.province) ||
-      norm(district) !== norm(prefillAddress.district) ||
-      norm(ward) !== norm(prefillAddress.ward) ||
-      norm(street) !== norm(prefillAddress.street);
-    setAddressChanged(changed);
-  }, [province, district, ward, street, prefillAddress]);
 
   const handleGetLocation = useCallback(() => {
     if (!navigator.geolocation) return;
@@ -192,81 +177,108 @@ export function CheckoutForm() {
 
       {/* Delivery address */}
       <section className="rounded-2xl border border-gray-200 bg-white p-5 space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="font-bold text-gray-900 flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-[#22c55e]" />
-            Địa chỉ giao hàng
-          </h2>
-          <button
-            type="button"
-            onClick={handleGetLocation}
-            disabled={locating}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 disabled:opacity-50 transition-colors"
-          >
-            {locating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Navigation className="h-3.5 w-3.5" />}
-            {locating ? "Đang lấy vị trí..." : "Lấy vị trí của tôi"}
-          </button>
-        </div>
+        <h2 className="font-bold text-gray-900 flex items-center gap-2">
+          <MapPin className="h-4 w-4 text-[#22c55e]" />
+          Địa chỉ giao hàng
+        </h2>
 
-        {locationLabel && (
-          <div className="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-3 py-2 text-xs text-green-700">
-            <MapPin className="h-3.5 w-3.5 shrink-0" />
-            Đã ghim vị trí: {locationLabel}
+        {/* Returning customer: show old/new toggle — never show address text */}
+        {prefillAddress && (
+          <div className="space-y-2">
+            <button
+              type="button"
+              onClick={() => {
+                setUseOldAddress(true);
+                setValue("province", prefillAddress.province);
+                setValue("district", prefillAddress.district);
+                setValue("ward", prefillAddress.ward);
+                setValue("street", prefillAddress.street);
+              }}
+              className={`w-full flex items-center gap-3 rounded-xl border px-4 py-3 text-sm font-medium transition-colors ${
+                useOldAddress
+                  ? "border-[#22c55e] bg-[#22c55e]/5 text-[#22c55e]"
+                  : "border-gray-200 text-gray-600 hover:border-gray-300"
+              }`}
+            >
+              <CheckCircle2 className={`h-4 w-4 shrink-0 ${useOldAddress ? "text-[#22c55e]" : "text-gray-300"}`} />
+              Giao theo địa chỉ cũ
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setUseOldAddress(false);
+                setValue("province", "");
+                setValue("district", "");
+                setValue("ward", "");
+                setValue("street", "");
+              }}
+              className={`w-full flex items-center gap-3 rounded-xl border px-4 py-3 text-sm font-medium transition-colors ${
+                !useOldAddress
+                  ? "border-[#22c55e] bg-[#22c55e]/5 text-[#22c55e]"
+                  : "border-gray-200 text-gray-600 hover:border-gray-300"
+              }`}
+            >
+              <Plus className={`h-4 w-4 shrink-0 ${!useOldAddress ? "text-[#22c55e]" : "text-gray-400"}`} />
+              Địa chỉ mới
+            </button>
           </div>
         )}
 
-        {addressChanged && (
-          <div className="flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-700">
-            <TriangleAlert className="h-3.5 w-3.5 shrink-0" />
-            Địa chỉ khác với lần đặt trước — admin sẽ được thông báo để xác nhận.
-          </div>
+        {/* New address form — shown for first-time or when user picks "Địa chỉ mới" */}
+        {(!prefillAddress || !useOldAddress) && (
+          <>
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={handleGetLocation}
+                disabled={locating}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 disabled:opacity-50 transition-colors"
+              >
+                {locating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Navigation className="h-3.5 w-3.5" />}
+                {locating ? "Đang lấy vị trí..." : "Lấy vị trí của tôi"}
+              </button>
+            </div>
+
+            {locationLabel && (
+              <div className="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-3 py-2 text-xs text-green-700">
+                <MapPin className="h-3.5 w-3.5 shrink-0" />
+                Đã ghim vị trí: {locationLabel}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-gray-700">
+                  Tỉnh / Thành phố <span className="text-red-500">*</span>
+                </label>
+                <Input {...register("province")} placeholder="TP. Hồ Chí Minh" className="rounded-xl" />
+                {errors.province && <p className="text-xs text-red-500">{errors.province.message}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-gray-700">
+                  Quận / Huyện <span className="text-red-500">*</span>
+                </label>
+                <Input {...register("district")} placeholder="Quận 1" className="rounded-xl" />
+                {errors.district && <p className="text-xs text-red-500">{errors.district.message}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-gray-700">
+                  Phường / Xã <span className="text-red-500">*</span>
+                </label>
+                <Input {...register("ward")} placeholder="Phường Bến Nghé" className="rounded-xl" />
+                {errors.ward && <p className="text-xs text-red-500">{errors.ward.message}</p>}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-gray-700">
+                Số nhà, tên đường <span className="text-red-500">*</span>
+              </label>
+              <Input {...register("street")} placeholder="123 Nguyễn Huệ" className="rounded-xl" />
+              {errors.street && <p className="text-xs text-red-500">{errors.street.message}</p>}
+            </div>
+          </>
         )}
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-700">
-              Tỉnh / Thành phố <span className="text-red-500">*</span>
-            </label>
-            <Input {...register("province")} placeholder="TP. Hồ Chí Minh" className="rounded-xl" />
-            {errors.province && (
-              <p className="text-xs text-red-500">{errors.province.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-700">
-              Quận / Huyện <span className="text-red-500">*</span>
-            </label>
-            <Input {...register("district")} placeholder="Quận 1" className="rounded-xl" />
-            {errors.district && (
-              <p className="text-xs text-red-500">{errors.district.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-700">
-              Phường / Xã <span className="text-red-500">*</span>
-            </label>
-            <Input {...register("ward")} placeholder="Phường Bến Nghé" className="rounded-xl" />
-            {errors.ward && (
-              <p className="text-xs text-red-500">{errors.ward.message}</p>
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-1.5">
-          <label className="text-sm font-medium text-gray-700">
-            Số nhà, tên đường <span className="text-red-500">*</span>
-          </label>
-          <Input
-            {...register("street")}
-            placeholder="123 Nguyễn Huệ"
-            className="rounded-xl"
-          />
-          {errors.street && (
-            <p className="text-xs text-red-500">{errors.street.message}</p>
-          )}
-        </div>
       </section>
 
       {/* Delivery slot */}

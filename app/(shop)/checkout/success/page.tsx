@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 export const dynamic = "force-dynamic";
 import Link from "next/link";
-import { CheckCircle2, Package, MapPin, Clock, CreditCard, ChevronRight } from "lucide-react";
+import { CheckCircle2, Package, MapPin, Clock, CreditCard, ChevronRight, MessageCircle } from "lucide-react";
+import { APP_CONFIG } from "@/constants/config";
 import { db } from "@/lib/db";
 import { ROUTES } from "@/constants/routes";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
@@ -166,6 +167,17 @@ export default async function CheckoutSuccessPage({ searchParams }: CheckoutSucc
             </div>
           )}
         </div>
+
+        {/* Zalo feedback */}
+        <a
+          href={`https://zalo.me/${APP_CONFIG.phone}?text=${encodeURIComponent(`Phản hồi đơn hàng #${order.orderNumber}: `)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 w-full rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-700 hover:bg-blue-100 transition-colors"
+        >
+          <MessageCircle className="h-4 w-4 shrink-0" />
+          Phản hồi / Báo món chưa ưng qua Zalo
+        </a>
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3">

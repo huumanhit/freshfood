@@ -57,6 +57,7 @@ export interface ProductFilter {
   maxPrice?: number;
   isOrganic?: boolean;
   isFeatured?: boolean;
+  isCore?: boolean;
   status?: ProductStatus;
   search?: string;
   origin?: string;

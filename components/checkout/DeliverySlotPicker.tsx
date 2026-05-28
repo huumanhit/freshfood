@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Calendar, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DELIVERY_SLOTS } from "@/lib/validations/order";
-import { getDeliveryInfo, DEFAULT_CUTOFF } from "@/lib/business/ordering";
+import { getDeliveryInfo, DEFAULT_CUTOFF, DEFAULT_AFTER_HOURS, isAfterHoursClient } from "@/lib/business/ordering";
 
 interface DeliverySlotPickerProps {
   value: string;
@@ -16,24 +16,31 @@ export function DeliverySlotPicker({ value, onChange, error }: DeliverySlotPicke
   const [cutoff, setCutoff] = useState(DEFAULT_CUTOFF);
   const [deliveryLabel, setDeliveryLabel] = useState<string | null>(null);
   const [isToday, setIsToday] = useState(false);
+  const [afterHours, setAfterHours] = useState(false);
 
   useEffect(() => {
-    // Fetch configurable cutoff from admin settings
     fetch("/api/checkout/config")
       .then((r) => r.json())
-      .then(({ cutoff: c }) => {
+      .then(({ cutoff: c, afterHoursCutoff: ahc }) => {
         const cf = c ?? DEFAULT_CUTOFF;
         setCutoff(cf);
         const info = getDeliveryInfo(cf);
         setDeliveryLabel(info.label);
         setIsToday(info.isToday);
+        setAfterHours(isAfterHoursClient(ahc ?? DEFAULT_AFTER_HOURS));
       })
       .catch(() => {
         const info = getDeliveryInfo(DEFAULT_CUTOFF);
         setDeliveryLabel(info.label);
         setIsToday(info.isToday);
+        setAfterHours(isAfterHoursClient(DEFAULT_AFTER_HOURS));
       });
   }, []);
+
+  // PA2: after cutoff hour, hide early-morning slots (before 09:00)
+  const visibleSlots = afterHours
+    ? DELIVERY_SLOTS.filter((s) => parseInt(s.value.split(":")[0]) >= 9)
+    : DELIVERY_SLOTS;
 
   return (
     <div className="space-y-3">
@@ -62,8 +69,14 @@ export function DeliverySlotPicker({ value, onChange, error }: DeliverySlotPicke
         Chốt đơn lúc {cutoff} — đặt trước {cutoff} giao cùng ngày, sau {cutoff} giao ngày hôm sau.
       </p>
 
+      {afterHours && (
+        <div className="rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-700">
+          Sau giờ chốt: chỉ nhận đặt từ 9h trở đi cho ngày hôm sau với món phổ thông.
+        </div>
+      )}
+
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-        {DELIVERY_SLOTS.map((slot) => (
+        {visibleSlots.map((slot) => (
           <button
             key={slot.value}
             type="button"

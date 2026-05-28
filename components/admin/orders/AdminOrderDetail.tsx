@@ -270,7 +270,27 @@ export function AdminOrderDetail({ order }: AdminOrderDetailProps) {
               Cập nhật thanh toán
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
+            {/* Quick mark-as-paid button for pending bank transfers */}
+            {order.paymentMethod === "BANK_TRANSFER" && order.paymentStatus === "PENDING" && (
+              <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-amber-800">Chưa xác nhận thanh toán</p>
+                  <p className="text-xs text-amber-600 mt-0.5">Khách báo đã chuyển khoản nhưng hệ thống chưa nhận?</p>
+                </div>
+                <Button
+                  size="sm"
+                  disabled={updateMutation.isPending}
+                  onClick={() => updateMutation.mutate({ paymentStatus: "PAID" })}
+                  className="rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white shrink-0 whitespace-nowrap"
+                >
+                  {updateMutation.isPending
+                    ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    : "Đánh dấu đã thanh toán"
+                  }
+                </Button>
+              </div>
+            )}
             <div className="flex gap-3">
               <Select
                 value={nextPaymentStatus || order.paymentStatus}

@@ -1,6 +1,7 @@
 const VN_OFFSET_MS = 7 * 60 * 60 * 1000; // UTC+7
 
 export const DEFAULT_CUTOFF = "02:30"; // HH:MM Vietnam time
+export const DEFAULT_AFTER_HOURS = "21:00"; // after this → restricted menu + limited slots
 
 function cutoffToMinutes(cutoffTime: string): number {
   const [h, m] = cutoffTime.split(":").map(Number);
@@ -36,6 +37,14 @@ export function getDeliveryInfo(cutoffTime: string = DEFAULT_CUTOFF): {
     isToday,
     label: `${isToday ? "Hôm nay" : "Ngày mai"}, ${dayName} (${dd}/${mm})`,
   };
+}
+
+/** Client-side: is current local time past the after-hours threshold? */
+export function isAfterHoursClient(afterHoursTime: string = DEFAULT_AFTER_HOURS): boolean {
+  const [h, m] = afterHoursTime.split(":").map(Number);
+  const now = new Date();
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  return nowMinutes >= h * 60 + (m ?? 0);
 }
 
 /**

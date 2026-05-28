@@ -7,6 +7,7 @@ import { useProducts } from "@/hooks/use-products";
 import { useCategories } from "@/hooks/use-categories";
 import { useDebounce } from "@/hooks/use-debounce";
 import { buildSearchParams } from "@/lib/utils";
+import { DEFAULT_AFTER_HOURS, isAfterHoursClient } from "@/lib/business/ordering";
 import { ProductFilters, FilterState } from "@/components/products/ProductFilters";
 import { ProductGrid } from "@/components/products/ProductGrid";
 import { ProductSort } from "@/components/products/ProductSort";
@@ -54,6 +55,16 @@ export function ProductsClient({ initialSearchParams, initialProducts, initialPa
     buildInitialFilters(initialSearchParams)
   );
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [afterHours, setAfterHours] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/checkout/config")
+      .then((r) => r.json())
+      .then(({ afterHoursCutoff }) => {
+        setAfterHours(isAfterHoursClient(afterHoursCutoff ?? DEFAULT_AFTER_HOURS));
+      })
+      .catch(() => setAfterHours(isAfterHoursClient(DEFAULT_AFTER_HOURS)));
+  }, []);
 
   // Auto-clear invalid categorySlug when categories are loaded
   const { data: categoriesData } = useCategories();
@@ -84,6 +95,7 @@ export function ProductsClient({ initialSearchParams, initialProducts, initialPa
       minPrice: queryFilters.minPrice > 0 ? queryFilters.minPrice : undefined,
       maxPrice: queryFilters.maxPrice < PRICE_MAX ? queryFilters.maxPrice : undefined,
       isOrganic: queryFilters.isOrganic || undefined,
+      isCore: afterHours ? true : undefined,
       sortBy: queryFilters.sortBy as "price" | "name" | "createdAt" | "soldCount" | "rating",
       sortOrder: queryFilters.sortOrder as "asc" | "desc",
     },
@@ -166,6 +178,17 @@ export function ProductsClient({ initialSearchParams, initialProducts, initialPa
           Thực phẩm sạch, tươi ngon — giao tận nhà trong 2–3h
         </p>
       </div>
+
+      {/* After-hours notice — PA1 */}
+      {afterHours && (
+        <div className="mb-4 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800 flex items-start gap-2">
+          <span className="text-lg leading-none">🌙</span>
+          <div>
+            <p className="font-semibold">Sau giờ chốt — chỉ hiển thị món phổ thông</p>
+            <p className="text-xs text-amber-600 mt-0.5">Đặt ngay, giao từ 9h sáng hôm sau. Các món đặc biệt sẽ hiện lại vào sáng sớm.</p>
+          </div>
+        </div>
+      )}
 
       {/* Search bar */}
       <div className="relative mb-4 max-w-xl">

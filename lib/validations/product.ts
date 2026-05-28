@@ -43,6 +43,7 @@ export const productFilterSchema = z.object({
   maxPrice: z.coerce.number().optional(),
   isOrganic: z.coerce.boolean().optional(),
   isFeatured: z.coerce.boolean().optional(),
+  isCore: z.coerce.boolean().optional(),
   status: z.nativeEnum(ProductStatus).optional(),
   sortBy: z
     .enum(["price", "name", "createdAt", "soldCount", "rating"])
