@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -10,7 +11,6 @@ import {
   ShoppingBag,
   Users,
   LogOut,
-  Leaf,
   Truck,
   GitMerge,
   ShoppingCart,
@@ -64,9 +64,7 @@ export function AdminSidebar() {
     <aside className="w-56 shrink-0 flex flex-col bg-white border-r border-gray-200 min-h-screen">
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 py-5 border-b border-gray-100">
-        <div className="h-8 w-8 rounded-lg bg-[#16a34a] flex items-center justify-center shrink-0">
-          <Leaf className="h-4.5 w-4.5 text-white" />
-        </div>
+        <Image src="/logo-mark.png" alt="Logo" width={34} height={34} className="rounded-lg shrink-0 border border-gray-100" />
         <div className="leading-tight">
           <p className="font-bold text-sm text-[#15803d]">FreshFood</p>
           <p className="text-[10px] text-gray-400 uppercase tracking-wider">Admin</p>

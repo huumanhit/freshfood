@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Leaf, Phone, Mail, MapPin } from "lucide-react";
+import { Phone, Mail, MapPin } from "lucide-react";
+import Image from "next/image";
 import { APP_CONFIG } from "@/constants/config";
 import { ROUTES } from "@/constants/routes";
 
@@ -35,9 +36,7 @@ export function Footer() {
         {/* Brand */}
         <div className="space-y-4 sm:col-span-2 lg:col-span-1">
           <Link href={ROUTES.HOME} className="inline-flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#16a34a]">
-              <Leaf className="h-5 w-5 text-white" />
-            </div>
+            <Image src="/logo-mark.png" alt="Logo" width={52} height={52} className="rounded-xl" />
             <span className="font-display font-bold text-xl text-white">
               {APP_CONFIG.name}
             </span>

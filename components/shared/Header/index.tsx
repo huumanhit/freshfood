@@ -16,8 +16,8 @@ import {
   LogOut,
   Package,
   Settings,
-  Leaf,
 } from "lucide-react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUIStore } from "@/store/ui-store";
 import { useCart } from "@/hooks/use-cart";
@@ -117,10 +117,8 @@ export function Header() {
             href={ROUTES.HOME}
             className="flex items-center gap-2 font-display font-bold text-xl text-[#15803d] shrink-0"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#16a34a]">
-              <Leaf className="h-5 w-5 text-white" />
-            </div>
-            <span className="hidden sm:block">{APP_CONFIG.name}</span>
+            <Image src="/logo-mark.png" alt="Logo" width={38} height={38} className="rounded-xl border border-gray-100 shrink-0" />
+            <span className="text-base sm:text-xl">{APP_CONFIG.name}</span>
           </Link>
 
           {/* Desktop nav */}
