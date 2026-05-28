@@ -60,13 +60,12 @@ export async function GET() {
         where: { status: "ACTIVE" },
         orderBy: { soldCount: "desc" },
         take: 5,
-        include: { images: { where: { isPrimary: true }, take: 1 } },
         select: {
           id: true,
           name: true,
           soldCount: true,
           price: true,
-          images: true,
+          images: { where: { isPrimary: true }, take: 1 },
         },
       }),
       db.order.findMany({

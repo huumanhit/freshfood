@@ -27,9 +27,9 @@ const phoneRegex = /^(0|\+84)[3-9]\d{8}$/;
 export const checkoutSchema = z.object({
   fullName: z.string().min(2, "Họ tên tối thiểu 2 ký tự").max(100),
   phone: z.string().regex(phoneRegex, "Số điện thoại không hợp lệ"),
-  province: z.string().min(1, "Vui lòng nhập tỉnh/thành"),
-  district: z.string().min(1, "Vui lòng nhập quận/huyện"),
-  ward: z.string().min(1, "Vui lòng nhập phường/xã"),
+  province: z.string().min(1, "Vui lòng chọn tỉnh/thành"),
+  district: z.string().default(""),
+  ward: z.string().min(1, "Vui lòng chọn phường/xã"),
   street: z.string().min(5, "Địa chỉ tối thiểu 5 ký tự").max(255),
   lat: z.number().optional(),
   lng: z.number().optional(),

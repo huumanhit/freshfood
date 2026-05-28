@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 export const dynamic = "force-dynamic";
 import Link from "next/link";
+import Image from "next/image";
 import { CheckCircle2, Package, MapPin, Clock, CreditCard, ChevronRight, MessageCircle } from "lucide-react";
 import { APP_CONFIG } from "@/constants/config";
 import { db } from "@/lib/db";
@@ -37,8 +38,8 @@ export default async function CheckoutSuccessPage({ searchParams }: CheckoutSucc
 
   if (!order) {
     return (
-      <div className="container py-20 text-center space-y-4">
-        <CheckCircle2 className="h-16 w-16 text-[#22c55e] mx-auto" />
+      <div className="container py-16 text-center space-y-4 max-w-md mx-auto">
+        <Image src="/logo.png" alt="Đặt hàng thành công" width={260} height={210} className="mx-auto object-contain" />
         <h1 className="text-2xl font-bold text-gray-900">Đặt hàng thành công!</h1>
         <p className="text-gray-500">Cảm ơn bạn đã đặt hàng. Chúng tôi sẽ liên hệ xác nhận sớm nhất.</p>
         <Button asChild className="rounded-xl bg-[#22c55e] hover:bg-[#16a34a]">
@@ -52,10 +53,13 @@ export default async function CheckoutSuccessPage({ searchParams }: CheckoutSucc
     <div className="bg-[#f7fdf8] min-h-screen py-10">
       <div className="container max-w-2xl space-y-6">
         {/* Success header */}
-        <div className="rounded-2xl bg-white border border-gray-100 p-8 text-center space-y-3 shadow-sm">
+        <div className="rounded-2xl bg-white border border-gray-100 pt-6 pb-8 px-8 text-center space-y-3 shadow-sm">
           <div className="flex justify-center">
-            <div className="h-20 w-20 rounded-full bg-[#22c55e]/10 flex items-center justify-center">
-              <CheckCircle2 className="h-10 w-10 text-[#22c55e]" />
+            <Image src="/logo.png" alt="Đặt hàng thành công" width={220} height={176} className="object-contain" />
+          </div>
+          <div className="flex justify-center -mt-2">
+            <div className="flex items-center gap-2 text-[#22c55e]">
+              <CheckCircle2 className="h-6 w-6" />
             </div>
           </div>
           <h1 className="text-2xl font-bold font-display text-gray-900">Đặt hàng thành công!</h1>

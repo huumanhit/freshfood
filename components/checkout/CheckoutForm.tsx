@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { DeliverySlotPicker } from "@/components/checkout/DeliverySlotPicker";
 import { PaymentMethodSelector } from "@/components/checkout/PaymentMethodSelector";
+import { AddressSelector } from "@/components/checkout/AddressSelector";
 
 
 export function CheckoutForm() {
@@ -37,6 +38,8 @@ export function CheckoutForm() {
   } = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
+      province: "Hồ Chí Minh",
+      district: "",
       paymentMethod: "COD",
       deliverySlot: "",
       note: "",
@@ -62,8 +65,8 @@ export function CheckoutForm() {
           const addr: PrefillAddress = res.data.address;
           setPrefillAddress(addr);
           setValue("fullName", addr.fullName);
-          setValue("province", addr.province);
-          setValue("district", addr.district);
+          setValue("province", "Hồ Chí Minh");
+          setValue("district", "");
           setValue("ward", addr.ward);
           setValue("street", addr.street);
           setUseOldAddress(true);
@@ -189,8 +192,8 @@ export function CheckoutForm() {
               type="button"
               onClick={() => {
                 setUseOldAddress(true);
-                setValue("province", prefillAddress.province);
-                setValue("district", prefillAddress.district);
+                setValue("province", "Hồ Chí Minh");
+                setValue("district", "");
                 setValue("ward", prefillAddress.ward);
                 setValue("street", prefillAddress.street);
               }}
@@ -207,7 +210,7 @@ export function CheckoutForm() {
               type="button"
               onClick={() => {
                 setUseOldAddress(false);
-                setValue("province", "");
+                setValue("province", "Hồ Chí Minh");
                 setValue("district", "");
                 setValue("ward", "");
                 setValue("street", "");
@@ -246,29 +249,11 @@ export function CheckoutForm() {
               </div>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-gray-700">
-                  Tỉnh / Thành phố <span className="text-red-500">*</span>
-                </label>
-                <Input {...register("province")} placeholder="TP. Hồ Chí Minh" className="rounded-xl" />
-                {errors.province && <p className="text-xs text-red-500">{errors.province.message}</p>}
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-gray-700">
-                  Quận / Huyện <span className="text-red-500">*</span>
-                </label>
-                <Input {...register("district")} placeholder="Quận 1" className="rounded-xl" />
-                {errors.district && <p className="text-xs text-red-500">{errors.district.message}</p>}
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-gray-700">
-                  Phường / Xã <span className="text-red-500">*</span>
-                </label>
-                <Input {...register("ward")} placeholder="Phường Bến Nghé" className="rounded-xl" />
-                {errors.ward && <p className="text-xs text-red-500">{errors.ward.message}</p>}
-              </div>
-            </div>
+            <AddressSelector
+              ward={watch("ward") ?? ""}
+              onWardChange={(v) => setValue("ward", v, { shouldValidate: true })}
+              error={errors.ward?.message}
+            />
 
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-gray-700">

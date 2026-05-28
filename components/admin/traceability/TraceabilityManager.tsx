@@ -282,7 +282,7 @@ export function TraceabilityManager() {
 
       {/* Create batch dialog */}
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
-        <DialogContent className="max-w-md rounded-2xl">
+        <DialogContent className="max-w-md rounded-2xl" aria-describedby={undefined}>
           <DialogHeader>
             <DialogTitle>Tạo lô hàng mới</DialogTitle>
           </DialogHeader>

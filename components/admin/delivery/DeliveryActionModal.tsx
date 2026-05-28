@@ -102,7 +102,7 @@ export function DeliveryActionModal({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-      <DialogContent className="max-w-sm mx-auto rounded-2xl">
+      <DialogContent className="max-w-sm mx-auto rounded-2xl" aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base">
             {cfg.icon}

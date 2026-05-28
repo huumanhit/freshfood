@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import type { Session } from "next-auth";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-function adminGuard(session: Awaited<ReturnType<typeof auth>>) {
+function adminGuard(session: Session | null) {
   return session?.user && (session.user.role === "ADMIN" || session.user.role === "SUPER_ADMIN");
 }
 
@@ -87,7 +88,7 @@ export async function PATCH(
     await tx.orderItem.deleteMany({ where: { orderId: primaryOrder.id } });
 
     // Recreate merged items on primary order
-    for (const { quantity, subtotal, item } of itemMap.values()) {
+    for (const { quantity, subtotal, item } of Array.from(itemMap.values())) {
       await tx.orderItem.create({
         data: {
           orderId: primaryOrder.id,

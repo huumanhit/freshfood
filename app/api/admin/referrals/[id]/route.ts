@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import type { Session } from "next-auth";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-function adminGuard(s: Awaited<ReturnType<typeof auth>>) {
+function adminGuard(s: Session | null) {
   return s?.user && (s.user.role === "ADMIN" || s.user.role === "SUPER_ADMIN");
 }
 

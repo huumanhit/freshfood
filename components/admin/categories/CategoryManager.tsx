@@ -221,7 +221,7 @@ export function CategoryManager() {
 
       {/* Create/Edit dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md" aria-describedby={undefined}>
           <DialogHeader>
             <DialogTitle>{editTarget ? "Sửa danh mục" : "Thêm danh mục"}</DialogTitle>
           </DialogHeader>
