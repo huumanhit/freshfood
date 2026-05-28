@@ -24,24 +24,24 @@ const SUPPORT_LINKS = [
 const ACCOUNT_LINKS = [
   { label: "Đăng nhập", href: ROUTES.LOGIN },
   { label: "Đăng ký tài khoản", href: ROUTES.REGISTER },
-{ label: "Danh sách yêu thích", href: ROUTES.WISHLIST },
+  { label: "Danh sách yêu thích", href: ROUTES.WISHLIST },
   { label: "Hồ sơ cá nhân", href: ROUTES.PROFILE },
 ];
 
 export function Footer() {
   return (
-    <footer className="bg-gray-950 text-gray-400">
+    <footer className="bg-green-50 text-gray-600 border-t border-green-100">
       {/* Main grid */}
       <div className="container py-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
         {/* Brand */}
         <div className="space-y-4 sm:col-span-2 lg:col-span-1">
           <Link href={ROUTES.HOME} className="inline-flex items-center gap-2">
             <Image src="/logo-mark.png" alt="Logo" width={52} height={52} className="rounded-xl" />
-            <span className="font-display font-bold text-xl text-white">
+            <span className="font-display font-bold text-xl text-gray-900">
               {APP_CONFIG.name}
             </span>
           </Link>
-          <p className="text-sm leading-relaxed text-gray-400 max-w-xs">
+          <p className="text-sm leading-relaxed text-gray-500 max-w-xs">
             Mang thực phẩm sạch, tươi ngon từ nông trại đến bàn ăn của bạn. Chúng
             tôi cam kết chất lượng và sự tươi mới mỗi ngày.
           </p>
@@ -61,14 +61,11 @@ export function Footer() {
 
         {/* Products */}
         <div className="space-y-4">
-          <p className="font-semibold text-sm text-white">Danh mục sản phẩm</p>
+          <p className="font-semibold text-sm text-gray-900">Danh mục sản phẩm</p>
           <ul className="space-y-2.5">
             {PRODUCT_LINKS.map((link) => (
               <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className="text-sm text-gray-400 hover:text-[#22c55e] transition-colors"
-                >
+                <Link href={link.href} className="text-sm text-gray-500 hover:text-[#16a34a] transition-colors">
                   {link.label}
                 </Link>
               </li>
@@ -78,14 +75,11 @@ export function Footer() {
 
         {/* Support */}
         <div className="space-y-4">
-          <p className="font-semibold text-sm text-white">Hỗ trợ khách hàng</p>
+          <p className="font-semibold text-sm text-gray-900">Hỗ trợ khách hàng</p>
           <ul className="space-y-2.5">
             {SUPPORT_LINKS.map((link) => (
               <li key={link.label}>
-                <Link
-                  href={link.href}
-                  className="text-sm text-gray-400 hover:text-[#22c55e] transition-colors"
-                >
+                <Link href={link.href} className="text-sm text-gray-500 hover:text-[#16a34a] transition-colors">
                   {link.label}
                 </Link>
               </li>
@@ -96,36 +90,33 @@ export function Footer() {
         {/* Contact + Account */}
         <div className="space-y-6">
           <div className="space-y-3">
-            <p className="font-semibold text-sm text-white">Liên hệ</p>
+            <p className="font-semibold text-sm text-gray-900">Liên hệ</p>
             <ul className="space-y-2.5 text-sm">
               <li className="flex items-start gap-2.5">
-                <Phone className="h-4 w-4 text-[#22c55e] mt-0.5 shrink-0" />
-                <a href={`tel:${APP_CONFIG.phone}`} className="hover:text-[#22c55e] transition-colors">
+                <Phone className="h-4 w-4 text-[#16a34a] mt-0.5 shrink-0" />
+                <a href={`tel:${APP_CONFIG.phone}`} className="text-gray-600 hover:text-[#16a34a] transition-colors">
                   {APP_CONFIG.phone}
                 </a>
               </li>
               <li className="flex items-start gap-2.5">
-                <Mail className="h-4 w-4 text-[#22c55e] mt-0.5 shrink-0" />
-                <a href={`mailto:${APP_CONFIG.email}`} className="hover:text-[#22c55e] transition-colors">
+                <Mail className="h-4 w-4 text-[#16a34a] mt-0.5 shrink-0" />
+                <a href={`mailto:${APP_CONFIG.email}`} className="text-gray-600 hover:text-[#16a34a] transition-colors">
                   {APP_CONFIG.email}
                 </a>
               </li>
               <li className="flex items-start gap-2.5">
-                <MapPin className="h-4 w-4 text-[#22c55e] mt-0.5 shrink-0" />
-                <span>{APP_CONFIG.address}</span>
+                <MapPin className="h-4 w-4 text-[#16a34a] mt-0.5 shrink-0" />
+                <span className="text-gray-600">{APP_CONFIG.address}</span>
               </li>
             </ul>
           </div>
 
           <div className="space-y-3">
-            <p className="font-semibold text-sm text-white">Tài khoản</p>
+            <p className="font-semibold text-sm text-gray-900">Tài khoản</p>
             <ul className="space-y-2">
               {ACCOUNT_LINKS.map((link) => (
                 <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-gray-400 hover:text-[#22c55e] transition-colors"
-                  >
+                  <Link href={link.href} className="text-sm text-gray-500 hover:text-[#16a34a] transition-colors">
                     {link.label}
                   </Link>
                 </li>
@@ -136,8 +127,8 @@ export function Footer() {
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-gray-800">
-        <div className="container py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
+      <div className="border-t border-green-100">
+        <div className="container py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400">
           <p>© {new Date().getFullYear()} {APP_CONFIG.name}. All rights reserved.</p>
           <p>Giấy phép kinh doanh số: 0123456789 · Cục Quản lý Thị trường TP.HCM</p>
         </div>
@@ -161,7 +152,7 @@ function SocialIconRaw({
       target="_blank"
       rel="noopener noreferrer"
       aria-label={label}
-      className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-800 text-gray-400 hover:bg-[#16a34a] hover:text-white transition-all duration-200"
+      className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-100 text-green-700 hover:bg-[#16a34a] hover:text-white transition-all duration-200"
     >
       {children}
     </a>

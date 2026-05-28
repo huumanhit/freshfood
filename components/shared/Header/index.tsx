@@ -77,32 +77,6 @@ export function Header() {
 
   return (
     <>
-      {/* ── Top bar ── */}
-      <div className="hidden md:block bg-[#15803d] text-white text-xs py-2">
-        <div className="container flex items-center justify-between gap-4">
-          <div className="flex items-center gap-1.5 text-green-100">
-            <Phone className="h-3 w-3" />
-            <span>Hotline: </span>
-            <a href={`tel:${APP_CONFIG.phone}`} className="font-semibold text-white hover:text-green-200">
-              {APP_CONFIG.phone}
-            </a>
-            <span className="mx-2 text-green-400">·</span>
-            <span className="text-green-100">Giao hàng trong 2–3h nội thành TP.HCM</span>
-          </div>
-          <div className="flex items-center gap-4 text-green-100">
-            {!isAuthenticated && (
-              <>
-                <Link href={ROUTES.LOGIN} className="hover:text-white transition-colors">
-                  Đăng nhập
-                </Link>
-                <Link href={ROUTES.REGISTER} className="hover:text-white transition-colors">
-                  Đăng ký
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
 
       {/* ── Main header ── */}
       <header
