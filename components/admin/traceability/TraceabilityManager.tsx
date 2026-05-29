@@ -98,7 +98,7 @@ export function TraceabilityManager() {
     queryKey: ["products-simple"],
     queryFn: () =>
       axios.get("/api/admin/products?limit=200").then((r) =>
-        ({ products: r.data.products?.map((p: { id: string; name: string }) => ({ id: p.id, name: p.name })) ?? [] })
+        ({ products: (r.data.data ?? r.data.products ?? []).map((p: { id: string; name: string }) => ({ id: p.id, name: p.name })) })
       ),
   });
 
