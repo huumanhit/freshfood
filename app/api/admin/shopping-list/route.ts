@@ -41,15 +41,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Ngày không hợp lệ (YYYY-MM-DD)" }, { status: 400 });
   }
 
-  // Get all CONFIRMED/PROCESSING orders on this date
-  const startOfDay = new Date(date);
-  const endOfDay = new Date(date);
-  endOfDay.setDate(endOfDay.getDate() + 1);
-
+  // Get all outstanding orders (not filtered by date — shopping list = what to buy today)
   const orders = await db.order.findMany({
     where: {
       status: { in: ["PENDING", "CONFIRMED", "PROCESSING"] },
-      createdAt: { gte: startOfDay, lt: endOfDay },
     },
     include: {
       items: {
