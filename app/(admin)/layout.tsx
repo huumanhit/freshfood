@@ -28,7 +28,7 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
       <AdminSidebar />
       <div className="flex flex-1 flex-col min-w-0">
         <AdminTopbar />
-        <main className="flex-1 p-6 overflow-auto">{children}</main>
+        <main className="flex-1 p-4 lg:p-6 overflow-auto">{children}</main>
       </div>
     </div>
   );
