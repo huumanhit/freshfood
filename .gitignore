@@ -15,12 +15,17 @@ prisma/*.db-journal
 # Environment
 .env
 .env.local
+.env.vercel.local
 .env.development.local
 .env.test.local
 .env.production.local
 
 # Vercel
 .vercel
+
+# Prisma data files
+prisma/*.xlsx
+prisma/images/
 
 # TypeScript
 *.tsbuildinfo
