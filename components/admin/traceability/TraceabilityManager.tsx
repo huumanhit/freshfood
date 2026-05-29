@@ -97,8 +97,8 @@ export function TraceabilityManager() {
   const { data: productsData } = useQuery<{ products: { id: string; name: string }[] }>({
     queryKey: ["products-simple"],
     queryFn: () =>
-      axios.get("/api/admin/products?limit=200").then((r) =>
-        ({ products: (r.data.data ?? r.data.products ?? []).map((p: { id: string; name: string }) => ({ id: p.id, name: p.name })) })
+      axios.get("/api/admin/products?limit=100").then((r) =>
+        ({ products: (r.data.data ?? []).map((p: { id: string; name: string }) => ({ id: p.id, name: p.name })) })
       ),
   });
 
