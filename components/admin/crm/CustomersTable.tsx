@@ -1,15 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import Link from "next/link";
-import { Search, ChevronLeft, ChevronRight, Loader2, AlertTriangle, Star } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Loader2, AlertTriangle, Star, UserCheck, UserX } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 const TIER_COLORS: Record<string, string> = {
   BRONZE: "bg-amber-100 text-amber-700",
@@ -49,6 +50,17 @@ export function CustomersTable() {
   const [search, setSearch] = useState("");
   const [segment, setSegment] = useState("");
   const [page, setPage] = useState(1);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const toggleMutation = useMutation({
+    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
+      axios.patch(`/api/admin/customers/${id}`, { isActive }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-customers"] });
+    },
+    onError: () => toast({ title: "Lỗi cập nhật", variant: "destructive" }),
+  });
 
   const { data, isLoading } = useQuery<{ customers: Customer[]; total: number; pages: number }>({
     queryKey: ["admin-customers", search, segment, page],
@@ -106,6 +118,7 @@ export function CustomersTable() {
                     <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500">Chi tiêu</th>
                     <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500">Điểm</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Tham gia</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-gray-500"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -140,6 +153,23 @@ export function CustomersTable() {
                           ) : "—"}
                         </td>
                         <td className="px-4 py-3 text-xs text-gray-400">{formatDateTime(customer.createdAt)}</td>
+                        <td className="px-4 py-3">
+                          <button
+                            onClick={() => toggleMutation.mutate({ id: customer.id, isActive: !customer.isActive })}
+                            disabled={toggleMutation.isPending}
+                            title={customer.isActive ? "Vô hiệu hóa" : "Kích hoạt"}
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                              customer.isActive
+                                ? "bg-red-50 text-red-600 hover:bg-red-100"
+                                : "bg-green-50 text-green-600 hover:bg-green-100"
+                            }`}
+                          >
+                            {customer.isActive
+                              ? <><UserX className="h-3.5 w-3.5" /> Vô hiệu</>
+                              : <><UserCheck className="h-3.5 w-3.5" /> Kích hoạt</>
+                            }
+                          </button>
+                        </td>
                       </tr>
                     );
                   })}

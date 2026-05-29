@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Clock, Save, Info } from "lucide-react";
+import { Clock, Save, Info, KeyRound, Eye, EyeOff } from "lucide-react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,15 @@ export default function AdminSettingsPage() {
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Password change state
+  const [currentPwd, setCurrentPwd] = useState("");
+  const [newPwd, setNewPwd] = useState("");
+  const [confirmPwd, setConfirmPwd] = useState("");
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [pwdSaving, setPwdSaving] = useState(false);
+  const [pwdMsg, setPwdMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
   useEffect(() => {
     axios.get("/api/admin/settings")
       .then(({ data }) => {
@@ -22,6 +31,29 @@ export default function AdminSettingsPage() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  async function handleChangePassword() {
+    if (newPwd !== confirmPwd) {
+      setPwdMsg({ type: "error", text: "Mật khẩu xác nhận không khớp" });
+      return;
+    }
+    if (newPwd.length < 8) {
+      setPwdMsg({ type: "error", text: "Mật khẩu mới tối thiểu 8 ký tự" });
+      return;
+    }
+    setPwdSaving(true);
+    setPwdMsg(null);
+    try {
+      await axios.post("/api/admin/change-password", { currentPassword: currentPwd, newPassword: newPwd });
+      setPwdMsg({ type: "success", text: "Đổi mật khẩu thành công!" });
+      setCurrentPwd(""); setNewPwd(""); setConfirmPwd("");
+    } catch (err) {
+      const msg = axios.isAxiosError(err) ? err.response?.data?.error : "Lỗi đổi mật khẩu";
+      setPwdMsg({ type: "error", text: msg });
+    } finally {
+      setPwdSaving(false);
+    }
+  }
 
   async function handleSave() {
     setSaving(true);
@@ -132,6 +164,75 @@ export default function AdminSettingsPage() {
           {saved && (
             <span className="text-sm text-green-600 font-medium">Đã lưu!</span>
           )}
+        </div>
+      </div>
+      {/* Change password */}
+      <div className="rounded-2xl border border-gray-200 bg-white p-6 space-y-5">
+        <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+          <KeyRound className="h-4 w-4 text-[#22c55e]" />
+          Đổi mật khẩu admin
+        </h2>
+
+        <div className="space-y-3 max-w-sm">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-gray-700">Mật khẩu hiện tại</label>
+            <div className="relative">
+              <Input
+                type={showCurrent ? "text" : "password"}
+                value={currentPwd}
+                onChange={(e) => setCurrentPwd(e.target.value)}
+                className="rounded-xl pr-10"
+                placeholder="••••••••"
+              />
+              <button type="button" onClick={() => setShowCurrent(!showCurrent)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                {showCurrent ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-gray-700">Mật khẩu mới</label>
+            <div className="relative">
+              <Input
+                type={showNew ? "text" : "password"}
+                value={newPwd}
+                onChange={(e) => setNewPwd(e.target.value)}
+                className="rounded-xl pr-10"
+                placeholder="Tối thiểu 8 ký tự"
+              />
+              <button type="button" onClick={() => setShowNew(!showNew)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-gray-700">Xác nhận mật khẩu mới</label>
+            <Input
+              type="password"
+              value={confirmPwd}
+              onChange={(e) => setConfirmPwd(e.target.value)}
+              className="rounded-xl"
+              placeholder="Nhập lại mật khẩu mới"
+            />
+          </div>
+
+          {pwdMsg && (
+            <p className={`text-sm font-medium ${pwdMsg.type === "success" ? "text-green-600" : "text-red-500"}`}>
+              {pwdMsg.text}
+            </p>
+          )}
+
+          <Button
+            onClick={handleChangePassword}
+            disabled={pwdSaving || !currentPwd || !newPwd || !confirmPwd}
+            className="rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white gap-2"
+          >
+            <Save className="h-4 w-4" />
+            {pwdSaving ? "Đang lưu..." : "Đổi mật khẩu"}
+          </Button>
         </div>
       </div>
     </div>
