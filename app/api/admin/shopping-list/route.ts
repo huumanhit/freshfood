@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 
   const orders = await db.order.findMany({
     where: {
-      status: { in: ["CONFIRMED", "PROCESSING"] },
+      status: { in: ["PENDING", "CONFIRMED", "PROCESSING"] },
       createdAt: { gte: startOfDay, lt: endOfDay },
     },
     include: {
