@@ -23,6 +23,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
   const [justAdded, setJustAdded] = useState(false);
 
   const primaryImage = product.images?.find((img) => img.isPrimary) ?? product.images?.[0];
+  const [imgError, setImgError] = useState(false);
   const currentPrice = getProductPrice(product.price, product.salePrice ?? null);
   const hasDiscount = product.salePrice != null && product.salePrice < product.price;
   const discountPct = hasDiscount ? getDiscountPercentage(product.price, product.salePrice!) : 0;
@@ -68,7 +69,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
     >
       {/* Image area */}
       <Link href={ROUTES.PRODUCT_DETAIL(product.slug)} className="block relative aspect-square overflow-hidden bg-gray-50">
-        {primaryImage ? (
+        {primaryImage && !imgError ? (
           <Image
             src={primaryImage.url}
             alt={primaryImage.alt ?? product.name}
@@ -76,10 +77,12 @@ export function ProductCard({ product, className }: ProductCardProps) {
             height={400}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
             unoptimized
+            onError={() => setImgError(true)}
           />
         ) : (
-          <div className="h-full w-full bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center">
-            <ShoppingCart className="h-12 w-12 text-green-300" />
+          <div className="h-full w-full bg-gradient-to-br from-green-50 to-emerald-100 flex flex-col items-center justify-center gap-2">
+            <ShoppingCart className="h-10 w-10 text-green-300" />
+            <span className="text-xs text-green-400 text-center px-2 line-clamp-2">{product.name}</span>
           </div>
         )}
 
@@ -125,7 +128,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
       {/* Info */}
       <div className="p-3 flex flex-col flex-1 gap-2">
         <Link href={ROUTES.PRODUCT_DETAIL(product.slug)}>
-          <h3 className="text-sm font-semibold leading-tight line-clamp-2 hover:text-[#22c55e] transition-colors">
+          <h3 className="text-sm font-semibold leading-tight line-clamp-2 min-h-[2.5rem] hover:text-[#22c55e] transition-colors">
             {product.name}
           </h3>
         </Link>
