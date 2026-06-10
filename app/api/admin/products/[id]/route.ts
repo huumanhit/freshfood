@@ -53,6 +53,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
 
     const updateData = {
       ...data,
+      sku: data.sku === "" ? null : data.sku,
       ...(data.name ? { slug: generateSlug(data.name) } : {}),
     };
 

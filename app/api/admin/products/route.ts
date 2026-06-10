@@ -74,6 +74,7 @@ export async function POST(req: NextRequest) {
     const product = await db.product.create({
       data: {
         ...data,
+        sku: data.sku === "" ? null : data.sku,
         slug,
         ...(images && {
           images: { create: images.map((img, i) => ({ ...img, sortOrder: i })) },
