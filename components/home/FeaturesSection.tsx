@@ -14,8 +14,8 @@ const FEATURES = [
   },
   {
     icon: Leaf,
-    title: "Thực phẩm 100% sạch",
-    description: "Đạt chuẩn VietGAP & GlobalGAP, không hóa chất, không thuốc tăng trọng.",
+    title: "Thực phẩm tươi sạch",
+    description: "Tuyển chọn kỹ lưỡng, rõ nguồn gốc, đảm bảo vệ sinh an toàn thực phẩm.",
     gradient: "from-green-50 to-emerald-100",
     iconBg: "bg-green-100",
     iconColor: "text-green-600",

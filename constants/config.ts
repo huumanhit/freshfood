@@ -7,7 +7,7 @@ export const APP_CONFIG = {
   phone: "0932133139",
   address: "Chung cư Thái An 1, 1/45 Nguyễn Văn Quá, P. Đông Hưng Thuận, Q.12, TP.HCM",
   socialLinks: {
-    facebook: "https://facebook.com/freshfood",
+    facebook: "https://www.facebook.com/share/1CTrFL5rxk/",
     instagram: "https://instagram.com/freshfood",
     youtube: "https://youtube.com/freshfood",
     tiktok: "https://tiktok.com/@freshfood",
@@ -21,7 +21,7 @@ export const PAGINATION = {
 } as const;
 
 export const SHIPPING = {
-  FREE_SHIPPING_THRESHOLD: 120000,
+  FREE_SHIPPING_THRESHOLD: 80000,
   DEFAULT_FEE: 15000,
   EXPRESS_FEE: 50000,
 } as const;

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { notifyOrderStatus } from "@/lib/zalo-zns";
 
 export async function POST(req: NextRequest) {
   // Validate Sepay API key
@@ -30,7 +31,13 @@ export async function POST(req: NextRequest) {
 
   const order = await db.order.findFirst({
     where: { orderNumber },
-    select: { id: true, paymentStatus: true },
+    select: {
+      id: true,
+      paymentStatus: true,
+      orderNumber: true,
+      user: { select: { phone: true } },
+      address: { select: { phone: true } },
+    },
   });
 
   if (!order) {
@@ -45,9 +52,14 @@ export async function POST(req: NextRequest) {
     where: { id: order.id },
     data: {
       paymentStatus: "PAID",
+      status: "CONFIRMED",
       ...(transactionId && { transactionId }),
     },
   });
+
+  // Fire-and-forget Zalo ZNS notification
+  const phone = order.user?.phone ?? order.address?.phone;
+  notifyOrderStatus(phone, "CONFIRMED", order.orderNumber, order.id).catch(() => {});
 
   return NextResponse.json({ success: true });
 }

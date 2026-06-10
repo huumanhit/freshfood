@@ -9,7 +9,7 @@ function adminGuard(session: Session | null) {
   return session?.user && (session.user.role === "ADMIN" || session.user.role === "SUPER_ADMIN");
 }
 
-const FREE_SHIPPING_THRESHOLD = 120_000;
+const FREE_SHIPPING_THRESHOLD = 80_000;
 const SHIPPING_FEE = 15_000;
 
 // PATCH: confirm or reject merge

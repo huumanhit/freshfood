@@ -74,7 +74,7 @@ export function HeroBanner() {
           {/* Feature badges */}
           <div className="flex gap-1">
             {[
-              { icon: <Leaf className="h-3 w-3 text-green-500" />, bg: "#f0fdf4", top: "Sạch 100%", bot: "Không hóa chất" },
+              { icon: <Leaf className="h-3 w-3 text-green-500" />, bg: "#f0fdf4", top: "Tươi sạch", bot: "Rõ nguồn gốc" },
               { icon: <ShieldCheck className="h-3 w-3 text-blue-500" />, bg: "#eff6ff", top: "Chế biến", bot: "sạch sẽ" },
               { icon: <Truck className="h-3 w-3 text-sky-500" />, bg: "#f0f9ff", top: "Giao hàng", bot: "nhanh chóng" },
             ].map((b) => (

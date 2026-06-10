@@ -35,9 +35,16 @@ interface ProductsClientProps {
   initialPagination?: PaginationMeta;
 }
 
+function sanitizeSearch(s?: string): string {
+  if (!s) return "";
+  // Ignore Google Sitelinks Searchbox placeholder if crawler visits the template URL directly
+  if (s.startsWith("{") && s.endsWith("}")) return "";
+  return s;
+}
+
 function buildInitialFilters(sp: ProductsClientProps["initialSearchParams"]): FilterState {
   return {
-    search: sp.search ?? "",
+    search: sanitizeSearch(sp.search),
     categorySlug: sp.categorySlug ?? "",
     minPrice: sp.minPrice ? parseInt(sp.minPrice) : 0,
     maxPrice: sp.maxPrice ? parseInt(sp.maxPrice) : PRICE_MAX,

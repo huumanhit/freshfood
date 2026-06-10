@@ -13,10 +13,10 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: `Tất cả sản phẩm — ${APP_CONFIG.name}`,
   description:
-    "Khám phá hàng trăm sản phẩm thực phẩm sạch, tươi ngon, đạt chuẩn VietGAP. Rau củ, thịt, hải sản, gà — giao hàng 2–3h nội thành TP.HCM.",
+    "Khám phá hàng trăm sản phẩm thực phẩm tươi sạch và an toàn. Rau củ, thịt, hải sản, gà — giao hàng nhanh chóng nội thành TP.HCM.",
   openGraph: {
     title: `Tất cả sản phẩm — ${APP_CONFIG.name}`,
-    description: "Thực phẩm sạch, tươi ngon — giao tận nhà trong 2–3h",
+    description: "Thực phẩm tươi ngon, sạch sẽ — giao tận nhà nhanh chóng",
   },
 };
 

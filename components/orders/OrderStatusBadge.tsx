@@ -2,14 +2,14 @@ import { OrderStatus, PaymentStatus } from "@prisma/client";
 import { cn } from "@/lib/utils";
 
 const ORDER_STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-  PENDING: { label: "Chờ xác nhận", className: "bg-yellow-50 text-yellow-600 border-yellow-200" },
-  CONFIRMED: { label: "Đã xác nhận", className: "bg-blue-50 text-blue-600 border-blue-200" },
-  PROCESSING: { label: "Đang xử lý", className: "bg-indigo-50 text-indigo-600 border-indigo-200" },
-  SHIPPED: { label: "Đang giao hàng", className: "bg-purple-50 text-purple-600 border-purple-200" },
-  DELIVERED: { label: "Đã giao hàng", className: "bg-green-50 text-green-600 border-green-200" },
-  CANCELLED: { label: "Đã huỷ", className: "bg-red-50 text-red-500 border-red-200" },
-  REFUNDED: { label: "Đã hoàn tiền", className: "bg-gray-50 text-gray-500 border-gray-200" },
-  FAILED: { label: "Giao thất bại", className: "bg-rose-50 text-rose-600 border-rose-200" },
+  PENDING:    { label: "Chờ xác nhận",   className: "bg-yellow-50 text-yellow-600 border-yellow-200" },
+  CONFIRMED:  { label: "Đang xử lý",     className: "bg-blue-50 text-blue-600 border-blue-200" },
+  PROCESSING: { label: "Đang xử lý",     className: "bg-blue-50 text-blue-600 border-blue-200" },
+  SHIPPED:    { label: "Đang giao hàng", className: "bg-purple-50 text-purple-600 border-purple-200" },
+  DELIVERED:  { label: "Đã giao hàng",   className: "bg-green-50 text-green-600 border-green-200" },
+  CANCELLED:  { label: "Đã huỷ",         className: "bg-red-50 text-red-500 border-red-200" },
+  REFUNDED:   { label: "Đã huỷ",         className: "bg-red-50 text-red-500 border-red-200" },
+  FAILED:     { label: "Đã huỷ",         className: "bg-red-50 text-red-500 border-red-200" },
 };
 
 const PAYMENT_STATUS_CONFIG: Record<

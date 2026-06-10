@@ -14,11 +14,10 @@ const PRODUCT_LINKS = [
 ];
 
 const SUPPORT_LINKS = [
-  { label: "Chính sách bảo mật", href: "#" },
-  { label: "Điều khoản sử dụng", href: "#" },
-  { label: "Chính sách đổi trả", href: "#" },
-  { label: "Chính sách vận chuyển", href: "#" },
-  { label: "Câu hỏi thường gặp", href: "#" },
+  { label: "Chính sách bảo mật", href: "/chinh-sach-bao-mat" },
+  { label: "Chính sách đổi trả", href: "/chinh-sach-doi-tra" },
+  { label: "Chính sách giao hàng", href: "/chinh-sach-giao-hang" },
+  { label: "Liên hệ", href: "/lien-he" },
 ];
 
 const ACCOUNT_LINKS = [
@@ -130,7 +129,6 @@ export function Footer() {
       <div className="border-t border-green-100">
         <div className="container py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400">
           <p>© {new Date().getFullYear()} {APP_CONFIG.name}. All rights reserved.</p>
-          <p>Giấy phép kinh doanh số: 0123456789 · Cục Quản lý Thị trường TP.HCM</p>
         </div>
       </div>
     </footer>

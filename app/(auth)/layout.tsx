@@ -71,7 +71,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           Tươi · An toàn · Mỗi ngày
         </p>
         <div className="flex flex-col gap-1.5 mt-3">
-          {["100% hữu cơ, không hóa chất", "Giao hàng trong 2–3 giờ", "Cam kết hoàn tiền nếu không tươi"].map((t) => (
+          {["Thực phẩm tươi sạch, rõ nguồn gốc", "Đặt trước 22h – nhận hàng ngày mai", "Cam kết hoàn tiền nếu không tươi"].map((t) => (
             <div key={t} className="flex items-center gap-2 text-xs text-white/80">
               <div className="h-1.5 w-1.5 rounded-full bg-green-400 shrink-0" />
               {t}

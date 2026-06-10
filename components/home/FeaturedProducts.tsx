@@ -52,7 +52,7 @@ export function FeaturedProducts() {
       {/* Promo strip */}
       <div className="flex gap-2 overflow-x-auto pb-1 mb-4 scrollbar-hide">
         <div className="flex items-center gap-1.5 shrink-0 bg-green-50 border border-green-200 rounded-full px-3 py-1.5 text-xs font-semibold text-green-700 whitespace-nowrap">
-          🚚 Freeship đơn từ 120k
+          🚚 Freeship đơn từ 80k
         </div>
         <div className="flex items-center gap-1.5 shrink-0 bg-orange-50 border border-orange-200 rounded-full px-3 py-1.5 text-xs font-semibold text-orange-600 whitespace-nowrap">
           🎁 Giới thiệu bạn bè nhận quà

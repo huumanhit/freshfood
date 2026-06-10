@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Clock, Save, Info, KeyRound, Eye, EyeOff } from "lucide-react";
+import { Clock, Save, Info, KeyRound, Eye, EyeOff, Plus, Trash2, GripVertical } from "lucide-react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DEFAULT_CUTOFF, DEFAULT_AFTER_HOURS } from "@/lib/business/ordering";
+import { DELIVERY_SLOTS } from "@/lib/validations/order";
+
+interface Slot { value: string; label: string }
 
 export default function AdminSettingsPage() {
   const [cutoff, setCutoff] = useState(DEFAULT_CUTOFF);
@@ -13,6 +16,11 @@ export default function AdminSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Delivery slots state
+  const [slots, setSlots] = useState<Slot[]>([...DELIVERY_SLOTS]);
+  const [slotsSaving, setSlotsSaving] = useState(false);
+  const [slotsSaved, setSlotsSaved] = useState(false);
 
   // Password change state
   const [currentPwd, setCurrentPwd] = useState("");
@@ -28,6 +36,12 @@ export default function AdminSettingsPage() {
       .then(({ data }) => {
         if (data.data?.order_cutoff) setCutoff(data.data.order_cutoff);
         if (data.data?.after_hours_cutoff) setAfterHours(data.data.after_hours_cutoff);
+        if (data.data?.delivery_slots) {
+          try {
+            const parsed = JSON.parse(data.data.delivery_slots);
+            if (Array.isArray(parsed) && parsed.length > 0) setSlots(parsed);
+          } catch { /* keep defaults */ }
+        }
       })
       .finally(() => setLoading(false));
   }, []);
@@ -70,6 +84,34 @@ export default function AdminSettingsPage() {
     }
   }
 
+  async function handleSaveSlots() {
+    if (slots.some((s) => !s.value.trim() || !s.label.trim())) return;
+    setSlotsSaving(true);
+    setSlotsSaved(false);
+    try {
+      await axios.patch("/api/admin/settings", {
+        key: "delivery_slots",
+        value: JSON.stringify(slots),
+      });
+      setSlotsSaved(true);
+      setTimeout(() => setSlotsSaved(false), 3000);
+    } finally {
+      setSlotsSaving(false);
+    }
+  }
+
+  function addSlot() {
+    setSlots((prev) => [...prev, { value: "", label: "" }]);
+  }
+
+  function removeSlot(idx: number) {
+    setSlots((prev) => prev.filter((_, i) => i !== idx));
+  }
+
+  function updateSlot(idx: number, field: "value" | "label", val: string) {
+    setSlots((prev) => prev.map((s, i) => i === idx ? { ...s, [field]: val } : s));
+  }
+
   return (
     <div className="space-y-6 max-w-xl">
       <div>
@@ -77,6 +119,7 @@ export default function AdminSettingsPage() {
         <p className="text-sm text-gray-500 mt-0.5">Các thông số vận hành của shop</p>
       </div>
 
+      {/* ── Giờ chốt đơn ── */}
       <div className="rounded-2xl border border-gray-200 bg-white p-6 space-y-5">
         <h2 className="font-semibold text-gray-900 flex items-center gap-2">
           <Clock className="h-4 w-4 text-[#22c55e]" />
@@ -101,11 +144,8 @@ export default function AdminSettingsPage() {
             <Info className="h-3.5 w-3.5" />
             Cách hoạt động
           </div>
-          <p>• Đặt <strong>trước {cutoff}</strong> → giao <strong>cùng ngày</strong></p>
-          <p>• Đặt <strong>sau {cutoff}</strong> → giao <strong>ngày hôm sau</strong></p>
-          <p className="text-blue-500 mt-1">
-            Thường đặt vào 2h–3h sáng để kịp đi chợ mua hàng.
-          </p>
+          <p>• Đặt <strong>trước {cutoff}</strong> → giao <strong>ngày mai</strong></p>
+          <p>• Đặt <strong>sau {cutoff}</strong> → giao <strong>ngày kia</strong></p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -123,7 +163,81 @@ export default function AdminSettingsPage() {
         </div>
       </div>
 
-      {/* After-hours cutoff */}
+      {/* ── Khung giờ giao hàng ── */}
+      <div className="rounded-2xl border border-gray-200 bg-white p-6 space-y-5">
+        <div>
+          <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+            <Clock className="h-4 w-4 text-purple-500" />
+            Khung giờ giao hàng
+          </h2>
+          <p className="text-xs text-gray-400 mt-1">
+            Danh sách khung giờ khách hàng có thể chọn khi đặt hàng.
+          </p>
+        </div>
+
+        <div className="space-y-2.5">
+          {slots.map((slot, idx) => (
+            <div key={idx} className="flex items-center gap-2">
+              <GripVertical className="h-4 w-4 text-gray-300 shrink-0" />
+              <Input
+                placeholder="Mã giờ, vd: 08:00-12:00"
+                value={slot.value}
+                onChange={(e) => updateSlot(idx, "value", e.target.value)}
+                className="rounded-xl flex-1 text-sm font-mono"
+              />
+              <Input
+                placeholder="Tên hiển thị, vd: Sáng (8h-12h)"
+                value={slot.label}
+                onChange={(e) => updateSlot(idx, "label", e.target.value)}
+                className="rounded-xl flex-1 text-sm"
+              />
+              <button
+                type="button"
+                onClick={() => removeSlot(idx)}
+                disabled={slots.length <= 1}
+                className="text-gray-300 hover:text-red-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+                title="Xóa khung giờ này"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <button
+          type="button"
+          onClick={addSlot}
+          className="flex items-center gap-2 text-sm text-[#16a34a] font-medium hover:text-[#15803d] transition-colors"
+        >
+          <Plus className="h-4 w-4" />
+          Thêm khung giờ
+        </button>
+
+        <div className="rounded-xl bg-purple-50 border border-purple-200 px-4 py-3 text-xs text-purple-700 space-y-1">
+          <div className="flex items-center gap-1.5 font-semibold">
+            <Info className="h-3.5 w-3.5" />
+            Lưu ý định dạng
+          </div>
+          <p>• <strong>Mã giờ:</strong> dạng <code className="bg-purple-100 px-1 rounded">HH:MM-HH:MM</code>, ví dụ: <code className="bg-purple-100 px-1 rounded">08:00-12:00</code></p>
+          <p>• <strong>Tên hiển thị:</strong> nội dung khách nhìn thấy, ví dụ: <em>Sáng (8h-12h)</em></p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={handleSaveSlots}
+            disabled={slotsSaving || loading || slots.some((s) => !s.value.trim() || !s.label.trim())}
+            className="rounded-xl bg-purple-600 hover:bg-purple-700 text-white gap-2"
+          >
+            <Save className="h-4 w-4" />
+            {slotsSaving ? "Đang lưu..." : "Lưu khung giờ"}
+          </Button>
+          {slotsSaved && (
+            <span className="text-sm text-purple-600 font-medium">Đã lưu khung giờ!</span>
+          )}
+        </div>
+      </div>
+
+      {/* ── After-hours cutoff (ẩn nhãn cũ không còn dùng) ── */}
       <div className="rounded-2xl border border-gray-200 bg-white p-6 space-y-5">
         <h2 className="font-semibold text-gray-900 flex items-center gap-2">
           <Clock className="h-4 w-4 text-amber-500" />
@@ -166,7 +280,8 @@ export default function AdminSettingsPage() {
           )}
         </div>
       </div>
-      {/* Change password */}
+
+      {/* ── Đổi mật khẩu ── */}
       <div className="rounded-2xl border border-gray-200 bg-white p-6 space-y-5">
         <h2 className="font-semibold text-gray-900 flex items-center gap-2">
           <KeyRound className="h-4 w-4 text-[#22c55e]" />

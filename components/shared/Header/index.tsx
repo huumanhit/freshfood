@@ -77,7 +77,6 @@ export function Header() {
 
   return (
     <>
-
       {/* ── Main header ── */}
       <header
         className={cn(
