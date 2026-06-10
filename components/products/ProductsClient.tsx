@@ -182,7 +182,7 @@ export function ProductsClient({ initialSearchParams, initialProducts, initialPa
         <p className="text-xs font-semibold uppercase tracking-widest text-[#22c55e] mb-0.5">Cửa hàng</p>
         <h1 className="text-2xl lg:text-3xl font-bold font-display text-gray-900">Tất cả sản phẩm</h1>
         <p className="text-xs lg:text-sm text-gray-400 mt-0.5 hidden lg:block">
-          Thực phẩm sạch, tươi ngon — giao tận nhà trong 2–3h
+          Thực phẩm tươi sạch — đặt trước 22h, giao tận nhà ngày mai
         </p>
       </div>
 

@@ -46,8 +46,8 @@ export function PromoBanner() {
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="rounded-2xl bg-white/15 backdrop-blur-sm p-4 text-center min-w-[120px]">
                 <Clock className="h-6 w-6 text-green-200 mx-auto mb-1" />
-                <p className="text-2xl font-bold text-white">2–3h</p>
-                <p className="text-xs text-green-200">Thời gian giao</p>
+                <p className="text-2xl font-bold text-white">Ngày mai</p>
+                <p className="text-xs text-green-200">Nhận hàng</p>
               </div>
               <div className="rounded-2xl bg-white/15 backdrop-blur-sm p-4 text-center min-w-[120px]">
                 <Tag className="h-6 w-6 text-green-200 mx-auto mb-1" />

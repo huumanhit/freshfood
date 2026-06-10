@@ -6,8 +6,8 @@ import { Truck, Leaf, Banknote, RefreshCcw } from "lucide-react";
 const FEATURES = [
   {
     icon: Truck,
-    title: "Giao hàng nhanh 2–3h",
-    description: "Giao tận nhà trong nội thành, cam kết đúng giờ mọi ngày trong tuần.",
+    title: "Giao hàng ngày mai",
+    description: "Đặt trước 22h hôm nay — nhận hàng tươi ngon tận nhà vào ngày mai.",
     gradient: "from-blue-50 to-sky-100",
     iconBg: "bg-blue-100",
     iconColor: "text-blue-600",

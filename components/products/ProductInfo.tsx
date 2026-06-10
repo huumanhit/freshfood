@@ -220,13 +220,13 @@ export function ProductInfo({ product }: ProductInfoProps) {
             )}
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex gap-3 min-w-0">
             <Button
               onClick={handleAddToCart}
               variant="outline"
               size="lg"
               className={cn(
-                "flex-1 h-12 rounded-2xl font-semibold transition-all",
+                "flex-1 min-w-0 h-12 rounded-2xl font-semibold transition-all",
                 justAdded
                   ? "border-green-500 text-green-600 bg-green-50"
                   : "border-[#22c55e] text-[#22c55e] hover:bg-green-50"
@@ -258,7 +258,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
             <Button
               onClick={handleBuyNow}
               size="lg"
-              className="flex-1 h-12 rounded-2xl bg-[#16a34a] hover:bg-[#16a34a] font-semibold shadow-md shadow-green-200"
+              className="flex-1 min-w-0 h-12 rounded-2xl bg-[#16a34a] hover:bg-[#16a34a] font-semibold shadow-md shadow-green-200"
             >
               <Zap className="h-4 w-4 mr-2" />
               Mua ngay
@@ -276,7 +276,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
       {/* Delivery info strip */}
       <div className="rounded-2xl bg-green-50 border border-green-100 p-4 space-y-2">
         {[
-          { icon: "🚚", text: "Giao hàng nhanh 2–3h nội thành TP.HCM" },
+          { icon: "🚚", text: "Giao hàng nhanh nội thành TP.HCM" },
           { icon: "🔄", text: "Đổi trả trong 24h nếu hàng không tươi" },
           { icon: "💰", text: "Thanh toán COD — trả tiền khi nhận hàng" },
         ].map(({ icon, text }) => (
