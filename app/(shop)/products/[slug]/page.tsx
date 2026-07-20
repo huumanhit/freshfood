@@ -109,6 +109,9 @@ export async function generateMetadata({ params }: ProductDetailPageProps): Prom
         description: product.metaDescription ?? product.shortDescription ?? undefined,
         images: product.images[0] ? [{ url: product.images[0].url }] : undefined,
       },
+      alternates: {
+        canonical: `/products/${product.slug}`,
+      },
     };
   } catch {
     return { title: APP_CONFIG.name };

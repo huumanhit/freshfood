@@ -18,6 +18,9 @@ export const metadata: Metadata = {
     title: `Tất cả sản phẩm — ${APP_CONFIG.name}`,
     description: "Thực phẩm tươi ngon, sạch sẽ — giao tận nhà nhanh chóng",
   },
+  alternates: {
+    canonical: "/products",
+  },
 };
 
 interface ProductsPageProps {
