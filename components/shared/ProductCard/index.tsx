@@ -27,12 +27,13 @@ export function ProductCard({ product, className }: ProductCardProps) {
   const currentPrice = getProductPrice(product.price, product.salePrice ?? null);
   const hasDiscount = product.salePrice != null && product.salePrice < product.price;
   const discountPct = hasDiscount ? getDiscountPercentage(product.price, product.salePrice!) : 0;
+  const cartItemId = `cart-${product.id}-standard`;
   const inCart = isInCart(product.id);
   const qty = getItemQuantity(product.id);
 
   function handleAddToCart() {
     const cartItem: CartItem = {
-      id: `cart-${product.id}-${Date.now()}`,
+      id: cartItemId,
       productId: product.id,
       quantity: 1,
       product: {
@@ -52,8 +53,8 @@ export function ProductCard({ product, className }: ProductCardProps) {
   }
 
   function handleDecrease() {
-    if (qty <= 1) removeItem(product.id);
-    else updateQuantity(product.id, qty - 1);
+    if (qty <= 1) removeItem(cartItemId);
+    else updateQuantity(cartItemId, qty - 1);
   }
 
   return (
@@ -185,7 +186,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
                 {qty}
               </span>
               <button
-                onClick={() => updateQuantity(product.id, qty + 1)}
+                onClick={() => updateQuantity(cartItemId, qty + 1)}
                 className="flex-1 flex items-center justify-center h-full text-[#22c55e] hover:bg-green-50 transition-colors"
                 aria-label="Tăng số lượng"
                 disabled={qty >= product.stock}

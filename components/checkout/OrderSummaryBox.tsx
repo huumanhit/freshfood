@@ -19,7 +19,7 @@ export function OrderSummaryBox() {
           const price = getProductPrice(item.product.price, item.product.salePrice);
           const img = item.product.images.find((i) => i.isPrimary) ?? item.product.images[0];
           return (
-            <div key={item.productId} className="flex items-center gap-3">
+            <div key={item.id} className="flex items-center gap-3">
               <div className="relative h-12 w-12 shrink-0 rounded-lg overflow-hidden bg-gray-50 border border-gray-100">
                 {img ? (
                   <Image src={img.url} alt={item.product.name} fill sizes="48px" className="object-cover" unoptimized />

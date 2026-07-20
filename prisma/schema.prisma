@@ -129,6 +129,7 @@ model Product {
   stock            Int            @default(0)
   unit             String         @default("kg")
   weight           Decimal?       @db.Decimal(8, 3)
+  weightOptions    Json?          @default("[]")
   origin           String?
   status           ProductStatus  @default(ACTIVE)
   isFeatured       Boolean        @default(false)

@@ -113,7 +113,7 @@ export function CartSidebar() {
 
                     return (
                       <motion.div
-                        key={item.productId}
+                        key={item.id}
                         layout
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -152,8 +152,8 @@ export function CartSidebar() {
                               <button
                                 onClick={() =>
                                   item.quantity <= 1
-                                    ? removeItem(item.productId)
-                                    : updateQuantity(item.productId, item.quantity - 1)
+                                    ? removeItem(item.id)
+                                    : updateQuantity(item.id, item.quantity - 1)
                                 }
                                 className="flex h-7 w-7 items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors"
                                 aria-label="Giảm"
@@ -165,7 +165,7 @@ export function CartSidebar() {
                               </span>
                               <button
                                 onClick={() =>
-                                  updateQuantity(item.productId, item.quantity + 1)
+                                  updateQuantity(item.id, item.quantity + 1)
                                 }
                                 className="flex h-7 w-7 items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors"
                                 aria-label="Tăng"
@@ -180,7 +180,7 @@ export function CartSidebar() {
                         {/* Price + remove */}
                         <div className="flex flex-col items-end justify-between shrink-0">
                           <button
-                            onClick={() => removeItem(item.productId)}
+                            onClick={() => removeItem(item.id)}
                             className="text-gray-300 hover:text-red-400 transition-colors"
                             aria-label="Xóa"
                           >

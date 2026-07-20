@@ -8,8 +8,8 @@ interface CartState {
 
   // Actions
   addItem: (item: CartItem) => void;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  removeItem: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
   openCart: () => void;
   closeCart: () => void;
@@ -28,11 +28,11 @@ export const useCartStore = create<CartState>()(
 
       addItem: (newItem) => {
         set((state) => {
-          const existing = state.items.find((i) => i.productId === newItem.productId);
+          const existing = state.items.find((i) => i.id === newItem.id);
           if (existing) {
             return {
               items: state.items.map((i) =>
-                i.productId === newItem.productId
+                i.id === newItem.id
                   ? { ...i, quantity: i.quantity + newItem.quantity }
                   : i
               ),
@@ -42,20 +42,20 @@ export const useCartStore = create<CartState>()(
         });
       },
 
-      removeItem: (productId) => {
+      removeItem: (id) => {
         set((state) => ({
-          items: state.items.filter((i) => i.productId !== productId),
+          items: state.items.filter((i) => i.id !== id),
         }));
       },
 
-      updateQuantity: (productId, quantity) => {
+      updateQuantity: (id, quantity) => {
         if (quantity <= 0) {
-          get().removeItem(productId);
+          get().removeItem(id);
           return;
         }
         set((state) => ({
           items: state.items.map((i) =>
-            i.productId === productId ? { ...i, quantity } : i
+            i.id === id ? { ...i, quantity } : i
           ),
         }));
       },

@@ -27,6 +27,7 @@ const getProductBySlug = unstable_cache(
         description: true, shortDescription: true,
         price: true, salePrice: true,
         sku: true, stock: true, unit: true, weight: true,
+        weightOptions: true,
         origin: true, status: true,
         isFeatured: true, isOrganic: true, isCore: true,
         categoryId: true, soldCount: true,
@@ -43,6 +44,7 @@ const getProductBySlug = unstable_cache(
       price: Number(p.price),
       salePrice: p.salePrice != null ? Number(p.salePrice) : null,
       weight: p.weight != null ? Number(p.weight) : null,
+      weightOptions: p.weightOptions ? (p.weightOptions as any) : [],
       createdAt: p.createdAt.toISOString(),
       updatedAt: p.updatedAt.toISOString(),
     };

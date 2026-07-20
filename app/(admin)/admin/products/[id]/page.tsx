@@ -59,6 +59,7 @@ export default async function AdminProductEditPage({ params }: AdminProductEditP
           isCore: product.isCore,
           categoryId: product.categoryId,
           images: product.images.map((img) => ({ url: img.url, isPrimary: img.isPrimary })),
+          weightOptions: product.weightOptions ? (product.weightOptions as any) : [],
         }}
       />
     </div>

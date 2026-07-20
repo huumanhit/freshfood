@@ -105,6 +105,7 @@ export function CheckoutForm() {
       const cartItems = items.map((item) => ({
         productId: item.productId,
         quantity: item.quantity,
+        weightOption: item.weightOption,
       }));
 
       const { data } = await axios.post("/api/checkout", { ...values, cartItems });

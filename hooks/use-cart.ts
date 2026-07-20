@@ -18,12 +18,12 @@ export function useCart() {
     SHIPPING.FREE_SHIPPING_THRESHOLD - subtotal
   );
 
-  function isInCart(productId: string): boolean {
-    return store.items.some((i) => i.productId === productId);
+  function isInCart(productId: string, weightOption?: string): boolean {
+    return store.items.some((i) => i.productId === productId && i.weightOption === weightOption);
   }
 
-  function getItemQuantity(productId: string): number {
-    return store.items.find((i) => i.productId === productId)?.quantity ?? 0;
+  function getItemQuantity(productId: string, weightOption?: string): number {
+    return store.items.find((i) => i.productId === productId && i.weightOption === weightOption)?.quantity ?? 0;
   }
 
   return {

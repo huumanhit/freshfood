@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import Image from "next/image";
-import { Loader2, Save, UploadCloud, X } from "lucide-react";
+import { Loader2, Save, UploadCloud, X, Plus, Trash2 } from "lucide-react";
 import { ProductStatus } from "@prisma/client";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,15 @@ const productFormSchema = z.object({
   isCore: z.boolean(),
   categoryId: z.string().min(1, "Vui lòng chọn danh mục"),
   imageUrl: z.string().url("URL ảnh không hợp lệ").optional().or(z.literal("")),
+  weightOptions: z
+    .array(
+      z.object({
+        name: z.string().min(1, "Tên tùy chọn không được để trống"),
+        price: z.coerce.number().positive("Giá phải lớn hơn 0"),
+        salePrice: z.coerce.number().positive().optional().nullable(),
+      })
+    )
+    .optional(),
 });
 
 type ProductFormValues = z.infer<typeof productFormSchema>;
@@ -213,6 +222,8 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
     handleSubmit,
     control,
     formState: { errors },
+    setValue,
+    watch,
   } = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
@@ -232,6 +243,7 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
       isCore: defaultValues?.isCore ?? false,
       categoryId: defaultValues?.categoryId ?? "",
       imageUrl: primaryImage?.url ?? "",
+      weightOptions: defaultValues?.weightOptions ? (typeof defaultValues.weightOptions === "string" ? JSON.parse(defaultValues.weightOptions) : defaultValues.weightOptions) : [],
     },
   });
 
@@ -264,6 +276,32 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
   });
 
   const categories = categoriesData ?? [];
+
+  const weightOptions = watch("weightOptions") || [];
+
+  function handleAddOption() {
+    const current = [...weightOptions];
+    current.push({ name: "", price: 0, salePrice: null });
+    setValue("weightOptions", current, { shouldValidate: true, shouldDirty: true });
+  }
+
+  function handleRemoveOption(index: number) {
+    const current = weightOptions.filter((_, i) => i !== index);
+    setValue("weightOptions", current, { shouldValidate: true, shouldDirty: true });
+  }
+
+  function handleOptionFieldChange(index: number, field: "name" | "price" | "salePrice", value: any) {
+    const current = weightOptions.map((opt, i) => {
+      if (i === index) {
+        return {
+          ...opt,
+          [field]: field === "name" ? value : (value === "" ? null : Number(value)),
+        };
+      }
+      return opt;
+    });
+    setValue("weightOptions", current, { shouldValidate: true, shouldDirty: true });
+  }
 
   return (
     <form onSubmit={handleSubmit((v) => mutation.mutate(v))} className="space-y-6">
@@ -349,6 +387,76 @@ export function ProductForm({ productId, defaultValues }: ProductFormProps) {
                   <Input {...register("origin")} placeholder="Đà Lạt" className="rounded-xl" />
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <CardTitle>Tùy chọn Khối lượng</CardTitle>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleAddOption}
+                className="rounded-xl flex items-center gap-1 border-green-200 text-[#16a34a] hover:bg-green-50"
+              >
+                <Plus className="h-4 w-4" /> Thêm tùy chọn
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {weightOptions.length === 0 ? (
+                <p className="text-sm text-gray-400 py-2">
+                  Chưa cấu hình tùy chọn khối lượng nào. Sản phẩm sẽ sử dụng giá bán mặc định theo số lượng (bó, kg).
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {weightOptions.map((option, index) => (
+                    <div key={index} className="flex gap-3 items-end border border-gray-100 p-3 rounded-xl bg-gray-50/50">
+                      <div className="flex-1 space-y-1">
+                        <label className="text-xs font-medium text-gray-500">Tên tùy chọn (ví dụ: 10g, 20g)*</label>
+                        <Input
+                          value={option.name}
+                          onChange={(e) => handleOptionFieldChange(index, "name", e.target.value)}
+                          placeholder="10g"
+                          className="rounded-xl bg-white h-9 text-sm"
+                          required
+                        />
+                      </div>
+                      <div className="w-32 space-y-1">
+                        <label className="text-xs font-medium text-gray-500">Giá bán (VND)*</label>
+                        <Input
+                          type="number"
+                          value={option.price || ""}
+                          onChange={(e) => handleOptionFieldChange(index, "price", e.target.value)}
+                          placeholder="15000"
+                          className="rounded-xl bg-white h-9 text-sm"
+                          min="1"
+                          required
+                        />
+                      </div>
+                      <div className="w-32 space-y-1">
+                        <label className="text-xs font-medium text-gray-500">Giá KM (nếu có)</label>
+                        <Input
+                          type="number"
+                          value={option.salePrice || ""}
+                          onChange={(e) => handleOptionFieldChange(index, "salePrice", e.target.value)}
+                          placeholder="12000"
+                          className="rounded-xl bg-white h-9 text-sm"
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleRemoveOption(index)}
+                        className="text-gray-400 hover:text-red-500 h-9 w-9 rounded-xl shrink-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

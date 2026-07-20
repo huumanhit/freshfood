@@ -55,7 +55,7 @@ export function HomeMiniCart() {
               const unitPrice = item.product.salePrice ?? item.product.price;
               return (
                 <motion.div
-                  key={item.productId}
+                  key={item.id}
                   layout
                   initial={{ opacity: 0, x: 12 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -77,14 +77,14 @@ export function HomeMiniCart() {
                     </p>
                     <div className="flex items-center gap-1 mt-1">
                       <button
-                        onClick={() => item.quantity <= 1 ? removeItem(item.productId) : updateQuantity(item.productId, item.quantity - 1)}
+                        onClick={() => item.quantity <= 1 ? removeItem(item.id) : updateQuantity(item.id, item.quantity - 1)}
                         className="h-5 w-5 rounded-md border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"
                       >
                         <Minus className="h-2.5 w-2.5 text-gray-500" />
                       </button>
                       <span className="text-xs font-semibold text-gray-700 w-5 text-center">{item.quantity}</span>
                       <button
-                        onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
                         className="h-5 w-5 rounded-md border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"
                         disabled={item.quantity >= item.product.stock}
                       >
@@ -93,7 +93,7 @@ export function HomeMiniCart() {
                     </div>
                   </div>
                   <button
-                    onClick={() => removeItem(item.productId)}
+                    onClick={() => removeItem(item.id)}
                     className="h-6 w-6 flex items-center justify-center rounded-lg hover:bg-red-50 hover:text-red-400 text-gray-300 transition-colors shrink-0"
                   >
                     <X className="h-3.5 w-3.5" />

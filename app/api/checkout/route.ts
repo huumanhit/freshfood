@@ -12,7 +12,13 @@ import { z } from "zod";
 
 const guestCheckoutSchema = checkoutSchema.extend({
   cartItems: z
-    .array(z.object({ productId: z.string(), quantity: z.number().int().min(1) }))
+    .array(
+      z.object({
+        productId: z.string(),
+        quantity: z.number().int().min(1),
+        weightOption: z.string().optional().nullable(),
+      })
+    )
     .min(1, "Giỏ hàng trống"),
   couponCode: z.string().max(50).optional(),
 });
@@ -65,10 +71,21 @@ export async function POST(req: NextRequest) {
         throw new AppError(`"${p.name}" không đủ hàng (còn ${p.stock})`, 400);
     }
 
-    const price = (p: (typeof products)[0]) =>
-      p.salePrice != null && Number(p.salePrice) < Number(p.price)
+    const getCartItemPrice = (productId: string, weightOption?: string | null) => {
+      const p = products.find((x) => x.id === productId)!;
+      if (weightOption && p.weightOptions) {
+        const options = p.weightOptions as any[];
+        const opt = options.find((o) => o.name === weightOption);
+        if (opt) {
+          return opt.salePrice != null && Number(opt.salePrice) < Number(opt.price)
+            ? Number(opt.salePrice)
+            : Number(opt.price);
+        }
+      }
+      return p.salePrice != null && Number(p.salePrice) < Number(p.price)
         ? Number(p.salePrice)
         : Number(p.price);
+    };
 
     // ── 4. Delivery date ─────────────────────────────────────────────────────
     const cutoffSetting = await db.setting.findUnique({ where: { key: "order_cutoff" } }).catch(() => null);
@@ -90,7 +107,7 @@ export async function POST(req: NextRequest) {
 
     // ── 5. Totals ─────────────────────────────────────────────────────────────
     const subtotal = cartItems.reduce(
-      (s, ci) => s + price(products.find((x) => x.id === ci.productId)!) * ci.quantity,
+      (s, ci) => s + getCartItemPrice(ci.productId, ci.weightOption) * ci.quantity,
       0
     );
 
@@ -146,11 +163,19 @@ export async function POST(req: NextRequest) {
 
       for (const ci of cartItems) {
         const p = products.find((x) => x.id === ci.productId)!;
-        const unitPrice = price(p);
+        const unitPrice = getCartItemPrice(ci.productId, ci.weightOption);
+        let itemName = p.name;
+        if (ci.weightOption && p.weightOptions) {
+          const options = p.weightOptions as any[];
+          const opt = options.find((o) => o.name === ci.weightOption);
+          if (opt) {
+            itemName = `${p.name} (${opt.name})`;
+          }
+        }
         await tx.orderItem.create({
           data: {
             orderId: order.id, productId: ci.productId,
-            productName: p.name, price: unitPrice,
+            productName: itemName, price: unitPrice,
             quantity: ci.quantity, subtotal: unitPrice * ci.quantity,
           },
         });

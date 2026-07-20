@@ -25,24 +25,47 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const [qty, setQty] = useState(1);
   const [justAdded, setJustAdded] = useState(false);
 
-  const currentPrice = getProductPrice(product.price, product.salePrice ?? null);
-  const hasDiscount = product.salePrice != null && product.salePrice < product.price;
-  const discountPct = hasDiscount ? getDiscountPercentage(product.price, product.salePrice!) : 0;
-  const inCart = isInCart(product.id);
-  const cartQty = getItemQuantity(product.id);
+  const weightOptions = (product.weightOptions as any[]) || [];
+  const [selectedOption, setSelectedOption] = useState<any>(null); // null represents standard option
+
+  const currentPrice = selectedOption
+    ? (selectedOption.salePrice != null && selectedOption.salePrice < selectedOption.price
+        ? Number(selectedOption.salePrice)
+        : Number(selectedOption.price))
+    : getProductPrice(product.price, product.salePrice ?? null);
+
+  const hasDiscount = selectedOption
+    ? (selectedOption.salePrice != null && selectedOption.salePrice < selectedOption.price)
+    : (product.salePrice != null && product.salePrice < product.price);
+
+  const originalPrice = selectedOption
+    ? Number(selectedOption.price)
+    : Number(product.price);
+
+  const discountPct = hasDiscount
+    ? getDiscountPercentage(originalPrice, selectedOption ? Number(selectedOption.salePrice!) : product.salePrice!)
+    : 0;
+
+  const displayUnit = selectedOption ? selectedOption.name : product.unit;
+
+  const inCart = isInCart(product.id, selectedOption?.name);
+  const cartQty = getItemQuantity(product.id, selectedOption?.name);
 
   function handleAddToCart() {
+    const optionName = selectedOption?.name;
+    const cartItemId = optionName ? `cart-${product.id}-${optionName}` : `cart-${product.id}-standard`;
     const cartItem: CartItem = {
-      id: `cart-${product.id}-${Date.now()}`,
+      id: cartItemId,
       productId: product.id,
       quantity: qty,
+      weightOption: optionName,
       product: {
         id: product.id,
-        name: product.name,
-        price: product.price,
-        salePrice: product.salePrice ?? null,
+        name: optionName ? `${product.name} (${optionName})` : product.name,
+        price: originalPrice,
+        salePrice: selectedOption ? (selectedOption.salePrice ?? null) : (product.salePrice ?? null),
         stock: product.stock,
-        unit: product.unit,
+        unit: displayUnit,
         images: product.images?.map((img) => ({ url: img.url, isPrimary: img.isPrimary })) ?? [],
       },
     };
@@ -134,13 +157,49 @@ export function ProductInfo({ product }: ProductInfoProps) {
         <span className="text-3xl font-bold text-[#22c55e]">
           {formatCurrency(currentPrice)}
         </span>
-        <span className="text-base text-gray-400">/{product.unit}</span>
+        <span className="text-base text-gray-400">/{displayUnit}</span>
         {hasDiscount && (
           <span className="text-lg text-gray-400 line-through">
-            {formatCurrency(product.price)}
+            {formatCurrency(originalPrice)}
           </span>
         )}
       </div>
+
+      {/* Weight options selector */}
+      {weightOptions.length > 0 && (
+        <div className="space-y-2 border-y border-gray-100 py-4">
+          <p className="text-sm font-semibold text-gray-700">Chọn khối lượng / phân loại:</p>
+          <div className="flex flex-wrap gap-2.5">
+            {/* Standard option */}
+            <button
+              onClick={() => setSelectedOption(null)}
+              className={cn(
+                "px-4 py-2 rounded-xl text-sm font-medium border transition-all duration-200",
+                selectedOption === null
+                  ? "border-[#22c55e] bg-green-50 text-[#16a34a] font-semibold shadow-sm"
+                  : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+              )}
+            >
+              Mặc định ({product.unit})
+            </button>
+            {/* Custom options */}
+            {weightOptions.map((opt) => (
+              <button
+                key={opt.name}
+                onClick={() => setSelectedOption(opt)}
+                className={cn(
+                  "px-4 py-2 rounded-xl text-sm font-medium border transition-all duration-200",
+                  selectedOption?.name === opt.name
+                    ? "border-[#22c55e] bg-green-50 text-[#16a34a] font-semibold shadow-sm"
+                    : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+                )}
+              >
+                {opt.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Meta info */}
       <div className="grid grid-cols-2 gap-3">
@@ -157,7 +216,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
           <Package className="h-4 w-4 text-[#22c55e] shrink-0" />
           <div>
             <p className="text-[11px] text-gray-400">Đơn vị</p>
-            <p className="text-sm font-medium text-gray-700">{product.unit}</p>
+            <p className="text-sm font-medium text-gray-700">{displayUnit}</p>
           </div>
         </div>
         {product.sku && (

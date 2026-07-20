@@ -20,6 +20,16 @@ export const createProductSchema = z.object({
   metaTitle: z.string().max(255).optional(),
   metaDescription: z.string().max(500).optional(),
   tags: z.string().max(1000).optional(),
+  weightOptions: z
+    .array(
+      z.object({
+        name: z.string().min(1, "Tên tùy chọn không được để trống"),
+        price: z.number().positive("Giá phải lớn hơn 0"),
+        salePrice: z.number().positive().optional().nullable(),
+      })
+    )
+    .optional()
+    .nullable(),
   images: z
     .array(
       z.object({

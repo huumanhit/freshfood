@@ -50,6 +50,7 @@ export interface CartItem {
   id: string;
   productId: string;
   quantity: number;
+  weightOption?: string;
   product: {
     id: string;
     name: string;

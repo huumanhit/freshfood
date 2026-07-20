@@ -39,6 +39,7 @@ export interface Product {
   isOrganic: boolean;
   isCore: boolean;
   categoryId: string;
+  weightOptions?: WeightOption[] | null;
   soldCount?: number;
   viewCount?: number;
   createdAt: Date;
@@ -65,6 +66,12 @@ export interface ProductFilter {
   sortOrder?: "asc" | "desc";
 }
 
+export interface WeightOption {
+  name: string;
+  price: number;
+  salePrice?: number | null;
+}
+
 export interface CreateProductPayload {
   name: string;
   description?: string;
@@ -85,6 +92,7 @@ export interface CreateProductPayload {
   metaDescription?: string;
   tags?: string;
   images?: { url: string; alt?: string; isPrimary?: boolean }[];
+  weightOptions?: WeightOption[];
 }
 
 export type UpdateProductPayload = Partial<CreateProductPayload>;

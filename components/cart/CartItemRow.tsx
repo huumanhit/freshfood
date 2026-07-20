@@ -49,7 +49,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
             {item.product.name}
           </p>
           <button
-            onClick={() => removeItem(item.productId)}
+            onClick={() => removeItem(item.id)}
             className="shrink-0 text-gray-300 hover:text-red-400 transition-colors p-0.5 rounded"
             aria-label="Xóa sản phẩm"
           >
@@ -72,7 +72,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center rounded-xl border border-gray-200 overflow-hidden">
             <button
-              onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+              onClick={() => updateQuantity(item.id, item.quantity - 1)}
               className="px-2.5 py-1.5 text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-40"
               disabled={item.quantity <= 1}
             >
@@ -82,7 +82,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
               {item.quantity}
             </span>
             <button
-              onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+              onClick={() => updateQuantity(item.id, item.quantity + 1)}
               className="px-2.5 py-1.5 text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-40"
               disabled={item.quantity >= item.product.stock}
             >
@@ -107,7 +107,7 @@ export function CartItemList({ items }: { items: CartItem[] }) {
   return (
     <AnimatePresence mode="popLayout">
       {items.map((item) => (
-        <CartItemRow key={item.productId} item={item} />
+        <CartItemRow key={item.id} item={item} />
       ))}
     </AnimatePresence>
   );
