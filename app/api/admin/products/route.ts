@@ -74,6 +74,7 @@ export async function POST(req: NextRequest) {
     const product = await db.product.create({
       data: {
         ...data,
+        weightOptions: data.weightOptions ?? undefined,
         sku: data.sku === "" ? null : data.sku,
         slug,
         ...(images && {
