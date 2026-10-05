@@ -1,37 +1,41 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useProducts } from "@/hooks/use-products";
+import { useCategories } from "@/hooks/use-categories";
 import { ProductCard } from "@/components/shared/ProductCard";
 import { ProductCardSkeleton } from "@/components/home/ProductCardSkeleton";
 import { ROUTES } from "@/constants/routes";
 import { Product } from "@/types/product";
 
 export function FeaturedProducts() {
-  const [activeTab, setActiveTab] = useState("all");
+  // Lấy toàn bộ danh mục thực tế từ Database
+  const { data: categories = [] } = useCategories();
 
-  const { data, isLoading } = useProducts({ limit: 8, sortBy: "createdAt", sortOrder: "desc" });
+  // Danh sách tabs từ danh mục (bỏ mục "Tất cả")
+  const tabs = categories
+    .filter((cat) => (cat._count?.products ?? 1) > 0)
+    .map((cat) => ({
+      key: cat.slug,
+      label: cat.name,
+    }));
+
+  const [selectedTab, setSelectedTab] = useState<string>("");
+  const activeTab = selectedTab || tabs[0]?.key || "";
+
+  // Truy vấn sản phẩm theo danh mục đang chọn
+  const productFilter = {
+    limit: 8,
+    sortBy: "createdAt" as const,
+    sortOrder: "desc" as const,
+    categorySlug: activeTab || undefined,
+  };
+
+  const { data, isLoading } = useProducts(productFilter);
   const products: Product[] = data?.data ?? [];
-
-  // Build tabs dynamically from unique categories in the returned products
-  const tabs = useMemo(() => {
-    const seen = new Set<string>();
-    const cats: { key: string; label: string }[] = [{ key: "all", label: "Tất cả" }];
-    for (const p of products) {
-      if (p.category && !seen.has(p.category.id)) {
-        seen.add(p.category.id);
-        cats.push({ key: p.category.id, label: p.category.name });
-      }
-    }
-    return cats;
-  }, [products]);
-
-  const filtered = activeTab === "all"
-    ? products
-    : products.filter((p) => p.category?.id === activeTab);
 
   return (
     <div>
@@ -42,31 +46,21 @@ export function FeaturedProducts() {
           <span className="hidden lg:block">Sản phẩm nổi bật</span>
         </h2>
         <Link
-          href={ROUTES.PRODUCTS}
+          href={activeTab ? ROUTES.CATEGORY(activeTab) : ROUTES.PRODUCTS}
           className="flex items-center gap-1 text-sm font-medium text-[#22c55e] hover:text-[#15803d] transition-colors"
         >
           Xem tất cả <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
 
-      {/* Promo strip */}
-      <div className="flex gap-2 overflow-x-auto pb-1 mb-4 scrollbar-hide">
-        <div className="flex items-center gap-1.5 shrink-0 bg-green-50 border border-green-200 rounded-full px-3 py-1.5 text-xs font-semibold text-green-700 whitespace-nowrap">
-          🚚 Freeship đơn từ 80k
-        </div>
-        <div className="flex items-center gap-1.5 shrink-0 bg-orange-50 border border-orange-200 rounded-full px-3 py-1.5 text-xs font-semibold text-orange-600 whitespace-nowrap">
-          🎁 Giới thiệu bạn bè nhận quà
-        </div>
-      </div>
-
-      {/* Tabs */}
-      {!isLoading && tabs.length > 1 && (
-        <div className="flex gap-2 flex-wrap mb-8">
+      {/* Tabs danh mục (đã bỏ freeship, giới thiệu bạn bè và mục Tất cả để các icon/tab chạy mượt) */}
+      {tabs.length > 0 && (
+        <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
           {tabs.map((tab) => (
             <button
               key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-200 ${
+              onClick={() => setSelectedTab(tab.key)}
+              className={`rounded-full px-4 py-1.5 text-sm font-medium whitespace-nowrap transition-all duration-200 shrink-0 ${
                 activeTab === tab.key
                   ? "bg-[#16a34a] text-white shadow-md shadow-green-200"
                   : "bg-white text-gray-600 border border-gray-200 hover:border-green-300 hover:text-green-600"
@@ -82,7 +76,7 @@ export function FeaturedProducts() {
       <AnimatePresence mode="wait">
         {isLoading ? (
           <motion.div
-            key="skeletons"
+            key={`skeletons-${activeTab}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -92,9 +86,9 @@ export function FeaturedProducts() {
               <ProductCardSkeleton key={i} />
             ))}
           </motion.div>
-        ) : filtered.length === 0 ? (
+        ) : products.length === 0 ? (
           <motion.div
-            key="empty"
+            key={`empty-${activeTab}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -107,14 +101,14 @@ export function FeaturedProducts() {
           </motion.div>
         ) : (
           <motion.div
-            key={activeTab}
+            key={`grid-${activeTab}`}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
             className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5"
           >
-            {filtered.map((product) => (
+            {products.map((product) => (
               <ProductCard key={product.id} product={product} className="h-full" />
             ))}
           </motion.div>
@@ -124,10 +118,10 @@ export function FeaturedProducts() {
       {/* Mobile CTA */}
       <div className="mt-8 text-center sm:hidden">
         <Link
-          href={ROUTES.PRODUCTS}
+          href={activeTab ? ROUTES.CATEGORY(activeTab) : ROUTES.PRODUCTS}
           className="inline-flex items-center gap-1 text-sm font-medium text-[#22c55e] hover:text-[#15803d]"
         >
-          Xem tất cả sản phẩm <ArrowRight className="h-4 w-4" />
+          Xem thêm trong danh mục <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
     </div>

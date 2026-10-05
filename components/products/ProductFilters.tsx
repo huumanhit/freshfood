@@ -108,48 +108,77 @@ export function ProductFilters({ filters, onChange, onReset }: ProductFiltersPro
             ))}
           </div>
         ) : (
-          <ul className="space-y-2.5">
-            <li>
-              <label className="flex items-center gap-2.5 cursor-pointer group">
-                <Checkbox
-                  checked={filters.categorySlug === ""}
-                  onCheckedChange={() => onChange({ categorySlug: "", page: 1 })}
-                  className="data-[state=checked]:bg-[#16a34a] data-[state=checked]:border-[#22c55e]"
-                />
-                <span className={cn("text-sm transition-colors group-hover:text-[#22c55e]",
-                  filters.categorySlug === "" ? "font-medium text-[#22c55e]" : "text-gray-600"
-                )}>
-                  Tất cả
-                </span>
-              </label>
-            </li>
-            {categories?.map((cat) => (
-              <li key={cat.id}>
-                <label className="flex items-center justify-between gap-2.5 cursor-pointer group">
-                  <div className="flex items-center gap-2.5">
-                    <Checkbox
-                      checked={filters.categorySlug === cat.slug}
-                      onCheckedChange={() =>
-                        onChange({
-                          categorySlug: filters.categorySlug === cat.slug ? "" : cat.slug,
-                          page: 1,
-                        })
-                      }
-                      className="data-[state=checked]:bg-[#16a34a] data-[state=checked]:border-[#22c55e]"
-                    />
-                    <span className={cn("text-sm transition-colors group-hover:text-[#22c55e]",
-                      filters.categorySlug === cat.slug ? "font-medium text-[#22c55e]" : "text-gray-600"
-                    )}>
-                      {cat.name}
-                    </span>
+          <div className="space-y-1">
+            <button
+              type="button"
+              onClick={() => onChange({ categorySlug: "", page: 1 })}
+              className={cn(
+                "flex w-full items-center justify-between px-2.5 py-1.5 rounded-xl text-left text-sm transition-all group",
+                filters.categorySlug === ""
+                  ? "bg-green-50 font-semibold text-[#16a34a]"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              )}
+            >
+              <div className="flex items-center gap-2.5">
+                <div
+                  className={cn(
+                    "h-4 w-4 rounded border flex items-center justify-center transition-colors shrink-0",
+                    filters.categorySlug === ""
+                      ? "bg-[#16a34a] border-[#16a34a] text-white"
+                      : "border-gray-300 group-hover:border-[#16a34a]"
+                  )}
+                >
+                  {filters.categorySlug === "" && (
+                    <div className="h-1.5 w-1.5 rounded-full bg-white" />
+                  )}
+                </div>
+                <span>Tất cả</span>
+              </div>
+            </button>
+
+            {categories?.map((cat) => {
+              const isSelected = filters.categorySlug === cat.slug;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() =>
+                    onChange({
+                      categorySlug: isSelected ? "" : cat.slug,
+                      page: 1,
+                    })
+                  }
+                  className={cn(
+                    "flex w-full items-center justify-between px-2.5 py-1.5 rounded-xl text-left text-sm transition-all group",
+                    isSelected
+                      ? "bg-green-50 font-semibold text-[#16a34a]"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  )}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div
+                      className={cn(
+                        "h-4 w-4 rounded border flex items-center justify-center transition-colors shrink-0",
+                        isSelected
+                          ? "bg-[#16a34a] border-[#16a34a] text-white"
+                          : "border-gray-300 group-hover:border-[#16a34a]"
+                      )}
+                    >
+                      {isSelected && (
+                        <div className="h-1.5 w-1.5 rounded-full bg-white" />
+                      )}
+                    </div>
+                    <span className="truncate">{cat.name}</span>
                   </div>
                   {cat._count && (
-                    <span className="text-xs text-gray-400">{cat._count.products}</span>
+                    <span className="text-xs text-gray-400 shrink-0 ml-2">
+                      {cat._count.products}
+                    </span>
                   )}
-                </label>
-              </li>
-            ))}
-          </ul>
+                </button>
+              );
+            })}
+          </div>
         )}
       </FilterSection>
 

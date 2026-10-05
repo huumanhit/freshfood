@@ -77,7 +77,7 @@ export async function GET(req: NextRequest) {
           { tags: { contains: search, mode: "insensitive" } },
         ],
       }),
-      ...(categorySlug && { category: { slug: categorySlug, isActive: true } }),
+      ...(categorySlug && categorySlug !== "all" && { category: { slug: categorySlug.trim(), isActive: true } }),
       ...(minPrice !== undefined && { price: { gte: minPrice } }),
       ...(maxPrice !== undefined && { price: { lte: maxPrice } }),
       ...(isOrganic !== undefined && { isOrganic }),

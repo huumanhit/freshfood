@@ -60,24 +60,6 @@ export function CategoryGrid({ categories }: { categories: Category[] }) {
             </span>
           </Link>
         ))}
-
-        {/* Tất cả */}
-        <Link
-          href={ROUTES.PRODUCTS}
-          className="flex flex-col items-center gap-2 shrink-0"
-        >
-          <div className="w-[72px] h-[72px] rounded-2xl bg-[#f0fdf4] border border-green-100 shadow-sm flex items-center justify-center">
-            <svg viewBox="0 0 24 24" width="28" height="28" fill="none">
-              <rect x="3" y="3" width="7" height="7" rx="1.5" fill="#16a34a" />
-              <rect x="14" y="3" width="7" height="7" rx="1.5" fill="#16a34a" />
-              <rect x="3" y="14" width="7" height="7" rx="1.5" fill="#16a34a" />
-              <rect x="14" y="14" width="7" height="7" rx="1.5" fill="#16a34a" />
-            </svg>
-          </div>
-          <span className="text-xs text-[#16a34a] text-center whitespace-nowrap font-semibold">
-            Tất cả
-          </span>
-        </Link>
       </div>
 
       {/* ── DESKTOP: grid ── */}

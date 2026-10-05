@@ -73,20 +73,27 @@ export function ProductsClient({ initialSearchParams, initialProducts, initialPa
       .catch(() => setAfterHours(isAfterHoursClient(DEFAULT_AFTER_HOURS)));
   }, []);
 
-  // Auto-clear invalid categorySlug when categories are loaded
-  const { data: categoriesData } = useCategories();
+  // Đồng bộ categorySlug khi URL searchParams thay đổi (ví dụ bấm từ menu hoặc trang chủ)
   useEffect(() => {
-    if (!categoriesData || !filters.categorySlug) return;
-    const validSlugs = categoriesData.map((c) => c.slug);
-    if (!validSlugs.includes(filters.categorySlug)) {
-      setFilters((prev) => ({ ...prev, categorySlug: "", page: 1 }));
+    if (initialSearchParams.categorySlug !== undefined && initialSearchParams.categorySlug !== filters.categorySlug) {
+      setFilters((prev) => ({
+        ...prev,
+        categorySlug: initialSearchParams.categorySlug ?? "",
+        page: 1,
+      }));
     }
-  }, [categoriesData, filters.categorySlug]);
+  }, [initialSearchParams.categorySlug]);
 
   const debouncedSearch = useDebounce(filters.search, 400);
   const queryFilters = { ...filters, search: debouncedSearch };
 
-  const serverInitial = initialProducts && initialPagination
+  // Chỉ dùng serverInitial làm placeholder khi bộ lọc trùng với dữ liệu ban đầu từ SSR
+  const isMatchingInitial =
+    queryFilters.categorySlug === (initialSearchParams.categorySlug ?? "") &&
+    !queryFilters.search &&
+    queryFilters.page === (initialSearchParams.page ? parseInt(initialSearchParams.page) : 1);
+
+  const serverInitial = initialProducts && initialPagination && isMatchingInitial
     ? {
         success: true,
         data: initialProducts,
@@ -94,7 +101,7 @@ export function ProductsClient({ initialSearchParams, initialProducts, initialPa
       }
     : undefined;
 
-  const { data, isLoading, isError, refetch } = useProducts(
+  const { data, isLoading, isFetching, isError, refetch } = useProducts(
     {
       page: queryFilters.page,
       search: queryFilters.search || undefined,
@@ -109,15 +116,9 @@ export function ProductsClient({ initialSearchParams, initialProducts, initialPa
     serverInitial
   );
 
-  const lastGoodDataRef = useRef<{ products: Product[]; pagination: PaginationMeta } | null>(
-    serverInitial ? { products: serverInitial.data, pagination: serverInitial.pagination! } : null
-  );
-  if (data?.data?.length) {
-    lastGoodDataRef.current = { products: data.data, pagination: data.pagination! };
-  }
-
-  const products = data?.data ?? lastGoodDataRef.current?.products ?? [];
-  const pagination = data?.pagination ?? lastGoodDataRef.current?.pagination;
+  const products = data?.data ?? (isMatchingInitial ? serverInitial?.data : undefined) ?? [];
+  const pagination = data?.pagination ?? (isMatchingInitial ? serverInitial?.pagination : undefined);
+  const showLoading = isLoading || (isFetching && !data);
 
   // Sync filters → URL (debounced)
   const debouncedFilters = useDebounce(filters, 600);
@@ -233,7 +234,7 @@ export function ProductsClient({ initialSearchParams, initialProducts, initialPa
         <div className="flex-1 min-w-0 space-y-4">
           <ProductSort
             total={pagination?.total ?? 0}
-            isLoading={isLoading}
+            isLoading={showLoading}
             filters={filters}
             onChange={handleChange}
             onOpenMobileFilter={() => setMobileFilterOpen(true)}
@@ -241,7 +242,7 @@ export function ProductsClient({ initialSearchParams, initialProducts, initialPa
 
           <ActiveFilters filters={filters} onChange={handleChange} />
 
-          <ProductGrid products={products} isLoading={isLoading} />
+          <ProductGrid products={products} isLoading={showLoading} />
 
           {pagination && pagination.totalPages > 1 && (
             <div className="pt-4">

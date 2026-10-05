@@ -67,19 +67,6 @@ function ProductsPageSkeleton() {
   );
 }
 
-// Cached category slug validation — invalidated when admin changes categories
-const validateCategorySlug = unstable_cache(
-  async (slug: string) => {
-    const cat = await db.category.findFirst({
-      where: { slug, isActive: true },
-      select: { slug: true },
-    });
-    return cat?.slug ?? null;
-  },
-  ["validate-category-slug"],
-  { revalidate: 300, tags: ["categories"] }
-);
-
 async function fetchInitialProducts(sp: ProductsPageProps["searchParams"]): Promise<{
   products: Product[];
   pagination: PaginationMeta;
@@ -92,12 +79,6 @@ async function fetchInitialProducts(sp: ProductsPageProps["searchParams"]): Prom
     const sortBy = (sp.sortBy as "price" | "name" | "createdAt") ?? "createdAt";
     const sortOrder = (sp.sortOrder as "asc" | "desc") ?? "desc";
 
-    // Validate categorySlug using cache — avoids a live DB hit on every page nav
-    let validCategorySlug: string | undefined;
-    if (sp.categorySlug) {
-      validCategorySlug = (await validateCategorySlug(sp.categorySlug)) ?? undefined;
-    }
-
     const where = {
       status: "ACTIVE" as const,
       ...(sp.search && {
@@ -106,7 +87,7 @@ async function fetchInitialProducts(sp: ProductsPageProps["searchParams"]): Prom
           { description: { contains: sp.search, mode: "insensitive" as const } },
         ],
       }),
-      ...(validCategorySlug && { category: { slug: validCategorySlug } }),
+      ...(sp.categorySlug && sp.categorySlug !== "all" && { category: { slug: sp.categorySlug.trim(), isActive: true } }),
       ...(sp.minPrice && { price: { gte: parseFloat(sp.minPrice) } }),
       ...(sp.maxPrice && { price: { lte: parseFloat(sp.maxPrice) } }),
       ...(sp.isOrganic === "true" && { isOrganic: true }),
