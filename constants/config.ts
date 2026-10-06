@@ -21,7 +21,6 @@ export const PAGINATION = {
 } as const;
 
 export const SHIPPING = {
-  FREE_SHIPPING_THRESHOLD: 80000,
   DEFAULT_FEE: 15000,
   EXPRESS_FEE: 50000,
 } as const;

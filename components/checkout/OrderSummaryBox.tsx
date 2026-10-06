@@ -7,7 +7,7 @@ import { formatCurrency, getProductPrice } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 
 export function OrderSummaryBox() {
-  const { items, subtotal, shippingFee, total, hasFreeShipping } = useCart();
+  const { items, subtotal, shippingFee, total } = useCart();
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-5 space-y-4 sticky top-24">
@@ -55,7 +55,7 @@ export function OrderSummaryBox() {
             <Truck className="h-3.5 w-3.5" />
             Vận chuyển
           </span>
-          {hasFreeShipping ? (
+          {shippingFee === 0 ? (
             <span className="text-[#22c55e] font-medium">Miễn phí</span>
           ) : (
             <span className="text-gray-800 font-medium">{formatCurrency(shippingFee)}</span>

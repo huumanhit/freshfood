@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/hooks/use-cart";
 import { formatCurrency } from "@/lib/utils";
 import { ROUTES } from "@/constants/routes";
-import { SHIPPING } from "@/constants/config";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
@@ -24,14 +23,7 @@ export function CartSidebar() {
     shippingFee,
     total,
     itemCount,
-    hasFreeShipping,
-    freeShippingRemaining,
   } = useCart();
-
-  const progressPct = Math.min(
-    100,
-    (subtotal / SHIPPING.FREE_SHIPPING_THRESHOLD) * 100
-  );
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && closeCart()}>
@@ -75,32 +67,6 @@ export function CartSidebar() {
           </div>
         ) : (
           <>
-            {/* Free shipping progress */}
-            <div className="px-5 py-3 bg-green-50 border-b border-green-100">
-              {hasFreeShipping ? (
-                <p className="text-xs font-medium text-green-700 flex items-center gap-1.5">
-                  🎉 Bạn được miễn phí vận chuyển!
-                </p>
-              ) : (
-                <div className="space-y-1.5">
-                  <p className="text-xs text-gray-500">
-                    Thêm{" "}
-                    <span className="font-semibold text-[#22c55e]">
-                      {formatCurrency(freeShippingRemaining)}
-                    </span>{" "}
-                    để được miễn phí vận chuyển
-                  </p>
-                  <div className="h-1.5 rounded-full bg-green-200 overflow-hidden">
-                    <motion.div
-                      className="h-full rounded-full bg-[#16a34a]"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${progressPct}%` }}
-                      transition={{ duration: 0.4 }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
 
             {/* Items */}
             <ScrollArea className="flex-1">
@@ -206,9 +172,7 @@ export function CartSidebar() {
                 </div>
                 <div className="flex justify-between text-gray-500">
                   <span>Phí vận chuyển</span>
-                  <span className={hasFreeShipping ? "text-[#22c55e] font-medium" : "text-gray-700"}>
-                    {hasFreeShipping ? "Miễn phí" : formatCurrency(shippingFee)}
-                  </span>
+                  <span className="text-gray-700 font-medium">{formatCurrency(shippingFee)}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between font-bold text-base">

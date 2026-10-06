@@ -59,8 +59,8 @@ export default function ShippingPolicyPage() {
               <Truck className="h-5 w-5 text-[#16a34a] shrink-0 mt-0.5" /> 3. Biểu phí vận chuyển
             </h2>
             <ul className="list-disc list-inside pl-4 space-y-2 text-sm">
-              <li>Miễn phí vận chuyển (Freeship) cho mọi đơn hàng có giá trị thanh toán từ <strong>80.000đ</strong> trở lên.</li>
-              <li>Với đơn hàng dưới 80.000đ, phí vận chuyển tiêu chuẩn là <strong>15.000đ</strong> cho mỗi đơn hàng trong khu vực nội thành.</li>
+              <li>Phí vận chuyển tiêu chuẩn là <strong>15.000đ</strong> cho mỗi đơn hàng trong khu vực nội thành.</li>
+              <li>Đối với các khu vực xa hơn, phí vận chuyển được tính linh hoạt theo khoảng cách thực tế (km) và sẽ được nhân viên gọi xác nhận cùng quý khách trước khi giao hàng.</li>
             </ul>
           </section>
         </div>

@@ -9,7 +9,6 @@ function adminGuard(session: Session | null) {
   return session?.user && (session.user.role === "ADMIN" || session.user.role === "SUPER_ADMIN");
 }
 
-const FREE_SHIPPING_THRESHOLD = 80_000;
 const SHIPPING_FEE = 15_000;
 
 // PATCH: confirm or reject merge
@@ -77,7 +76,7 @@ export async function PATCH(
   }
 
   const mergedSubtotal = Array.from(itemMap.values()).reduce((s, v) => s + v.subtotal, 0);
-  const mergedShipping = mergedSubtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+  const mergedShipping = SHIPPING_FEE;
 
   // Use the highest discount among orders
   const maxDiscount = Math.max(...group.orders.map((o) => Number(o.discount)));

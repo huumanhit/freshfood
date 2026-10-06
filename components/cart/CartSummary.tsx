@@ -1,20 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingCart, ArrowRight, Truck } from "lucide-react";
+import { ShoppingCart, ArrowRight } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { formatCurrency } from "@/lib/utils";
-import { SHIPPING } from "@/constants/config";
 import { ROUTES } from "@/constants/routes";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 export function CartSummary() {
-  const { subtotal, shippingFee, total, hasFreeShipping, freeShippingRemaining, itemCount } = useCart();
+  const { subtotal, shippingFee, total, itemCount } = useCart();
 
   if (itemCount === 0) return null;
-
-  const progressPct = Math.min(100, Math.round((subtotal / SHIPPING.FREE_SHIPPING_THRESHOLD) * 100));
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-6 space-y-5 sticky top-24">
@@ -22,30 +19,6 @@ export function CartSummary() {
         <ShoppingCart className="h-5 w-5 text-[#22c55e]" />
         Tóm tắt đơn hàng
       </h2>
-
-      {/* Free shipping progress */}
-      <div className="space-y-2">
-        {hasFreeShipping ? (
-          <div className="flex items-center gap-2 text-sm text-[#22c55e] font-medium">
-            <Truck className="h-4 w-4" />
-            Bạn được miễn phí vận chuyển!
-          </div>
-        ) : (
-          <p className="text-sm text-gray-500">
-            Mua thêm{" "}
-            <span className="font-semibold text-[#22c55e]">{formatCurrency(freeShippingRemaining)}</span>{" "}
-            để được miễn phí vận chuyển
-          </p>
-        )}
-        <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-[#22c55e] to-[#16a34a] transition-all duration-500"
-            style={{ width: `${progressPct}%` }}
-          />
-        </div>
-      </div>
-
-      <Separator />
 
       {/* Totals */}
       <div className="space-y-2.5 text-sm">
@@ -55,11 +28,7 @@ export function CartSummary() {
         </div>
         <div className="flex justify-between text-gray-600">
           <span>Phí vận chuyển</span>
-          {hasFreeShipping ? (
-            <span className="font-medium text-[#22c55e]">Miễn phí</span>
-          ) : (
-            <span className="font-medium text-gray-900">{formatCurrency(shippingFee)}</span>
-          )}
+          <span className="font-medium text-gray-900">{formatCurrency(shippingFee)}</span>
         </div>
         <Separator />
         <div className="flex justify-between text-base font-bold text-gray-900">

@@ -4,8 +4,6 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Tag, ArrowRight, Clock } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
-import { SHIPPING } from "@/constants/config";
-import { formatCurrency } from "@/lib/utils";
 
 export function PromoBanner() {
   return (
@@ -31,14 +29,14 @@ export function PromoBanner() {
                 Ưu đãi đặc biệt
               </div>
               <h3 className="text-2xl sm:text-3xl font-bold font-display text-white leading-tight mb-2">
-                Miễn phí vận chuyển
+                Thực phẩm tươi sạch
                 <br />
                 <span className="text-green-200">
-                  cho đơn từ {formatCurrency(SHIPPING.FREE_SHIPPING_THRESHOLD)}
+                  Giao tận nhà mỗi ngày
                 </span>
               </h3>
               <p className="text-sm text-green-100">
-                Áp dụng toàn bộ sản phẩm · Giao hàng nội thành TP.HCM
+                Đặt trước 22h hôm nay · Nhận hàng tươi ngon ngày mai tại TP.HCM
               </p>
             </div>
 

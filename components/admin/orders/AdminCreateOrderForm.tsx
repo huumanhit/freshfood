@@ -96,7 +96,7 @@ export function AdminCreateOrderForm() {
   }
 
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
-  const shippingFee = subtotal >= SHIPPING.FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING.DEFAULT_FEE;
+  const shippingFee = items.length > 0 ? SHIPPING.DEFAULT_FEE : 0;
   const total = subtotal + shippingFee;
 
   async function handleSubmit(e: React.FormEvent) {
@@ -112,6 +112,7 @@ export function AdminCreateOrderForm() {
         deliverySlot: deliverySlot || undefined,
         deliveryDate: deliveryDate || undefined,
         paymentMethod, paymentStatus, note, items,
+        shippingFee,
       });
       toast({ title: `Tạo đơn thành công — #${data.data.orderNumber}`, variant: "success" });
       router.push(ROUTES.ADMIN_ORDER_DETAIL(data.data.orderId));

@@ -90,6 +90,7 @@ export async function POST(req: NextRequest) {
 
     // Apply coupon
     let discount = 0;
+    let isCouponFreeShipping = false;
     let couponId: string | undefined;
 
     if (couponCode) {
@@ -113,15 +114,14 @@ export async function POST(req: NextRequest) {
             }
           } else if (coupon.type === "FIXED_AMOUNT") {
             discount = Number(coupon.value);
+          } else if (coupon.type === "FREE_SHIPPING") {
+            isCouponFreeShipping = true;
           }
         }
       }
     }
 
-    const shippingFee =
-      subtotal - discount >= SHIPPING.FREE_SHIPPING_THRESHOLD
-        ? 0
-        : SHIPPING.DEFAULT_FEE;
+    const shippingFee = isCouponFreeShipping ? 0 : SHIPPING.DEFAULT_FEE;
     const total = subtotal - discount + shippingFee;
 
     // Create order in transaction

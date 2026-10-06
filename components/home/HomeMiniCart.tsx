@@ -20,7 +20,6 @@ export function HomeMiniCart() {
     shippingFee,
     total,
     itemCount,
-    hasFreeShipping,
   } = useCart();
 
   return (
@@ -115,14 +114,11 @@ export function HomeMiniCart() {
           <span>Tạm tính</span>
           <span className="font-semibold text-gray-800">{formatCurrency(subtotal)}</span>
         </div>
-        {!hasFreeShipping && subtotal > 0 && (
+        {subtotal > 0 && (
           <div className="flex justify-between text-xs text-gray-500">
             <span>Phí vận chuyển</span>
             <span className="font-medium text-gray-700">{formatCurrency(shippingFee)}</span>
           </div>
-        )}
-        {hasFreeShipping && subtotal > 0 && (
-          <p className="text-[11px] text-[#22c55e] font-medium text-center">🎉 Miễn phí vận chuyển!</p>
         )}
 
         <Separator />

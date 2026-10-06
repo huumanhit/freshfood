@@ -83,6 +83,7 @@ const manualOrderSchema = z.object({
   paymentMethod: z.enum(["COD", "BANK_TRANSFER", "VNPAY", "MOMO", "STRIPE"]).default("COD"),
   paymentStatus: z.enum(["PENDING", "PAID"]).default("PENDING"),
   note: z.string().optional(),
+  shippingFee: z.number().nonnegative().optional(),
   items: z.array(z.object({
     productId: z.string(),
     productName: z.string(),
@@ -101,7 +102,7 @@ export async function POST(req: NextRequest) {
     const {
       phone, fullName, province, district, ward, street,
       deliverySlot, deliveryDate, paymentMethod, paymentStatus,
-      note, items,
+      note, items, shippingFee: customShippingFee,
     } = manualOrderSchema.parse(body);
 
     // Find or create user by phone
@@ -120,7 +121,7 @@ export async function POST(req: NextRequest) {
     });
 
     const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
-    const shippingFee = subtotal >= SHIPPING.FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING.DEFAULT_FEE;
+    const shippingFee = customShippingFee !== undefined ? customShippingFee : (items.length > 0 ? SHIPPING.DEFAULT_FEE : 0);
     const total = subtotal + shippingFee;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

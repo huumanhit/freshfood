@@ -112,6 +112,7 @@ export async function POST(req: NextRequest) {
     );
 
     let discount = 0;
+    let isCouponFreeShipping = false;
     let couponId: string | undefined;
     if (couponCode) {
       const coupon = await db.coupon.findUnique({
@@ -132,11 +133,14 @@ export async function POST(req: NextRequest) {
               : coupon.type === "FIXED_AMOUNT"
               ? Number(coupon.value)
               : 0;
+          if (coupon.type === "FREE_SHIPPING") {
+            isCouponFreeShipping = true;
+          }
         }
       }
     }
 
-    const shippingFee = subtotal - discount >= SHIPPING.FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING.DEFAULT_FEE;
+    const shippingFee = isCouponFreeShipping ? 0 : SHIPPING.DEFAULT_FEE;
     const total = subtotal - discount + shippingFee;
 
     // ── 5. Transaction ────────────────────────────────────────────────────────

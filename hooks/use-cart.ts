@@ -9,14 +9,10 @@ export function useCart() {
 
   const subtotal = store.subtotal();
   const itemCount = store.itemCount();
-  const shippingFee =
-    subtotal >= SHIPPING.FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING.DEFAULT_FEE;
+  const shippingFee = subtotal > 0 ? SHIPPING.DEFAULT_FEE : 0;
   const total = subtotal + shippingFee;
-  const hasFreeShipping = subtotal >= SHIPPING.FREE_SHIPPING_THRESHOLD;
-  const freeShippingRemaining = Math.max(
-    0,
-    SHIPPING.FREE_SHIPPING_THRESHOLD - subtotal
-  );
+  const hasFreeShipping = false;
+  const freeShippingRemaining = 0;
 
   function isInCart(productId: string, weightOption?: string): boolean {
     return store.items.some((i) => i.productId === productId && i.weightOption === weightOption);
