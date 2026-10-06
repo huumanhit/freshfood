@@ -117,7 +117,7 @@ export function HomeMiniCart() {
         {subtotal > 0 && (
           <div className="flex justify-between text-xs text-gray-500">
             <span>Phí vận chuyển</span>
-            <span className="font-medium text-gray-700">{formatCurrency(shippingFee)}</span>
+            <span className="text-gray-500 text-[11px]">Tính theo km</span>
           </div>
         )}
 

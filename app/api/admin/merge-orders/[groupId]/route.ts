@@ -9,7 +9,7 @@ function adminGuard(session: Session | null) {
   return session?.user && (session.user.role === "ADMIN" || session.user.role === "SUPER_ADMIN");
 }
 
-const SHIPPING_FEE = 15_000;
+const SHIPPING_FEE = 0;
 
 // PATCH: confirm or reject merge
 export async function PATCH(

@@ -50,21 +50,20 @@ export function OrderSummaryBox() {
           <span>Tạm tính</span>
           <span className="text-gray-800 font-medium">{formatCurrency(subtotal)}</span>
         </div>
-        <div className="flex justify-between text-gray-500">
+        <div className="flex justify-between text-gray-500 text-sm">
           <span className="flex items-center gap-1">
             <Truck className="h-3.5 w-3.5" />
-            Vận chuyển
+            Phí vận chuyển
           </span>
-          {shippingFee === 0 ? (
-            <span className="text-[#22c55e] font-medium">Miễn phí</span>
-          ) : (
-            <span className="text-gray-800 font-medium">{formatCurrency(shippingFee)}</span>
-          )}
+          <span className="text-gray-500 text-xs">Tính theo km khi giao</span>
         </div>
         <Separator />
-        <div className="flex justify-between font-bold text-base">
-          <span className="text-gray-900">Tổng cộng</span>
-          <span className="text-[#22c55e] text-lg">{formatCurrency(total)}</span>
+        <div className="space-y-1">
+          <div className="flex justify-between font-bold text-base">
+            <span className="text-gray-900">Tổng tiền hàng</span>
+            <span className="text-[#22c55e] text-lg">{formatCurrency(total)}</span>
+          </div>
+          <p className="text-[11px] text-gray-400 text-right">* Phí ship tính riêng theo km khi nhận hàng</p>
         </div>
       </div>
     </div>

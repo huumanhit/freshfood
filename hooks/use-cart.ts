@@ -9,8 +9,8 @@ export function useCart() {
 
   const subtotal = store.subtotal();
   const itemCount = store.itemCount();
-  const shippingFee = subtotal > 0 ? SHIPPING.DEFAULT_FEE : 0;
-  const total = subtotal + shippingFee;
+  const shippingFee = 0;
+  const total = subtotal;
   const hasFreeShipping = false;
   const freeShippingRemaining = 0;
 

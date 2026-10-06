@@ -172,12 +172,15 @@ export function CartSidebar() {
                 </div>
                 <div className="flex justify-between text-gray-500">
                   <span>Phí vận chuyển</span>
-                  <span className="text-gray-700 font-medium">{formatCurrency(shippingFee)}</span>
+                  <span className="text-gray-500 text-xs">Tính theo km khi giao</span>
                 </div>
                 <Separator />
-                <div className="flex justify-between font-bold text-base">
-                  <span>Tổng cộng</span>
-                  <span className="text-[#22c55e] text-lg">{formatCurrency(total)}</span>
+                <div className="space-y-0.5">
+                  <div className="flex justify-between font-bold text-base">
+                    <span>Tổng tiền hàng</span>
+                    <span className="text-[#22c55e] text-lg">{formatCurrency(total)}</span>
+                  </div>
+                  <p className="text-[11px] text-gray-400 text-right">* Chưa gồm phí ship (tính theo km)</p>
                 </div>
               </div>
 

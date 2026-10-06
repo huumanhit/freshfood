@@ -140,8 +140,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const shippingFee = isCouponFreeShipping ? 0 : SHIPPING.DEFAULT_FEE;
-    const total = subtotal - discount + shippingFee;
+    const shippingFee = 0;
+    const total = subtotal - discount;
 
     // ── 5. Transaction ────────────────────────────────────────────────────────
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

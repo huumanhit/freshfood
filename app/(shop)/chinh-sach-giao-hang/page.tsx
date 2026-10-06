@@ -59,8 +59,8 @@ export default function ShippingPolicyPage() {
               <Truck className="h-5 w-5 text-[#16a34a] shrink-0 mt-0.5" /> 3. Biểu phí vận chuyển
             </h2>
             <ul className="list-disc list-inside pl-4 space-y-2 text-sm">
-              <li>Phí vận chuyển tiêu chuẩn là <strong>15.000đ</strong> cho mỗi đơn hàng trong khu vực nội thành.</li>
-              <li>Đối với các khu vực xa hơn, phí vận chuyển được tính linh hoạt theo khoảng cách thực tế (km) và sẽ được nhân viên gọi xác nhận cùng quý khách trước khi giao hàng.</li>
+              <li>Đơn hàng đặt trực tiếp trên website chỉ tính <strong>tiền hàng</strong>, chưa bao gồm phí vận chuyển.</li>
+              <li>Phí vận chuyển được tính linh hoạt theo khoảng cách thực tế (km) từ cửa hàng đến địa chỉ nhận hàng và được thu khi giao hàng (hoặc nhân viên liên hệ xác nhận trước cùng quý khách).</li>
             </ul>
           </section>
         </div>

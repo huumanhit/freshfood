@@ -28,12 +28,15 @@ export function CartSummary() {
         </div>
         <div className="flex justify-between text-gray-600">
           <span>Phí vận chuyển</span>
-          <span className="font-medium text-gray-900">{formatCurrency(shippingFee)}</span>
+          <span className="text-gray-500 text-xs">Tính theo km khi giao</span>
         </div>
         <Separator />
-        <div className="flex justify-between text-base font-bold text-gray-900">
-          <span>Tổng cộng</span>
-          <span className="text-[#22c55e] text-lg">{formatCurrency(total)}</span>
+        <div className="space-y-1">
+          <div className="flex justify-between text-base font-bold text-gray-900">
+            <span>Tổng tiền hàng</span>
+            <span className="text-[#22c55e] text-lg">{formatCurrency(total)}</span>
+          </div>
+          <p className="text-[11px] text-gray-400 text-right">* Phí ship tính riêng theo km khi nhận hàng</p>
         </div>
       </div>
 

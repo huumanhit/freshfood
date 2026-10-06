@@ -121,8 +121,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const shippingFee = isCouponFreeShipping ? 0 : SHIPPING.DEFAULT_FEE;
-    const total = subtotal - discount + shippingFee;
+    const shippingFee = 0;
+    const total = subtotal - discount;
 
     // Create order in transaction
     const order = await db.$transaction(async (tx) => {
