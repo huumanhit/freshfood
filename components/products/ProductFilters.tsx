@@ -59,7 +59,7 @@ function FilterSection({
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="pb-4">{children}</div>
+            <div className="pt-2 pb-4">{children}</div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -186,7 +186,7 @@ export function ProductFilters({ filters, onChange, onReset }: ProductFiltersPro
 
       {/* Price range */}
       <FilterSection title="Giá">
-        <div className="space-y-4">
+        <div className="space-y-4 px-1">
           <Slider
             min={PRICE_MIN}
             max={PRICE_MAX}
