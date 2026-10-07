@@ -146,14 +146,24 @@ function SocialIconRaw({
 }) {
   const hasLink = Boolean(href && href.trim() !== "" && href !== "#");
 
+  if (!hasLink) {
+    return (
+      <span
+        aria-label={label}
+        className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-100 text-green-700 cursor-default"
+      >
+        {children}
+      </span>
+    );
+  }
+
   return (
     <a
-      href={hasLink ? href : "#"}
-      {...(hasLink
-        ? { target: "_blank", rel: "noopener noreferrer" }
-        : { onClick: (e: React.MouseEvent) => e.preventDefault(), role: "button" })}
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
       aria-label={label}
-      className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-100 text-green-700 hover:bg-[#16a34a] hover:text-white transition-all duration-200 cursor-pointer"
+      className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-100 text-green-700 hover:bg-[#16a34a] hover:text-white transition-all duration-200"
     >
       {children}
     </a>
