@@ -144,13 +144,16 @@ function SocialIconRaw({
   label: string;
   children: React.ReactNode;
 }) {
+  const hasLink = Boolean(href && href.trim() !== "" && href !== "#");
+
   return (
     <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
+      href={hasLink ? href : "#"}
+      {...(hasLink
+        ? { target: "_blank", rel: "noopener noreferrer" }
+        : { onClick: (e: React.MouseEvent) => e.preventDefault(), role: "button" })}
       aria-label={label}
-      className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-100 text-green-700 hover:bg-[#16a34a] hover:text-white transition-all duration-200"
+      className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-100 text-green-700 hover:bg-[#16a34a] hover:text-white transition-all duration-200 cursor-pointer"
     >
       {children}
     </a>

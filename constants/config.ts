@@ -7,10 +7,10 @@ export const APP_CONFIG = {
   phone: "0932133139",
   address: "Chung cư Thái An 1, 1/45 Nguyễn Văn Quá, P. Đông Hưng Thuận, Q.12, TP.HCM",
   socialLinks: {
-    facebook: "https://www.facebook.com/share/1CTrFL5rxk/",
-    instagram: "https://instagram.com/freshfood",
-    youtube: "https://youtube.com/freshfood",
-    tiktok: "https://tiktok.com/@freshfood",
+    facebook: "",
+    instagram: "",
+    youtube: "",
+    tiktok: "",
   },
 } as const;
 
