@@ -253,6 +253,7 @@ export function CheckoutForm() {
             <AddressSelector
               ward={watch("ward") ?? ""}
               onWardChange={(v) => setValue("ward", v, { shouldValidate: true })}
+              onDistrictChange={(d) => setValue("district", d)}
               error={errors.ward?.message}
             />
 
