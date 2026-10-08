@@ -99,14 +99,12 @@ export default async function CheckoutSuccessPage({ searchParams }: CheckoutSucc
               <span>Tạm tính</span>
               <span>{formatCurrency(Number(order.subtotal))}</span>
             </div>
-            <div className="flex justify-between text-gray-500">
-              <span>Phí vận chuyển</span>
-              {Number(order.shippingFee) === 0 ? (
-                <span className="text-[#22c55e]">Miễn phí</span>
-              ) : (
+            {Number(order.shippingFee) > 0 && (
+              <div className="flex justify-between text-gray-500">
+                <span>Phí vận chuyển</span>
                 <span>{formatCurrency(Number(order.shippingFee))}</span>
-              )}
-            </div>
+              </div>
+            )}
             <Separator />
             <div className="flex justify-between font-bold text-base">
               <span>Tổng cộng</span>

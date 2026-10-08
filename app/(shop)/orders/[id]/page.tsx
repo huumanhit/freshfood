@@ -100,14 +100,12 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
               <span>Tạm tính</span>
               <span>{formatCurrency(Number(order.subtotal))}</span>
             </div>
-            <div className="flex justify-between text-gray-500">
-              <span>Phí vận chuyển</span>
-              {Number(order.shippingFee) === 0 ? (
-                <span className="text-[#22c55e]">Miễn phí</span>
-              ) : (
+            {Number(order.shippingFee) > 0 && (
+              <div className="flex justify-between text-gray-500">
+                <span>Phí vận chuyển</span>
                 <span>{formatCurrency(Number(order.shippingFee))}</span>
-              )}
-            </div>
+              </div>
+            )}
             {Number(order.discount) > 0 && (
               <div className="flex justify-between text-green-600">
                 <span>Giảm giá</span>
