@@ -10,6 +10,15 @@ interface CartState {
   addItem: (item: CartItem) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
+  syncItems: (
+    updates: {
+      id: string;
+      stock?: number;
+      price?: number;
+      salePrice?: number | null;
+      status?: string;
+    }[]
+  ) => void;
   clearCart: () => void;
   openCart: () => void;
   closeCart: () => void;
@@ -30,10 +39,24 @@ export const useCartStore = create<CartState>()(
         set((state) => {
           const existing = state.items.find((i) => i.id === newItem.id);
           if (existing) {
+            const maxStock = newItem.product?.stock;
+            const targetQty = existing.quantity + newItem.quantity;
+            const finalQty =
+              maxStock != null && maxStock > 0
+                ? Math.min(targetQty, maxStock)
+                : targetQty;
             return {
               items: state.items.map((i) =>
                 i.id === newItem.id
-                  ? { ...i, quantity: i.quantity + newItem.quantity }
+                  ? {
+                      ...i,
+                      quantity: finalQty,
+                      product: {
+                        ...i.product,
+                        ...newItem.product,
+                        stock: newItem.product?.stock ?? i.product.stock,
+                      },
+                    }
                   : i
               ),
             };
@@ -44,7 +67,7 @@ export const useCartStore = create<CartState>()(
 
       removeItem: (id) => {
         set((state) => ({
-          items: state.items.filter((i) => i.id !== id),
+          items: state.items.filter((i) => i.id !== id && i.productId !== id),
         }));
       },
 
@@ -54,9 +77,50 @@ export const useCartStore = create<CartState>()(
           return;
         }
         set((state) => ({
-          items: state.items.map((i) =>
-            i.id === id ? { ...i, quantity } : i
-          ),
+          items: state.items.map((i) => {
+            if (i.id === id || i.productId === id) {
+              const maxStock = i.product?.stock;
+              const clamped =
+                maxStock != null && maxStock > 0
+                  ? Math.min(quantity, maxStock)
+                  : quantity;
+              return { ...i, quantity: clamped };
+            }
+            return i;
+          }),
+        }));
+      },
+
+      syncItems: (updates) => {
+        set((state) => ({
+          items: state.items
+            .filter((item) => {
+              const match = updates.find((u) => u.id === item.productId);
+              if (match && match.status && match.status !== "ACTIVE") return false;
+              return true;
+            })
+            .map((item) => {
+              const match = updates.find((u) => u.id === item.productId);
+              if (!match) return item;
+              const newStock =
+                match.stock !== undefined ? match.stock : item.product.stock;
+              const clampedQty =
+                newStock > 0 ? Math.min(item.quantity, newStock) : item.quantity;
+              return {
+                ...item,
+                quantity: clampedQty,
+                product: {
+                  ...item.product,
+                  stock: newStock,
+                  price:
+                    match.price !== undefined ? match.price : item.product.price,
+                  salePrice:
+                    match.salePrice !== undefined
+                      ? match.salePrice
+                      : item.product.salePrice,
+                },
+              };
+            }),
         }));
       },
 

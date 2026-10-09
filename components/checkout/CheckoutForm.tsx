@@ -19,10 +19,27 @@ import { AddressSelector } from "@/components/checkout/AddressSelector";
 
 export function CheckoutForm() {
   const router = useRouter();
-  const { items, clearCart } = useCart();
+  const { items, clearCart, removeItem, updateQuantity, syncItems } = useCart();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [invalidIds, setInvalidIds] = useState<string[]>([]);
+  type OutOfStockItem = { productId: string; name: string; requestedQty: number; availableStock: number };
+  const [outOfStockItems, setOutOfStockItems] = useState<OutOfStockItem[]>([]);
   const [locating, setLocating] = useState(false);
   const [locationLabel, setLocationLabel] = useState<string | null>(null);
+
+  // Sync cart items with DB on checkout page load
+  useEffect(() => {
+    if (items.length === 0) return;
+    const productIds = Array.from(new Set(items.map((i) => i.productId)));
+    axios
+      .post("/api/cart/validate", { productIds })
+      .then((res) => {
+        if (res.data?.success && Array.isArray(res.data?.data?.products)) {
+          syncItems(res.data.data.products);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   type PrefillAddress = { fullName: string; province: string; district: string; ward: string; street: string };
   const [prefillAddress, setPrefillAddress] = useState<PrefillAddress | null>(null);
@@ -101,6 +118,8 @@ export function CheckoutForm() {
 
   async function onSubmit(values: CheckoutFormValues) {
     setSubmitError(null);
+    setInvalidIds([]);
+    setOutOfStockItems([]);
     try {
       const cartItems = items.map((item) => ({
         productId: item.productId,
@@ -123,7 +142,17 @@ export function CheckoutForm() {
       }
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
-        setSubmitError(err.response?.data?.error ?? "Có lỗi xảy ra, vui lòng thử lại.");
+        const errorData = err.response?.data;
+        const msg = errorData?.error ?? "Có lỗi xảy ra, vui lòng thử lại.";
+        setSubmitError(msg);
+        const invIds = errorData?.details?.invalidProductIds;
+        if (Array.isArray(invIds) && invIds.length > 0) {
+          setInvalidIds(invIds);
+        }
+        const oos = errorData?.details?.outOfStockItems;
+        if (Array.isArray(oos) && oos.length > 0) {
+          setOutOfStockItems(oos);
+        }
       } else {
         setSubmitError("Có lỗi xảy ra, vui lòng thử lại.");
       }
@@ -347,8 +376,58 @@ export function CheckoutForm() {
 
       {/* Error */}
       {submitError && (
-        <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600">
-          {submitError}
+        <div className="rounded-xl bg-red-50 border border-red-200 p-4 space-y-3 text-sm text-red-600">
+          <p className="font-medium">{submitError}</p>
+
+          {invalidIds.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                invalidIds.forEach((id) => removeItem(id));
+                setInvalidIds([]);
+                setSubmitError(null);
+              }}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-600 text-white text-xs font-semibold hover:bg-red-700 transition-colors shadow-sm"
+            >
+              Xóa các món không khả dụng khỏi giỏ hàng
+            </button>
+          )}
+
+          {outOfStockItems.length > 0 && (
+            <div className="pt-2 border-t border-red-200/80 space-y-2">
+              <p className="text-xs text-red-700 font-medium">Hỗ trợ xử lý nhanh:</p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    outOfStockItems.forEach((item) => {
+                      if (item.availableStock > 0) {
+                        updateQuantity(item.productId, item.availableStock);
+                      } else {
+                        removeItem(item.productId);
+                      }
+                    });
+                    setOutOfStockItems([]);
+                    setSubmitError(null);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#16a34a] text-white text-xs font-semibold hover:bg-green-700 transition-colors shadow-sm"
+                >
+                  Tự động điều chỉnh giỏ hàng theo tồn kho thực tế
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    outOfStockItems.forEach((item) => removeItem(item.productId));
+                    setOutOfStockItems([]);
+                    setSubmitError(null);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-gray-300 text-gray-700 text-xs font-semibold hover:bg-gray-50 transition-colors"
+                >
+                  Xóa các món này khỏi giỏ hàng
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

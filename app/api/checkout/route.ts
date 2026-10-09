@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest } from "next/server";
+import { revalidateTag } from "next/cache";
 import { db } from "@/lib/db";
 import { createdResponse } from "@/lib/api-response";
 import { handleApiError, AppError } from "@/lib/api-error";
@@ -62,13 +63,48 @@ export async function POST(req: NextRequest) {
     });
 
     if (products.length !== cartItems.length) {
-      throw new AppError("Một hoặc nhiều sản phẩm không tồn tại hoặc đã ngừng bán", 400);
+      const activeIds = new Set(products.map((p) => p.id));
+      const invalidProductIds = cartItems
+        .filter((ci) => !activeIds.has(ci.productId))
+        .map((ci) => ci.productId);
+
+      throw new AppError(
+        "Một hoặc nhiều sản phẩm không tồn tại hoặc đã ngừng bán",
+        400,
+        "INVALID_PRODUCTS",
+        { invalidProductIds }
+      );
     }
+
+    const outOfStockItems: {
+      productId: string;
+      name: string;
+      requestedQty: number;
+      availableStock: number;
+    }[] = [];
 
     for (const ci of cartItems) {
       const p = products.find((x) => x.id === ci.productId)!;
-      if (p.stock < ci.quantity)
-        throw new AppError(`"${p.name}" không đủ hàng (còn ${p.stock})`, 400);
+      if (p.stock < ci.quantity) {
+        outOfStockItems.push({
+          productId: p.id,
+          name: p.name,
+          requestedQty: ci.quantity,
+          availableStock: p.stock,
+        });
+      }
+    }
+
+    if (outOfStockItems.length > 0) {
+      const first = outOfStockItems[0];
+      const msg =
+        outOfStockItems.length === 1
+          ? first.availableStock === 0
+            ? `"${first.name}" hiện đã tạm hết hàng`
+            : `"${first.name}" không đủ số lượng (bạn đặt ${first.requestedQty}, trong kho chỉ còn ${first.availableStock})`
+          : `Có ${outOfStockItems.length} sản phẩm trong giỏ không đủ số lượng tồn kho`;
+
+      throw new AppError(msg, 400, "OUT_OF_STOCK", { outOfStockItems });
     }
 
     const getCartItemPrice = (productId: string, weightOption?: string | null) => {
@@ -195,6 +231,12 @@ export async function POST(req: NextRequest) {
 
       return order;
     });
+
+    try {
+      revalidateTag("products");
+    } catch {
+      // ignore
+    }
 
     return createdResponse(
       { orderId: result.id, orderNumber: result.orderNumber, phone, total, paymentMethod },

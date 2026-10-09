@@ -50,14 +50,17 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
   const inCart = isInCart(product.id, selectedOption?.name);
   const cartQty = getItemQuantity(product.id, selectedOption?.name);
+  const remainingStock = product.stock > 0 ? Math.max(0, product.stock - cartQty) : 0;
 
   function handleAddToCart() {
+    if (remainingStock <= 0) return;
     const optionName = selectedOption?.name;
     const cartItemId = optionName ? `cart-${product.id}-${optionName}` : `cart-${product.id}-standard`;
+    const finalAddQty = Math.min(qty, remainingStock);
     const cartItem: CartItem = {
       id: cartItemId,
       productId: product.id,
-      quantity: qty,
+      quantity: finalAddQty,
       weightOption: optionName,
       product: {
         id: product.id,
@@ -75,7 +78,9 @@ export function ProductInfo({ product }: ProductInfoProps) {
   }
 
   function handleBuyNow() {
-    handleAddToCart();
+    if (remainingStock > 0) {
+      handleAddToCart();
+    }
     openCart();
   }
 
@@ -107,7 +112,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
           </Badge>
         )}
         {product.stock === 0 && (
-          <Badge variant="outline" className="text-red-500 border-red-200 rounded-lg px-2.5 py-1">
+          <Badge className="bg-red-600 text-white hover:bg-red-600 rounded-lg px-2.5 py-1 font-bold shadow-sm">
             Hết hàng
           </Badge>
         )}
@@ -254,18 +259,18 @@ export function ProductInfo({ product }: ProductInfoProps) {
             <div className="flex items-center rounded-xl border border-gray-200 overflow-hidden">
               <button
                 onClick={() => setQty((q) => Math.max(1, q - 1))}
-                disabled={qty <= 1}
+                disabled={qty <= 1 || remainingStock <= 0}
                 className="flex h-10 w-10 items-center justify-center text-gray-500 hover:bg-gray-100 disabled:opacity-40 transition-colors"
                 aria-label="Giảm"
               >
                 <Minus className="h-4 w-4" />
               </button>
               <span className="w-12 text-center text-base font-semibold select-none">
-                {qty}
+                {remainingStock <= 0 ? 0 : qty}
               </span>
               <button
-                onClick={() => setQty((q) => Math.min(product.stock, q + 1))}
-                disabled={qty >= product.stock}
+                onClick={() => setQty((q) => Math.min(remainingStock, q + 1))}
+                disabled={remainingStock <= 0 || qty >= remainingStock}
                 className="flex h-10 w-10 items-center justify-center text-gray-500 hover:bg-gray-100 disabled:opacity-40 transition-colors"
                 aria-label="Tăng"
               >
@@ -274,7 +279,9 @@ export function ProductInfo({ product }: ProductInfoProps) {
             </div>
             {inCart && (
               <span className="text-xs text-green-600 font-medium">
-                Đã có {cartQty} trong giỏ
+                {remainingStock <= 0
+                  ? `Đã có tối đa ${cartQty} trong giỏ`
+                  : `Đã có ${cartQty} trong giỏ (thêm tối đa ${remainingStock})`}
               </span>
             )}
           </div>
@@ -282,17 +289,22 @@ export function ProductInfo({ product }: ProductInfoProps) {
           <div className="flex gap-3 min-w-0">
             <Button
               onClick={handleAddToCart}
+              disabled={remainingStock <= 0}
               variant="outline"
               size="lg"
               className={cn(
                 "flex-1 min-w-0 h-12 rounded-2xl font-semibold transition-all",
-                justAdded
+                remainingStock <= 0
+                  ? "border-gray-200 text-gray-400 bg-gray-50 cursor-not-allowed"
+                  : justAdded
                   ? "border-green-500 text-green-600 bg-green-50"
                   : "border-[#22c55e] text-[#22c55e] hover:bg-green-50"
               )}
             >
               <AnimatePresence mode="wait">
-                {justAdded ? (
+                {remainingStock <= 0 ? (
+                  <span>Đã có đủ {cartQty} trong giỏ</span>
+                ) : justAdded ? (
                   <motion.span
                     key="added"
                     initial={{ opacity: 0, y: -4 }}
@@ -320,10 +332,33 @@ export function ProductInfo({ product }: ProductInfoProps) {
               className="flex-1 min-w-0 h-12 rounded-2xl bg-[#16a34a] hover:bg-[#16a34a] font-semibold shadow-md shadow-green-200"
             >
               <Zap className="h-4 w-4 mr-2" />
-              Mua ngay
+              {remainingStock <= 0 ? "Xem giỏ hàng" : "Mua ngay"}
             </Button>
           </div>
 
+          <WishlistButton
+            productId={product.id}
+            size="lg"
+            className="w-full h-10 rounded-2xl border border-gray-200 hover:border-red-200 hover:bg-red-50 bg-white"
+          />
+        </div>
+      )}
+
+      {/* Out of stock box */}
+      {product.stock === 0 && (
+        <div className="space-y-3">
+          <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4 text-center space-y-1">
+            <p className="font-semibold text-amber-800 text-sm">Sản phẩm hiện đã hết hàng trong ngày</p>
+            <p className="text-xs text-amber-600">
+              Shop đã bán hết số lượng hôm nay. Vui lòng quay lại hoặc chọn sản phẩm tương tự.
+            </p>
+          </div>
+          <Button
+            disabled
+            className="w-full h-12 rounded-2xl bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed font-semibold text-base shadow-none hover:bg-gray-100"
+          >
+            Tạm hết hàng
+          </Button>
           <WishlistButton
             productId={product.id}
             size="lg"

@@ -6,7 +6,8 @@ export class AppError extends Error {
   constructor(
     public message: string,
     public statusCode: number = 400,
-    public code?: string
+    public code?: string,
+    public details?: any
   ) {
     super(message);
     this.name = "AppError";
@@ -42,7 +43,7 @@ export function handleApiError(error: unknown): NextResponse<ApiResponse> {
 
   if (error instanceof AppError) {
     return NextResponse.json(
-      { success: false, error: error.message, code: error.code },
+      { success: false, error: error.message, code: error.code, details: error.details },
       { status: error.statusCode }
     );
   }

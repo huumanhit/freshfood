@@ -84,7 +84,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
             <button
               onClick={() => updateQuantity(item.id, item.quantity + 1)}
               className="px-2.5 py-1.5 text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-40"
-              disabled={item.quantity >= item.product.stock}
+              disabled={item.product.stock > 0 && item.quantity >= item.product.stock}
             >
               <Plus className="h-3.5 w-3.5" />
             </button>
@@ -95,9 +95,29 @@ export function CartItemRow({ item }: CartItemRowProps) {
           </span>
         </div>
 
-        {item.product.stock <= 5 && item.product.stock > 0 && (
-          <p className="text-xs text-orange-500">Chỉ còn {item.product.stock} sản phẩm</p>
-        )}
+        {item.product.stock === 0 ? (
+          <div className="flex items-center justify-between text-xs text-red-600 bg-red-50 rounded-lg px-2.5 py-1 mt-1">
+            <span className="font-medium">Sản phẩm hiện đã hết hàng</span>
+            <button
+              type="button"
+              onClick={() => removeItem(item.id)}
+              className="text-red-700 underline font-semibold hover:text-red-900 ml-2"
+            >
+              Xóa món này
+            </button>
+          </div>
+        ) : item.product.stock > 0 && item.quantity > item.product.stock ? (
+          <div className="flex items-center justify-between text-xs text-amber-700 bg-amber-50 rounded-lg px-2.5 py-1 mt-1">
+            <span className="font-medium">Kho chỉ còn {item.product.stock} {item.product.unit}</span>
+            <button
+              type="button"
+              onClick={() => updateQuantity(item.id, item.product.stock)}
+              className="text-amber-800 underline font-semibold hover:text-amber-950 ml-2"
+            >
+              Chỉnh về {item.product.stock}
+            </button>
+          </div>
+        ) : null}
       </div>
     </motion.div>
   );

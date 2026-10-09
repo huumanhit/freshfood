@@ -76,7 +76,10 @@ export function ProductCard({ product, className }: ProductCardProps) {
             alt={primaryImage.alt ?? product.name}
             width={400}
             height={400}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+            className={cn(
+              "h-full w-full object-cover transition-transform duration-500 group-hover:scale-110",
+              product.stock <= 0 && "grayscale opacity-75"
+            )}
             unoptimized
             onError={() => setImgError(true)}
           />
@@ -87,27 +90,41 @@ export function ProductCard({ product, className }: ProductCardProps) {
           </div>
         )}
 
+        {/* Out of stock overlay */}
+        {product.stock <= 0 && (
+          <div className="absolute inset-0 bg-black/35 flex items-center justify-center pointer-events-none z-10">
+            <span className="bg-red-600/90 text-white text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-md">
+              Tạm hết hàng
+            </span>
+          </div>
+        )}
+
         {/* Gradient overlay on hover */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
         {/* Badges */}
-        <div className="absolute top-2 left-2 flex flex-col gap-1">
-          {product.isFeatured && !hasDiscount && (
+        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+          {product.stock <= 0 && (
+            <Badge className="bg-red-600 text-white text-[11px] px-2 py-0.5 rounded-lg font-bold shadow-sm">
+              Hết hàng
+            </Badge>
+          )}
+          {product.stock > 0 && product.isFeatured && !hasDiscount && (
             <Badge className="bg-red-500 text-[11px] px-2 py-0.5 rounded-lg hover:bg-red-600 font-bold tracking-wide">
               HOT
             </Badge>
           )}
-          {hasDiscount && (
+          {product.stock > 0 && hasDiscount && (
             <Badge variant="destructive" className="text-[11px] px-2 py-0.5 rounded-lg">
               -{discountPct}%
             </Badge>
           )}
-          {product.isOrganic && (
+          {product.stock > 0 && product.isOrganic && (
             <Badge className="bg-[#16a34a] text-[11px] px-2 py-0.5 rounded-lg hover:bg-[#16a34a]">
               Organic
             </Badge>
           )}
-          {product.isCore && (
+          {product.stock > 0 && product.isCore && (
             <Badge className="bg-blue-600 text-[11px] px-2 py-0.5 rounded-lg hover:bg-blue-700">
               Lõi
             </Badge>
@@ -165,71 +182,77 @@ export function ProductCard({ product, className }: ProductCardProps) {
         </div>
 
         {/* Add to cart / quantity control */}
-        <AnimatePresence mode="wait">
-          {inCart ? (
-            <motion.div
-              key="qty"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.15 }}
-              className="flex items-center justify-between rounded-xl border border-[#22c55e] overflow-hidden h-9"
-            >
-              <button
-                onClick={handleDecrease}
-                className="flex-1 flex items-center justify-center h-full text-[#22c55e] hover:bg-green-50 transition-colors"
-                aria-label="Giảm số lượng"
+        {product.stock <= 0 ? (
+          <Button
+            disabled
+            className="w-full h-9 text-xs rounded-xl font-medium bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed hover:bg-gray-100 shadow-none"
+          >
+            Hết hàng
+          </Button>
+        ) : (
+          <AnimatePresence mode="wait">
+            {inCart ? (
+              <motion.div
+                key="qty"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.15 }}
+                className="flex items-center justify-between rounded-xl border border-[#22c55e] overflow-hidden h-9"
               >
-                <Minus className="h-3.5 w-3.5" />
-              </button>
-              <span className="px-3 text-sm font-semibold text-gray-800 select-none min-w-[32px] text-center">
-                {qty}
-              </span>
-              <button
-                onClick={() => updateQuantity(cartItemId, qty + 1)}
-                className="flex-1 flex items-center justify-center h-full text-[#22c55e] hover:bg-green-50 transition-colors"
-                aria-label="Tăng số lượng"
-                disabled={qty >= product.stock}
+                <button
+                  onClick={handleDecrease}
+                  className="flex-1 flex items-center justify-center h-full text-[#22c55e] hover:bg-green-50 transition-colors"
+                  aria-label="Giảm số lượng"
+                >
+                  <Minus className="h-3.5 w-3.5" />
+                </button>
+                <span className="px-3 text-sm font-semibold text-gray-800 select-none min-w-[32px] text-center">
+                  {qty}
+                </span>
+                <button
+                  onClick={() => updateQuantity(cartItemId, qty + 1)}
+                  className="flex-1 flex items-center justify-center h-full text-[#22c55e] hover:bg-green-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  aria-label="Tăng số lượng"
+                  disabled={qty >= product.stock}
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                </button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="add"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.15 }}
               >
-                <Plus className="h-3.5 w-3.5" />
-              </button>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="add"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.15 }}
-            >
-              <Button
-                className={cn(
-                  "w-full h-9 text-xs rounded-xl font-medium transition-all duration-200",
-                  justAdded
-                    ? "bg-green-600 text-white"
-                    : "bg-[#16a34a] hover:bg-[#16a34a] text-white shadow-sm hover:shadow-md"
-                )}
-                disabled={product.stock === 0}
-                onClick={handleAddToCart}
-                aria-label={`Thêm ${product.name} vào giỏ hàng`}
-              >
-                {product.stock === 0 ? (
-                  "Hết hàng"
-                ) : justAdded ? (
-                  <>
-                    <Check className="h-3.5 w-3.5 mr-1" />
-                    Đã thêm!
-                  </>
-                ) : (
-                  <>
-                    <ShoppingCart className="h-3.5 w-3.5 mr-1" />
-                    Thêm vào giỏ
-                  </>
-                )}
-              </Button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                <Button
+                  className={cn(
+                    "w-full h-9 text-xs rounded-xl font-medium transition-all duration-200",
+                    justAdded
+                      ? "bg-green-600 text-white"
+                      : "bg-[#16a34a] hover:bg-[#16a34a] text-white shadow-sm hover:shadow-md"
+                  )}
+                  onClick={handleAddToCart}
+                  aria-label={`Thêm ${product.name} vào giỏ hàng`}
+                >
+                  {justAdded ? (
+                    <>
+                      <Check className="h-3.5 w-3.5 mr-1" />
+                      Đã thêm!
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="h-3.5 w-3.5 mr-1" />
+                      Thêm vào giỏ
+                    </>
+                  )}
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
         </div>
       </div>
     </motion.div>

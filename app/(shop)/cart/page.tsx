@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
+import axios from "axios";
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { CartItemList } from "@/components/cart/CartItemRow";
@@ -10,7 +12,20 @@ import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
 
 export default function CartPage() {
-  const { items, clearCart, itemCount } = useCart();
+  const { items, clearCart, itemCount, syncItems } = useCart();
+
+  useEffect(() => {
+    if (items.length === 0) return;
+    const productIds = Array.from(new Set(items.map((i) => i.productId)));
+    axios
+      .post("/api/cart/validate", { productIds })
+      .then((res) => {
+        if (res.data?.success && Array.isArray(res.data?.data?.products)) {
+          syncItems(res.data.data.products);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="bg-white min-h-screen">

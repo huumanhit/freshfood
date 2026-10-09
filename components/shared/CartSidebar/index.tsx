@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import axios from "axios";
 import { X, ShoppingBag, Minus, Plus, ArrowRight, PackageOpen } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/hooks/use-cart";
@@ -19,11 +21,25 @@ export function CartSidebar() {
     closeCart,
     removeItem,
     updateQuantity,
+    syncItems,
     subtotal,
     shippingFee,
     total,
     itemCount,
   } = useCart();
+
+  useEffect(() => {
+    if (!isOpen || items.length === 0) return;
+    const productIds = Array.from(new Set(items.map((i) => i.productId)));
+    axios
+      .post("/api/cart/validate", { productIds })
+      .then((res) => {
+        if (res.data?.success && Array.isArray(res.data?.data?.products)) {
+          syncItems(res.data.data.products);
+        }
+      })
+      .catch(() => {});
+  }, [isOpen]);
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && closeCart()}>
@@ -133,13 +149,23 @@ export function CartSidebar() {
                                 onClick={() =>
                                   updateQuantity(item.id, item.quantity + 1)
                                 }
-                                className="flex h-7 w-7 items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors"
+                                className="flex h-7 w-7 items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                                 aria-label="Tăng"
-                                disabled={item.quantity >= item.product.stock}
+                                disabled={item.product.stock > 0 && item.quantity >= item.product.stock}
                               >
                                 <Plus className="h-3 w-3" />
                               </button>
                             </div>
+                            {item.product.stock > 0 && item.quantity >= item.product.stock && (
+                              <span className="text-[11px] text-amber-600 font-medium whitespace-nowrap">
+                                Tối đa ({item.product.stock})
+                              </span>
+                            )}
+                            {item.product.stock === 0 && (
+                              <span className="text-[11px] text-red-500 font-medium whitespace-nowrap">
+                                Hết hàng
+                              </span>
+                            )}
                           </div>
                         </div>
 
@@ -164,7 +190,7 @@ export function CartSidebar() {
             </ScrollArea>
 
             {/* Footer */}
-            <div className="px-5 py-4 border-t border-gray-100 space-y-4 bg-white">
+            <div className="px-5 py-4 border-t border-gray-100 space-y-3 bg-white">
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between text-gray-500">
                   <span>Tạm tính ({itemCount} sản phẩm)</span>
@@ -184,14 +210,25 @@ export function CartSidebar() {
                 </div>
               </div>
 
+              {items.some((i) => i.product.stock === 0) && (
+                <div className="rounded-lg bg-red-50 border border-red-200 p-2 text-xs text-red-600 font-medium text-center">
+                  Có món đã hết hàng trong kho. Vui lòng bấm ✕ xóa để thanh toán.
+                </div>
+              )}
+
               <Button
-                className="w-full h-11 bg-[#16a34a] hover:bg-[#16a34a] rounded-xl font-semibold text-base shadow-md shadow-green-200"
-                asChild
+                className="w-full h-11 bg-[#16a34a] hover:bg-[#16a34a] rounded-xl font-semibold text-base shadow-md shadow-green-200 disabled:opacity-50"
+                asChild={!items.some((i) => i.product.stock === 0)}
+                disabled={items.some((i) => i.product.stock === 0)}
                 onClick={closeCart}
               >
-                <Link href={ROUTES.CHECKOUT}>
-                  Thanh toán ngay <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
+                {items.some((i) => i.product.stock === 0) ? (
+                  <span>Giỏ có sản phẩm hết hàng</span>
+                ) : (
+                  <Link href={ROUTES.CHECKOUT}>
+                    Thanh toán ngay <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                )}
               </Button>
               <Button
                 variant="outline"
