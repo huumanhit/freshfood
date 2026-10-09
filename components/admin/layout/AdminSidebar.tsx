@@ -16,12 +16,12 @@ export const NAV_ITEMS = [
   { href: "/admin/products", label: "Sản phẩm", icon: Package },
   { href: "/admin/categories", label: "Danh mục", icon: Tag },
   { href: "/admin/orders", label: "Đơn hàng", icon: ShoppingBag, showPending: true },
-  { href: "/admin/delivery", label: "Giao hàng", icon: Truck },
+  { href: "/admin/delivery", label: "Giao hàng", icon: Truck, isPhase2: true },
   { href: "/admin/customers", label: "Khách hàng", icon: Users },
-  { href: "/admin/referrals", label: "Giới thiệu", icon: Gift },
-  { href: "/admin/merge-orders", label: "Gộp đơn", icon: GitMerge },
-  { href: "/admin/shopping-list", label: "Mua hàng", icon: ShoppingCart },
-  { href: "/admin/traceability", label: "Truy xuất", icon: Layers },
+  { href: "/admin/referrals", label: "Giới thiệu", icon: Gift, isPhase2: true },
+  { href: "/admin/merge-orders", label: "Gộp đơn", icon: GitMerge, isPhase2: true },
+  { href: "/admin/shopping-list", label: "Mua hàng", icon: ShoppingCart, isPhase2: true },
+  { href: "/admin/traceability", label: "Truy xuất", icon: Layers, isPhase2: true },
   { href: "/admin/settings", label: "Cài đặt", icon: Settings },
 ];
 
@@ -36,7 +36,7 @@ export function SidebarNav({ pendingCount, onNavigate }: SidebarNavProps) {
   const pathname = usePathname();
   return (
     <nav className="flex-1 px-3 py-4 space-y-0.5">
-      {NAV_ITEMS.map(({ href, label, icon: Icon, showPending }) => {
+      {NAV_ITEMS.map(({ href, label, icon: Icon, showPending, isPhase2 }) => {
         const active = pathname === href || pathname.startsWith(href + "/");
         const badge = showPending && pendingCount > 0 ? pendingCount : null;
         return (
@@ -54,6 +54,11 @@ export function SidebarNav({ pendingCount, onNavigate }: SidebarNavProps) {
           >
             <Icon className={cn("h-4 w-4 shrink-0", active ? "text-[#22c55e]" : "text-gray-400")} />
             <span className="flex-1">{label}</span>
+            {isPhase2 && (
+              <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
+                Phase 2
+              </span>
+            )}
             {badge && (
               <span className="inline-flex items-center justify-center h-5 min-w-5 rounded-full bg-red-500 text-white text-[10px] font-bold px-1">
                 {badge > 99 ? "99+" : badge}
