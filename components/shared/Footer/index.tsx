@@ -1,17 +1,41 @@
 import Link from "next/link";
 import { Phone, Mail, MapPin } from "lucide-react";
 import Image from "next/image";
+import { unstable_cache } from "next/cache";
+import { db } from "@/lib/db";
 import { APP_CONFIG } from "@/constants/config";
 import { ROUTES } from "@/constants/routes";
 
-const PRODUCT_LINKS = [
-  { label: "Rau củ quả", href: ROUTES.CATEGORY("rau-cu") },
-  { label: "Thịt heo", href: ROUTES.CATEGORY("thit-heo") },
-  { label: "Thịt bò", href: ROUTES.CATEGORY("thit-bo") },
-  { label: "Hải sản", href: ROUTES.CATEGORY("hai-san") },
-  { label: "Thịt gà", href: ROUTES.CATEGORY("thit-ga") },
-  { label: "Đồ chế biến", href: ROUTES.CATEGORY("do-che-bien") },
+const FALLBACK_CATEGORIES = [
+  { id: "rau-xanh", name: "Rau xanh", slug: "rau-xanh" },
+  { id: "cu-qua", name: "Củ quả", slug: "cu-qua" },
+  { id: "thit-heo", name: "Thịt heo", slug: "thit-heo" },
+  { id: "thit-bo", name: "Thịt bò", slug: "thit-bo" },
+  { id: "ca-hai-san", name: "Cá & Hải sản", slug: "ca-hai-san" },
+  { id: "dau-hat-tuoi", name: "Đậu/Hạt tươi", slug: "dau-hat-tuoi" },
 ];
+
+const getFooterCategories = unstable_cache(
+  async () => {
+    try {
+      const data = await db.category.findMany({
+        where: { isActive: true, parentId: null },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+        orderBy: { sortOrder: "asc" },
+        take: 8,
+      });
+      return data.length > 0 ? data : FALLBACK_CATEGORIES;
+    } catch {
+      return FALLBACK_CATEGORIES;
+    }
+  },
+  ["footer-categories"],
+  { revalidate: 300, tags: ["categories"] }
+);
 
 const SUPPORT_LINKS = [
   { label: "Chính sách bảo mật", href: "/chinh-sach-bao-mat" },
@@ -27,7 +51,9 @@ const ACCOUNT_LINKS = [
   { label: "Hồ sơ cá nhân", href: ROUTES.PROFILE },
 ];
 
-export function Footer() {
+export async function Footer() {
+  const categories = await getFooterCategories();
+
   return (
     <footer className="bg-green-50 text-gray-600 border-t border-green-100">
       {/* Main grid */}
@@ -62,10 +88,13 @@ export function Footer() {
         <div className="space-y-4">
           <p className="font-semibold text-sm text-gray-900">Danh mục sản phẩm</p>
           <ul className="space-y-2.5">
-            {PRODUCT_LINKS.map((link) => (
-              <li key={link.href}>
-                <Link href={link.href} className="text-sm text-gray-500 hover:text-[#16a34a] transition-colors">
-                  {link.label}
+            {categories.map((cat) => (
+              <li key={cat.id}>
+                <Link
+                  href={ROUTES.CATEGORY(cat.slug)}
+                  className="text-sm text-gray-500 hover:text-[#16a34a] transition-colors"
+                >
+                  {cat.name}
                 </Link>
               </li>
             ))}

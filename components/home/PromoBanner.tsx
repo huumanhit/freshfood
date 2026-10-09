@@ -41,21 +41,16 @@ export function PromoBanner() {
             </div>
 
             {/* Right: highlights */}
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row items-center gap-4">
               <div className="rounded-2xl bg-white/15 backdrop-blur-sm p-4 text-center min-w-[120px]">
                 <Clock className="h-6 w-6 text-green-200 mx-auto mb-1" />
                 <p className="text-2xl font-bold text-white">Ngày mai</p>
                 <p className="text-xs text-green-200">Nhận hàng</p>
               </div>
-              <div className="rounded-2xl bg-white/15 backdrop-blur-sm p-4 text-center min-w-[120px]">
-                <Tag className="h-6 w-6 text-green-200 mx-auto mb-1" />
-                <p className="text-2xl font-bold text-white">-20%</p>
-                <p className="text-xs text-green-200">Đơn đầu tiên</p>
-              </div>
 
               <Link
                 href={ROUTES.PRODUCTS}
-                className="self-center inline-flex items-center gap-2 rounded-2xl bg-white text-[#15803d] font-semibold px-6 py-3 text-sm hover:bg-green-50 transition-colors shadow-lg whitespace-nowrap"
+                className="inline-flex items-center gap-2 rounded-2xl bg-white text-[#15803d] font-semibold px-6 py-3 text-sm hover:bg-green-50 transition-colors shadow-lg whitespace-nowrap"
               >
                 Mua ngay <ArrowRight className="h-4 w-4" />
               </Link>
