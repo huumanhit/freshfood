@@ -18,9 +18,9 @@ import { useToast } from "@/hooks/use-toast";
 
 const STATUS_TRANSITIONS: Record<string, OrderStatus[]> = {
   PENDING: ["CONFIRMED", "CANCELLED"],
-  CONFIRMED: ["PROCESSING", "CANCELLED"],
+  CONFIRMED: ["PROCESSING", "SHIPPED", "CANCELLED"],
   PROCESSING: ["SHIPPED", "CANCELLED"],
-  SHIPPED: ["DELIVERED", "CANCELLED"],
+  SHIPPED: ["DELIVERED", "CANCELLED", "FAILED"],
   DELIVERED: [],
   CANCELLED: [],
   REFUNDED: [],
@@ -30,7 +30,7 @@ const STATUS_TRANSITIONS: Record<string, OrderStatus[]> = {
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "Chờ xác nhận",
   CONFIRMED: "Đã xác nhận",
-  PROCESSING: "Đang xử lý",
+  PROCESSING: "Đang soạn hàng",
   SHIPPED: "Đang giao hàng",
   DELIVERED: "Đã giao hàng",
   CANCELLED: "Đã hủy",

@@ -83,8 +83,9 @@ async function fetchInitialProducts(sp: ProductsPageProps["searchParams"]): Prom
       status: "ACTIVE" as const,
       ...(sp.search && {
         OR: [
-          { name: { contains: sp.search, mode: "insensitive" as const } },
-          { description: { contains: sp.search, mode: "insensitive" as const } },
+          { name: { contains: sp.search.trim(), mode: "insensitive" as const } },
+          { category: { name: { contains: sp.search.trim(), mode: "insensitive" as const } } },
+          { tags: { contains: sp.search.trim(), mode: "insensitive" as const } },
         ],
       }),
       ...(sp.categorySlug && sp.categorySlug !== "all" && { category: { slug: sp.categorySlug.trim(), isActive: true } }),

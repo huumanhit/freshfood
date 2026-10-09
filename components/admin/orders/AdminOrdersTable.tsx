@@ -19,7 +19,7 @@ const STATUS_OPTIONS: { value: string; label: string }[] = [
   { value: "all", label: "Tất cả" },
   { value: "PENDING", label: "Chờ xác nhận" },
   { value: "CONFIRMED", label: "Đã xác nhận" },
-  { value: "PROCESSING", label: "Đang xử lý" },
+  { value: "PROCESSING", label: "Đang soạn hàng" },
   { value: "SHIPPED", label: "Đang giao" },
   { value: "DELIVERED", label: "Đã giao" },
   { value: "CANCELLED", label: "Đã hủy" },
@@ -46,7 +46,7 @@ interface OrderRow {
   isNewAddress: boolean;
   user: { name: string | null; email: string } | null;
   address: { phone: string; fullName: string; province: string } | null;
-  items: { id: string }[];
+  items: { id: string; productName?: string; quantity?: number; price?: number | string }[];
 }
 
 export function AdminOrdersTable() {
@@ -83,9 +83,45 @@ export function AdminOrdersTable() {
 
   const orders: OrderRow[] = data?.data ?? [];
   const pagination = data?.pagination;
+  const statusCounts: Record<string, number> = data?.statusCounts ?? {};
 
   return (
     <div className="space-y-4">
+      {/* Status Tabs */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-gray-100">
+        {STATUS_OPTIONS.map((opt) => {
+          const isActive = statusFilter === opt.value;
+          const count = statusCounts[opt.value] ?? (opt.value === "all" ? statusCounts.all : undefined);
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => { setStatusFilter(opt.value); setPage(1); }}
+              className={`inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-xl whitespace-nowrap transition-all ${
+                isActive
+                  ? "bg-[#22c55e] text-white shadow-sm font-semibold"
+                  : "bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 border border-gray-200/70"
+              }`}
+            >
+              <span>{opt.label}</span>
+              {count !== undefined && count > 0 && (
+                <span
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-semibold ${
+                    isActive
+                      ? "bg-white/25 text-white"
+                      : opt.value === "PENDING"
+                      ? "bg-amber-100 text-amber-800"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                >
+                  {count}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Filters */}
       <div className="flex flex-col gap-3">
         <div className="flex flex-col sm:flex-row gap-3">
@@ -99,17 +135,6 @@ export function AdminOrdersTable() {
             />
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            <Filter className="h-4 w-4 text-gray-400 shrink-0" />
-            <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-              <SelectTrigger className="w-40 rounded-xl">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {STATUS_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
             <button
               type="button"
               onClick={() => { setNewAddressOnly((v) => !v); setPage(1); }}
@@ -189,7 +214,7 @@ export function AdminOrdersTable() {
               <TableHead>Mã đơn</TableHead>
               <TableHead>Khách hàng</TableHead>
               <TableHead>SĐT</TableHead>
-              <TableHead className="text-center">Số SP</TableHead>
+              <TableHead className="text-center">Số lượng / SP</TableHead>
               <TableHead>Giao hàng</TableHead>
               <TableHead>Thanh toán</TableHead>
               <TableHead>Trạng thái</TableHead>
@@ -215,34 +240,46 @@ export function AdminOrdersTable() {
                   </TableCell>
                 </TableRow>
               )
-              : orders.map((order) => (
-                  <TableRow key={order.id} className="group">
-                    <TableCell>
-                      <Link
-                        href={ROUTES.ADMIN_ORDER_DETAIL(order.id)}
-                        className="font-mono text-xs font-semibold text-[#22c55e] hover:underline"
-                      >
-                        #{order.orderNumber}
-                      </Link>
-                      {order.isNewAddress && (
-                        <div className="flex items-center gap-1 mt-1 text-amber-600">
-                          <TriangleAlert className="h-3 w-3 shrink-0" />
-                          <span className="text-[10px] font-medium">Địa chỉ mới</span>
+              : orders.map((order) => {
+                  const totalQty = order.items.reduce((s, it) => s + (it.quantity ?? 1), 0);
+                  const tooltipText = order.items
+                    .map((it) => `${it.productName ?? "Sản phẩm"} × ${it.quantity ?? 1}`)
+                    .join("\n");
+                  return (
+                    <TableRow key={order.id} className="group">
+                      <TableCell>
+                        <Link
+                          href={ROUTES.ADMIN_ORDER_DETAIL(order.id)}
+                          className="font-mono text-xs font-semibold text-[#22c55e] hover:underline"
+                        >
+                          #{order.orderNumber}
+                        </Link>
+                        {order.isNewAddress && (
+                          <div className="flex items-center gap-1 mt-1 text-amber-600">
+                            <TriangleAlert className="h-3 w-3 shrink-0" />
+                            <span className="text-[10px] font-medium">Địa chỉ mới</span>
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <p className="text-sm font-medium text-gray-800">{order.user?.name ?? order.address?.fullName ?? "—"}</p>
+                          <p className="text-xs text-gray-400 truncate max-w-[160px]">{order.user?.email}</p>
                         </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <p className="text-sm font-medium text-gray-800">{order.user?.name ?? order.address?.fullName ?? "—"}</p>
-                        <p className="text-xs text-gray-400 truncate max-w-[160px]">{order.user?.email}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm text-gray-600">
-                      {order.address?.phone ?? "—"}
-                    </TableCell>
-                    <TableCell className="text-center text-sm text-gray-600">
-                      {order.items.length}
-                    </TableCell>
+                      </TableCell>
+                      <TableCell className="text-sm text-gray-600">
+                        {order.address?.phone ?? "—"}
+                      </TableCell>
+                      <TableCell className="text-center text-sm">
+                        <div className="inline-flex flex-col items-center cursor-help" title={tooltipText}>
+                          <span className="font-semibold text-gray-800">
+                            {totalQty} <span className="text-xs font-normal text-gray-500">món</span>
+                          </span>
+                          <span className="text-[11px] text-gray-400">
+                            ({order.items.length} loại SP)
+                          </span>
+                        </div>
+                      </TableCell>
                     <TableCell className="text-xs text-gray-500">
                       {order.deliveryDate ? (
                         <div className="space-y-0.5">
@@ -279,7 +316,8 @@ export function AdminOrdersTable() {
                       </Link>
                     </TableCell>
                   </TableRow>
-                ))}
+                );
+              })}
           </TableBody>
         </Table>
       </div>

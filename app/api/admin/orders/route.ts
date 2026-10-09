@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { paginatedResponse, createdResponse } from "@/lib/api-response";
@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
       }),
     };
 
-    const [total, orders] = await Promise.all([
+    const [total, orders, statusGroups] = await Promise.all([
       db.order.count({ where }),
       db.order.findMany({
         where,
@@ -57,13 +57,28 @@ export async function GET(req: NextRequest) {
         skip,
         take: limit,
       }),
+      db.order.groupBy({
+        by: ["status"],
+        _count: { id: true },
+      }),
     ]);
 
+    const statusCounts: Record<string, number> = { all: 0 };
+    for (const g of statusGroups) {
+      statusCounts[g.status] = g._count.id;
+      statusCounts.all += g._count.id;
+    }
+
     const totalPages = Math.ceil(total / limit);
-    return paginatedResponse(orders, {
-      page, limit, total, totalPages,
-      hasNext: page < totalPages,
-      hasPrev: page > 1,
+    return NextResponse.json({
+      success: true,
+      data: orders,
+      pagination: {
+        page, limit, total, totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+      statusCounts,
     });
   } catch (error) {
     return handleApiError(error);

@@ -72,9 +72,9 @@ export async function GET(req: NextRequest) {
       status: status ?? "ACTIVE",
       ...(search && {
         OR: [
-          { name: { contains: search, mode: "insensitive" } },
-          { description: { contains: search, mode: "insensitive" } },
-          { tags: { contains: search, mode: "insensitive" } },
+          { name: { contains: search.trim(), mode: "insensitive" } },
+          { category: { name: { contains: search.trim(), mode: "insensitive" } } },
+          { tags: { contains: search.trim(), mode: "insensitive" } },
         ],
       }),
       ...(categorySlug && categorySlug !== "all" && { category: { slug: categorySlug.trim(), isActive: true } }),
