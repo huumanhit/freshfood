@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
   ShoppingCart,
@@ -35,6 +35,7 @@ const NAV_LINKS = [
 
 export function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const { toggleMobileMenu, isMobileMenuOpen } = useUIStore();
   const { itemCount, toggleCart } = useCart();
   const { isAuthenticated, isAdmin, user } = useAuth();
@@ -66,13 +67,35 @@ export function Header() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`${ROUTES.PRODUCTS}?search=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchOpen(false);
-      setSearchQuery("");
+  // Sync searchQuery with URL query if present
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const sp = new URLSearchParams(window.location.search);
+      const s = sp.get("search");
+      if (s) {
+        setSearchQuery(s);
+      } else if (pathname !== ROUTES.PRODUCTS) {
+        setSearchQuery("");
+      }
     }
+  }, [pathname]);
+
+  function handleSearch(e?: React.FormEvent | React.KeyboardEvent) {
+    if (e) e.preventDefault();
+    const query = searchQuery.trim();
+    const targetUrl = query
+      ? `${ROUTES.PRODUCTS}?search=${encodeURIComponent(query)}`
+      : ROUTES.PRODUCTS;
+
+    if (pathname === ROUTES.PRODUCTS) {
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("product-search", { detail: query }));
+      }
+      router.replace(targetUrl, { scroll: false });
+    } else {
+      router.push(targetUrl);
+    }
+    setSearchOpen(false);
   }
 
   return (
@@ -112,23 +135,44 @@ export function Header() {
             onSubmit={handleSearch}
             className="hidden md:flex flex-1 max-w-sm items-center rounded-xl border border-gray-200 bg-gray-50 hover:border-green-300 focus-within:border-[#22c55e] focus-within:bg-white transition-all overflow-hidden h-9"
           >
-            <Search className="ml-3 h-4 w-4 text-gray-400 shrink-0" />
+            <button
+              type="submit"
+              className="pl-3 pr-1 py-1 text-gray-400 hover:text-[#16a34a] transition-colors focus:outline-none"
+              aria-label="Tìm kiếm"
+            >
+              <Search className="h-4 w-4 shrink-0" />
+            </button>
             <input
               type="text"
               placeholder="Tìm thực phẩm tươi..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 bg-transparent px-3 text-sm outline-none placeholder:text-gray-400"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleSearch(e);
+                }
+              }}
+              className="flex-1 bg-transparent px-2 text-sm outline-none placeholder:text-gray-400"
             />
             {searchQuery && (
               <button
                 type="button"
-                onClick={() => setSearchQuery("")}
+                onClick={() => {
+                  setSearchQuery("");
+                  if (pathname === ROUTES.PRODUCTS) {
+                    router.push(ROUTES.PRODUCTS);
+                    if (typeof window !== "undefined") {
+                      window.dispatchEvent(new CustomEvent("product-search", { detail: "" }));
+                    }
+                  }
+                }}
                 className="mr-2 text-gray-400 hover:text-gray-600"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
             )}
+            <button type="submit" className="hidden" tabIndex={-1} aria-hidden="true" />
           </form>
 
           {/* Spacer */}
@@ -303,20 +347,44 @@ export function Header() {
               className="md:hidden overflow-hidden border-t border-gray-100 bg-white px-4 py-3"
             >
               <form onSubmit={handleSearch} className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 h-10">
-                <Search className="h-4 w-4 text-gray-400 shrink-0" />
+                <button
+                  type="submit"
+                  className="p-1 text-gray-400 hover:text-[#16a34a] transition-colors focus:outline-none"
+                  aria-label="Tìm kiếm"
+                >
+                  <Search className="h-4 w-4 shrink-0" />
+                </button>
                 <input
                   ref={searchRef}
                   type="text"
                   placeholder="Tìm thực phẩm tươi..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleSearch(e);
+                    }
+                  }}
                   className="flex-1 bg-transparent text-sm outline-none placeholder:text-gray-400"
                 />
                 {searchQuery && (
-                  <button type="button" onClick={() => setSearchQuery("")}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery("");
+                      if (pathname === ROUTES.PRODUCTS) {
+                        router.push(ROUTES.PRODUCTS);
+                        if (typeof window !== "undefined") {
+                          window.dispatchEvent(new CustomEvent("product-search", { detail: "" }));
+                        }
+                      }
+                    }}
+                  >
                     <X className="h-4 w-4 text-gray-400" />
                   </button>
                 )}
+                <button type="submit" className="hidden" tabIndex={-1} aria-hidden="true" />
               </form>
             </motion.div>
           )}

@@ -7,6 +7,7 @@ import { paginatedResponse } from "@/lib/api-response";
 import { handleApiError } from "@/lib/api-error";
 import { productFilterSchema } from "@/lib/validations/product";
 import { Prisma } from "@prisma/client";
+import { buildProductSearchFilter } from "@/lib/search";
 
 const queryProducts = unstable_cache(
   async (
@@ -68,14 +69,12 @@ export async function GET(req: NextRequest) {
 
     const skip = (page - 1) * limit;
 
+    const searchFilters = search ? buildProductSearchFilter(search) : [];
+
     const where: Prisma.ProductWhereInput = {
       status: status ?? "ACTIVE",
-      ...(search && {
-        OR: [
-          { name: { contains: search.trim(), mode: "insensitive" } },
-          { category: { name: { contains: search.trim(), mode: "insensitive" } } },
-          { tags: { contains: search.trim(), mode: "insensitive" } },
-        ],
+      ...(searchFilters.length > 0 && {
+        OR: searchFilters,
       }),
       ...(categorySlug && categorySlug !== "all" && { category: { slug: categorySlug.trim(), isActive: true } }),
       ...(minPrice !== undefined && { price: { gte: minPrice } }),

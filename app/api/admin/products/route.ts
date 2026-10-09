@@ -8,6 +8,7 @@ import { createdResponse, paginatedResponse } from "@/lib/api-response";
 import { handleApiError, UnauthorizedError, ForbiddenError } from "@/lib/api-error";
 import { createProductSchema, productFilterSchema } from "@/lib/validations/product";
 import { generateSlug } from "@/lib/utils";
+import { buildProductSearchFilter } from "@/lib/search";
 
 function requireAdmin(role: string) {
   if (role !== "ADMIN" && role !== "SUPER_ADMIN") throw new ForbiddenError();
@@ -24,13 +25,12 @@ export async function GET(req: NextRequest) {
     const { page, limit, search, status, sortBy, sortOrder } = filter;
     const skip = (page - 1) * limit;
 
+    const searchFilters = search ? buildProductSearchFilter(search) : [];
+
     const where = {
       ...(status && { status }),
-      ...(search && {
-        OR: [
-          { name: { contains: search } },
-          { sku: { contains: search } },
-        ],
+      ...(searchFilters.length > 0 && {
+        OR: searchFilters,
       }),
     };
 

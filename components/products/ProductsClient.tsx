@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Search, X, AlertCircle, RefreshCw } from "lucide-react";
 import { useProducts } from "@/hooks/use-products";
 import { useCategories } from "@/hooks/use-categories";
@@ -58,6 +58,7 @@ function buildInitialFilters(sp: ProductsClientProps["initialSearchParams"]): Fi
 export function ProductsClient({ initialSearchParams, initialProducts, initialPagination }: ProductsClientProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [filters, setFilters] = useState<FilterState>(() =>
     buildInitialFilters(initialSearchParams)
   );
@@ -73,24 +74,68 @@ export function ProductsClient({ initialSearchParams, initialProducts, initialPa
       .catch(() => setAfterHours(isAfterHoursClient(DEFAULT_AFTER_HOURS)));
   }, []);
 
-  // Đồng bộ categorySlug khi URL searchParams thay đổi (ví dụ bấm từ menu hoặc trang chủ)
-  useEffect(() => {
-    if (initialSearchParams.categorySlug !== undefined && initialSearchParams.categorySlug !== filters.categorySlug) {
-      setFilters((prev) => ({
-        ...prev,
-        categorySlug: initialSearchParams.categorySlug ?? "",
-        page: 1,
-      }));
-    }
-  }, [initialSearchParams.categorySlug]);
+  const isIncomingUrlChange = useRef(false);
 
-  const debouncedSearch = useDebounce(filters.search, 400);
+  // Đồng bộ searchParams từ URL vào filters state (Header search, nút back/forward, direct link...)
+  useEffect(() => {
+    const urlSearch = sanitizeSearch(searchParams.get("search") ?? "");
+    const urlCategory = searchParams.get("categorySlug") ?? "";
+    const urlPage = parseInt(searchParams.get("page") ?? "1") || 1;
+    const urlMinPrice = parseInt(searchParams.get("minPrice") ?? "0") || 0;
+    const urlMaxPrice = parseInt(searchParams.get("maxPrice") ?? String(PRICE_MAX)) || PRICE_MAX;
+    const urlIsOrganic = searchParams.get("isOrganic") === "true";
+    const urlSortBy = searchParams.get("sortBy") ?? "createdAt";
+    const urlSortOrder = searchParams.get("sortOrder") ?? "desc";
+
+    setFilters((prev) => {
+      if (
+        prev.search === urlSearch &&
+        prev.categorySlug === urlCategory &&
+        prev.page === urlPage &&
+        prev.minPrice === urlMinPrice &&
+        prev.maxPrice === urlMaxPrice &&
+        prev.isOrganic === urlIsOrganic &&
+        prev.sortBy === urlSortBy &&
+        prev.sortOrder === urlSortOrder
+      ) {
+        return prev;
+      }
+      isIncomingUrlChange.current = true;
+      return {
+        ...prev,
+        search: urlSearch,
+        categorySlug: urlCategory,
+        page: urlPage,
+        minPrice: urlMinPrice,
+        maxPrice: urlMaxPrice,
+        isOrganic: urlIsOrganic,
+        sortBy: urlSortBy,
+        sortOrder: urlSortOrder,
+      };
+    });
+  }, [searchParams]);
+
+  // Lắng nghe sự kiện tìm kiếm từ Header (khi người dùng gõ từ thanh tìm kiếm trên cùng và nhấn Enter)
+  useEffect(() => {
+    const handleProductSearch = (e: Event) => {
+      const detail = (e as CustomEvent<string>).detail;
+      if (typeof detail === "string") {
+        isIncomingUrlChange.current = true;
+        setFilters((prev) => ({ ...prev, search: sanitizeSearch(detail), page: 1 }));
+      }
+    };
+    window.addEventListener("product-search", handleProductSearch);
+    return () => window.removeEventListener("product-search", handleProductSearch);
+  }, []);
+
+  const debouncedSearch = useDebounce(filters.search, 200);
   const queryFilters = { ...filters, search: debouncedSearch };
 
-  // Chỉ dùng serverInitial làm placeholder khi bộ lọc trùng với dữ liệu ban đầu từ SSR
+  // Dùng serverInitial làm placeholder khi bộ lọc trùng với dữ liệu ban đầu từ SSR
+  const initialSanitizedSearch = sanitizeSearch(initialSearchParams.search);
   const isMatchingInitial =
     queryFilters.categorySlug === (initialSearchParams.categorySlug ?? "") &&
-    !queryFilters.search &&
+    queryFilters.search === initialSanitizedSearch &&
     queryFilters.page === (initialSearchParams.page ? parseInt(initialSearchParams.page) : 1);
 
   const serverInitial = initialProducts && initialPagination && isMatchingInitial
@@ -120,9 +165,14 @@ export function ProductsClient({ initialSearchParams, initialProducts, initialPa
   const pagination = data?.pagination ?? (isMatchingInitial ? serverInitial?.pagination : undefined);
   const showLoading = isLoading || (isFetching && !data);
 
-  // Sync filters → URL (debounced)
-  const debouncedFilters = useDebounce(filters, 600);
+  // Sync filters → URL (debounced, chỉ kích hoạt khi người dùng thay đổi bộ lọc trên trang)
+  const debouncedFilters = useDebounce(filters, 400);
   useEffect(() => {
+    if (isIncomingUrlChange.current) {
+      isIncomingUrlChange.current = false;
+      return;
+    }
+
     const params = buildSearchParams({
       page: debouncedFilters.page > 1 ? debouncedFilters.page : undefined,
       search: debouncedFilters.search || undefined,
@@ -133,7 +183,11 @@ export function ProductsClient({ initialSearchParams, initialProducts, initialPa
       sortBy: debouncedFilters.sortBy !== "createdAt" ? debouncedFilters.sortBy : undefined,
       sortOrder: debouncedFilters.sortOrder !== "desc" ? debouncedFilters.sortOrder : undefined,
     });
-    router.replace(`${pathname}${params.toString() ? `?${params}` : ""}`, { scroll: false });
+    const nextQuery = params.toString();
+    const currentQuery = typeof window !== "undefined" ? window.location.search.replace(/^\?/, "") : "";
+    if (nextQuery !== currentQuery) {
+      router.replace(`${pathname}${nextQuery ? `?${nextQuery}` : ""}`, { scroll: false });
+    }
   }, [debouncedFilters, pathname, router]);
 
   const handleChange = useCallback((partial: Partial<FilterState>) => {
@@ -206,6 +260,18 @@ export function ProductsClient({ initialSearchParams, initialProducts, initialPa
           placeholder="Tìm sản phẩm (cải bó xôi, cá hồi, thịt bò...)"
           value={filters.search}
           onChange={(e) => handleChange({ search: e.target.value, page: 1 })}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              const term = filters.search.trim();
+              const params = buildSearchParams({
+                ...filters,
+                search: term || undefined,
+                page: 1,
+              });
+              router.replace(`${pathname}${params.toString() ? `?${params}` : ""}`, { scroll: false });
+            }
+          }}
           className="w-full rounded-2xl border border-gray-200 bg-white pl-11 pr-11 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#22c55e] focus:border-transparent placeholder:text-gray-400 shadow-sm transition-shadow hover:shadow-md"
         />
         {filters.search && (

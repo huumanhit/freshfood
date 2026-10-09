@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { db } from "@/lib/db";
 import { Product } from "@/types/product";
 import { PaginationMeta } from "@/types/api";
+import { buildProductSearchFilter } from "@/lib/search";
 
 export const dynamic = "force-dynamic";
 
@@ -79,14 +80,12 @@ async function fetchInitialProducts(sp: ProductsPageProps["searchParams"]): Prom
     const sortBy = (sp.sortBy as "price" | "name" | "createdAt") ?? "createdAt";
     const sortOrder = (sp.sortOrder as "asc" | "desc") ?? "desc";
 
+    const searchFilters = sp.search ? buildProductSearchFilter(sp.search) : [];
+
     const where = {
       status: "ACTIVE" as const,
-      ...(sp.search && {
-        OR: [
-          { name: { contains: sp.search.trim(), mode: "insensitive" as const } },
-          { category: { name: { contains: sp.search.trim(), mode: "insensitive" as const } } },
-          { tags: { contains: sp.search.trim(), mode: "insensitive" as const } },
-        ],
+      ...(searchFilters.length > 0 && {
+        OR: searchFilters,
       }),
       ...(sp.categorySlug && sp.categorySlug !== "all" && { category: { slug: sp.categorySlug.trim(), isActive: true } }),
       ...(sp.minPrice && { price: { gte: parseFloat(sp.minPrice) } }),
