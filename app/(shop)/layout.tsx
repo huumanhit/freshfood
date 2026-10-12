@@ -3,6 +3,7 @@ import { Footer } from "@/components/shared/Footer";
 import { CartSidebar } from "@/components/shared/CartSidebar";
 import { MobileBottomNav } from "@/components/shared/MobileBottomNav";
 import { CartHydrator } from "@/components/shared/CartHydrator";
+import { VisitorTracker } from "@/components/shared/VisitorTracker";
 
 interface ShopLayoutProps {
   children: React.ReactNode;
@@ -12,6 +13,7 @@ export default function ShopLayout({ children }: ShopLayoutProps) {
   return (
     <div className="flex min-h-screen flex-col">
       <CartHydrator />
+      <VisitorTracker />
       {/* Announcement bar — server-rendered static HTML, no client JS */}
       <div className="w-full bg-[#16a34a] text-white text-xs sm:text-sm py-2 px-4 text-center font-medium">
         🌿 Đặt trước 22h hôm nay - Nhận hàng tươi ngon ngày mai!&nbsp;

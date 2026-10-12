@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { StatsCards } from "./StatsCards";
+import { TrafficSection, TrafficData } from "./TrafficSection";
 import { RecentOrdersTable } from "./RecentOrdersTable";
 import { TopProductsTable } from "./TopProductsTable";
 
@@ -12,6 +13,14 @@ interface DashboardStats {
   profit: { total: number; thisMonth: number };
   products: number;
   customers: { total: number; newThisMonth: number };
+  traffic?: {
+    todayViews: number;
+    todayVisitors: number;
+    thisMonthViews: number;
+    thisMonthVisitors: number;
+    totalViews: number;
+    totalVisitors: number;
+  };
 }
 
 interface RecentOrder {
@@ -42,6 +51,7 @@ const EMPTY_STATS: DashboardStats = {
 
 export function DashboardClient() {
   const [stats, setStats] = useState<DashboardStats>(EMPTY_STATS);
+  const [traffic, setTraffic] = useState<TrafficData | undefined>(undefined);
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
   const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,6 +63,7 @@ export function DashboardClient() {
       .then(({ data }) => {
         if (data.success) {
           setStats(data.data.stats ?? EMPTY_STATS);
+          setTraffic(data.data.traffic);
           setRecentOrders(data.data.recentOrders ?? []);
           setTopProducts(data.data.topProducts ?? []);
         }
@@ -93,6 +104,8 @@ export function DashboardClient() {
       )}
 
       <StatsCards stats={stats} />
+
+      <TrafficSection traffic={traffic} />
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2">

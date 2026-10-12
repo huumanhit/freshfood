@@ -71,6 +71,57 @@ export async function GET() {
       return Number(rows[0]?.profit ?? 0);
     }, 0);
 
+    // ── Traffic stats ────────────────────────────────────────────────────────
+    const vnTime = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+    const todayStr = vnTime.toISOString().slice(0, 10);
+    const thisMonthPrefix = todayStr.slice(0, 7);
+
+    const past7DateStrs: string[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(vnTime.getTime() - i * 24 * 60 * 60 * 1000);
+      past7DateStrs.push(d.toISOString().slice(0, 10));
+    }
+
+    interface VisitRecord {
+      date: string;
+      views: number;
+      visitors: number;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dailyVisitDb = (db as any).dailyVisit;
+
+    const [todayVisit, allVisits, past7Visits] = await Promise.all([
+      safe<VisitRecord | null>(() => dailyVisitDb?.findUnique({ where: { date: todayStr } }), null),
+      safe<VisitRecord[]>(() => dailyVisitDb?.findMany({ select: { date: true, views: true, visitors: true } }), []),
+      safe<VisitRecord[]>(() => dailyVisitDb?.findMany({ where: { date: { in: past7DateStrs } } }), []),
+    ]);
+
+    const totalViews = allVisits.reduce((acc, v) => acc + v.views, 0);
+    const totalVisitors = allVisits.reduce((acc, v) => acc + v.visitors, 0);
+    const thisMonthViews = allVisits
+      .filter((v) => v.date.startsWith(thisMonthPrefix))
+      .reduce((acc, v) => acc + v.views, 0);
+    const thisMonthVisitors = allVisits
+      .filter((v) => v.date.startsWith(thisMonthPrefix))
+      .reduce((acc, v) => acc + v.visitors, 0);
+
+    const past7Map = new Map(past7Visits.map((v) => [v.date, v]));
+    const dayNames = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+    const last7Days = past7DateStrs.map((dStr) => {
+      const item = past7Map.get(dStr);
+      const dObj = new Date(dStr + "T00:00:00Z");
+      const dayName = dayNames[dObj.getUTCDay()];
+      const label = `${dStr.slice(8, 10)}/${dStr.slice(5, 7)}`;
+      return {
+        date: dStr,
+        label,
+        dayName,
+        views: item?.views ?? 0,
+        visitors: item?.visitors ?? 0,
+      };
+    });
+
     return NextResponse.json({
       success: true,
       data: {
@@ -84,6 +135,23 @@ export async function GET() {
           profit: { total: totalProfit, thisMonth: profitThisMonth },
           products: totalProducts,
           customers: { total: totalCustomers, newThisMonth: newCustomersThisMonth },
+          traffic: {
+            todayViews: todayVisit?.views ?? 0,
+            todayVisitors: todayVisit?.visitors ?? 0,
+            thisMonthViews,
+            thisMonthVisitors,
+            totalViews,
+            totalVisitors,
+          },
+        },
+        traffic: {
+          todayViews: todayVisit?.views ?? 0,
+          todayVisitors: todayVisit?.visitors ?? 0,
+          thisMonthViews,
+          thisMonthVisitors,
+          totalViews,
+          totalVisitors,
+          last7Days,
         },
         topProducts: topProducts.map((p) => ({ ...p, price: Number(p.price) })),
         recentOrders: recentOrders.map((o) => ({ ...o, total: Number(o.total), createdAt: o.createdAt.toISOString() })),

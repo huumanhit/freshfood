@@ -203,6 +203,16 @@ export async function POST() {
     await run("orders.adminNote", `ALTER TABLE "orders" ADD COLUMN IF NOT EXISTS "adminNote" TEXT`);
     await run("users.rewardBalance", `ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "rewardBalance" DECIMAL(12,2) NOT NULL DEFAULT 0`);
 
+    // ── Table daily_visits ────────────────────────────────────────────────
+    await run("table daily_visits", `CREATE TABLE IF NOT EXISTS "daily_visits" (
+      "id" TEXT PRIMARY KEY,
+      "date" TEXT UNIQUE NOT NULL,
+      "views" INTEGER NOT NULL DEFAULT 0,
+      "visitors" INTEGER NOT NULL DEFAULT 0,
+      "createdAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`);
+
     return NextResponse.json({ ok: true, results });
   } catch (error) {
     return NextResponse.json({ ok: false, error: String(error) }, { status: 500 });
