@@ -49,7 +49,7 @@ export async function GET() {
       csv += row(
         c.id,
         c.name ?? "",
-        c.email,
+        c.email.includes("@guest.") ? "" : c.email,
         c.phone ?? "",
         c.segment,
         c.referralCode ?? "",

@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { formatCurrency, formatDateTime } from "@/lib/utils";
+import { formatCurrency, formatDateTime, formatDisplayEmail } from "@/lib/utils";
 
 const TIER_CONFIG = {
   BRONZE: { label: "Đồng", color: "bg-amber-700", ring: "ring-amber-300" },
@@ -336,7 +336,7 @@ export function CustomerCRMDetail({ customerId }: CustomerCRMDetailProps) {
         <Card>
           <CardContent className="p-4 space-y-3 text-sm">
             <p className="font-semibold text-gray-800">{customer.name ?? "Khách hàng"}</p>
-            {customer.email && <p className="text-gray-500 text-xs">{customer.email}</p>}
+            {formatDisplayEmail(customer.email) && <p className="text-gray-500 text-xs">{customer.email}</p>}
             {customer.phone && (
               <a href={`tel:${customer.phone}`} className="text-[#22c55e] font-medium hover:underline text-xs">{customer.phone}</a>
             )}

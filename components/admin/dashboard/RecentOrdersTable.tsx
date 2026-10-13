@@ -4,7 +4,7 @@ import { OrderStatus, PaymentMethod } from "@prisma/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { OrderStatusBadge } from "@/components/orders/OrderStatusBadge";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate, formatDisplayEmail } from "@/lib/utils";
 import { ROUTES } from "@/constants/routes";
 
 interface RecentOrder {
@@ -67,9 +67,11 @@ export function RecentOrdersTable({ orders }: RecentOrdersTableProps) {
                       <p className="text-sm font-medium text-gray-800">
                         {order.user?.name ?? "Khách hàng"}
                       </p>
-                      <p className="text-xs text-gray-400 truncate max-w-[140px]">
-                        {order.user?.email}
-                      </p>
+                      {formatDisplayEmail(order.user?.email) && (
+                        <p className="text-xs text-gray-400 truncate max-w-[140px]">
+                          {order.user?.email}
+                        </p>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>

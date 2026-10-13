@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { OrderStatusBadge, PaymentStatusBadge } from "@/components/orders/OrderStatusBadge";
-import { formatCurrency, formatDateTime } from "@/lib/utils";
+import { formatCurrency, formatDateTime, formatDisplayEmail } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
 const STATUS_TRANSITIONS: Record<string, OrderStatus[]> = {
@@ -403,7 +403,7 @@ export function AdminOrderDetail({ order }: AdminOrderDetailProps) {
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             <p className="font-semibold text-gray-800">{order.user?.name ?? order.address?.fullName ?? "Khách hàng"}</p>
-            {order.user?.email && <p className="text-gray-500 text-xs">{order.user.email}</p>}
+            {formatDisplayEmail(order.user?.email) && <p className="text-gray-500 text-xs">{order.user?.email}</p>}
             {(order.user?.phone ?? order.address?.phone) && (
               <a
                 href={`tel:${order.user?.phone ?? order.address?.phone}`}

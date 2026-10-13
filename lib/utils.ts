@@ -74,3 +74,13 @@ export function buildSearchParams(params: Record<string, string | number | boole
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+export function isGuestEmail(email?: string | null): boolean {
+  if (!email) return false;
+  return email.toLowerCase().includes("@guest.");
+}
+
+export function formatDisplayEmail(email?: string | null): string | null {
+  if (!email || isGuestEmail(email)) return null;
+  return email;
+}

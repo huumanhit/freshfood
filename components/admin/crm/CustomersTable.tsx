@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatCurrency, formatDateTime } from "@/lib/utils";
+import { formatCurrency, formatDateTime, formatDisplayEmail } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
 const TIER_COLORS: Record<string, string> = {
@@ -132,7 +132,7 @@ export function CustomersTable() {
                               {customer.name ?? "Ẩn danh"}
                               {hasRisk && <AlertTriangle className="h-3.5 w-3.5 text-orange-400" />}
                             </p>
-                            <p className="text-xs text-gray-400">{customer.phone ?? customer.email}</p>
+                            <p className="text-xs text-gray-400">{customer.phone ?? formatDisplayEmail(customer.email) ?? "—"}</p>
                           </Link>
                         </td>
                         <td className="px-4 py-3">

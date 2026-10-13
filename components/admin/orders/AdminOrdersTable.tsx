@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { OrderStatusBadge, PaymentStatusBadge } from "@/components/orders/OrderStatusBadge";
-import { formatCurrency, formatDateTime } from "@/lib/utils";
+import { formatCurrency, formatDateTime, formatDisplayEmail } from "@/lib/utils";
 import { ROUTES } from "@/constants/routes";
 import { DELIVERY_SLOTS } from "@/lib/validations/order";
 
@@ -264,7 +264,9 @@ export function AdminOrdersTable() {
                       <TableCell>
                         <div>
                           <p className="text-sm font-medium text-gray-800">{order.user?.name ?? order.address?.fullName ?? "—"}</p>
-                          <p className="text-xs text-gray-400 truncate max-w-[160px]">{order.user?.email}</p>
+                          {formatDisplayEmail(order.user?.email) && (
+                            <p className="text-xs text-gray-400 truncate max-w-[160px]">{order.user?.email}</p>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell className="text-sm text-gray-600">
