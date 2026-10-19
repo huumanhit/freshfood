@@ -50,12 +50,13 @@ export function RelatedProducts({ products, categoryName, categorySlug }: Relate
         {products.slice(0, 4).map((product, i) => (
           <motion.div
             key={product.id}
+            className="h-full flex flex-col"
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: i * 0.05, duration: 0.3 }}
           >
-            <ProductCard product={product} />
+            <ProductCard product={product} className="h-full" />
           </motion.div>
         ))}
       </motion.div>

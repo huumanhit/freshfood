@@ -64,7 +64,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
       whileHover={{ y: -4 }}
       transition={{ duration: 0.2 }}
       className={cn(
-        "group relative rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden flex flex-col",
+        "group relative rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden flex flex-col h-full",
         className
       )}
     >
@@ -151,25 +151,29 @@ export function ProductCard({ product, className }: ProductCardProps) {
           </h3>
         </Link>
 
-        {product.origin && (
-          <p className="text-xs text-gray-400">{product.origin}</p>
+        {product.origin ? (
+          <p className="text-xs text-gray-400 min-h-[1rem] truncate">{product.origin}</p>
+        ) : (
+          <div className="min-h-[1rem]" aria-hidden="true" />
         )}
 
         {/* Rating */}
-        {(product.reviewCount ?? 0) > 0 && (
-          <div className="flex items-center gap-1">
-            <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+        {(product.reviewCount ?? 0) > 0 ? (
+          <div className="flex items-center gap-1 min-h-[1rem]">
+            <Star className="h-3 w-3 fill-amber-400 text-amber-400 shrink-0" />
             <span className="text-xs text-gray-500">
               {product.averageRating?.toFixed(1)}{" "}
               <span className="text-gray-400">({product.reviewCount})</span>
             </span>
           </div>
+        ) : (
+          <div className="min-h-[1rem]" aria-hidden="true" />
         )}
 
         {/* Price + button — pinned to bottom */}
         <div className="mt-auto space-y-2">
         {/* Price */}
-        <div className="flex items-baseline gap-1 min-w-0">
+        <div className="flex items-baseline gap-1 min-w-0 min-h-[1.5rem]">
           <span className="font-bold text-[#22c55e] shrink-0">
             {formatCurrency(currentPrice)}
           </span>
