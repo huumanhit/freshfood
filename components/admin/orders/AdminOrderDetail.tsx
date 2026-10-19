@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { MapPin, Phone, Clock, User, Package, Navigation, Loader2, Printer, StickyNote, AlertTriangle, CreditCard } from "lucide-react";
@@ -22,9 +23,9 @@ const STATUS_TRANSITIONS: Record<string, OrderStatus[]> = {
   PROCESSING: ["SHIPPED", "CANCELLED"],
   SHIPPED: ["DELIVERED", "CANCELLED", "FAILED"],
   DELIVERED: [],
-  CANCELLED: [],
+  CANCELLED: ["PENDING", "CONFIRMED"],
   REFUNDED: [],
-  FAILED: [],
+  FAILED: ["SHIPPED", "CANCELLED"],
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -101,32 +102,51 @@ interface AdminOrderDetailProps {
 }
 
 export function AdminOrderDetail({ order }: AdminOrderDetailProps) {
+  const router = useRouter();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [currentStatus, setCurrentStatus] = useState<OrderStatus>(order.status);
+  const [currentPaymentStatus, setCurrentPaymentStatus] = useState<PaymentStatus>(order.paymentStatus);
   const [nextStatus, setNextStatus] = useState<string>("");
   const [nextPaymentStatus, setNextPaymentStatus] = useState<string>("");
   const [adminNoteText, setAdminNoteText] = useState(order.adminNote ?? "");
   const [savingNote, setSavingNote] = useState(false);
 
-  const allowedTransitions = STATUS_TRANSITIONS[order.status];
+  useEffect(() => {
+    setCurrentStatus(order.status);
+  }, [order.status]);
+
+  useEffect(() => {
+    setCurrentPaymentStatus(order.paymentStatus);
+  }, [order.paymentStatus]);
+
+  useEffect(() => {
+    setAdminNoteText(order.adminNote ?? "");
+  }, [order.adminNote]);
+
+  const allowedTransitions = STATUS_TRANSITIONS[currentStatus] ?? [];
 
   const updateMutation = useMutation({
     mutationFn: async (data: { status?: string; paymentStatus?: string; adminNote?: string }) => {
       await axios.patch(`/api/admin/orders/${order.id}`, data);
     },
     onSuccess: (_d, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
       queryClient.invalidateQueries({ queryKey: ["admin-order", order.id] });
       if (vars.status) {
+        setCurrentStatus(vars.status as OrderStatus);
         toast({ title: "Đã cập nhật trạng thái đơn hàng", variant: "success" });
         setNextStatus("");
       }
       if (vars.paymentStatus) {
+        setCurrentPaymentStatus(vars.paymentStatus as PaymentStatus);
         toast({ title: "Đã cập nhật trạng thái thanh toán", variant: "success" });
         setNextPaymentStatus("");
       }
       if (vars.adminNote !== undefined) {
         toast({ title: "Đã lưu ghi chú nội bộ", variant: "success" });
       }
+      router.refresh();
     },
     onError: () => toast({ title: "Lỗi cập nhật", variant: "destructive" }),
   });
@@ -136,6 +156,7 @@ export function AdminOrderDetail({ order }: AdminOrderDetailProps) {
     try {
       await axios.patch(`/api/admin/orders/${order.id}`, { adminNote: adminNoteText });
       toast({ title: "Đã lưu ghi chú nội bộ", variant: "success" });
+      router.refresh();
     } catch {
       toast({ title: "Lỗi lưu ghi chú", variant: "destructive" });
     } finally {
@@ -272,7 +293,7 @@ export function AdminOrderDetail({ order }: AdminOrderDetailProps) {
           </CardHeader>
           <CardContent className="space-y-3">
             {/* Quick mark-as-paid button for pending bank transfers */}
-            {order.paymentMethod === "BANK_TRANSFER" && order.paymentStatus === "PENDING" && (
+            {order.paymentMethod === "BANK_TRANSFER" && currentPaymentStatus === "PENDING" && (
               <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 flex items-center justify-between gap-3">
                 <div>
                   <p className="text-sm font-semibold text-amber-800">Chưa xác nhận thanh toán</p>
@@ -293,7 +314,7 @@ export function AdminOrderDetail({ order }: AdminOrderDetailProps) {
             )}
             <div className="flex gap-3">
               <Select
-                value={nextPaymentStatus || order.paymentStatus}
+                value={nextPaymentStatus || currentPaymentStatus}
                 onValueChange={setNextPaymentStatus}
               >
                 <SelectTrigger className="flex-1 rounded-xl">
@@ -306,7 +327,7 @@ export function AdminOrderDetail({ order }: AdminOrderDetailProps) {
                 </SelectContent>
               </Select>
               <Button
-                disabled={!nextPaymentStatus || nextPaymentStatus === order.paymentStatus || updateMutation.isPending}
+                disabled={!nextPaymentStatus || nextPaymentStatus === currentPaymentStatus || updateMutation.isPending}
                 onClick={() => nextPaymentStatus && updateMutation.mutate({ paymentStatus: nextPaymentStatus })}
                 variant="outline"
                 className="rounded-xl shrink-0"
@@ -356,11 +377,11 @@ export function AdminOrderDetail({ order }: AdminOrderDetailProps) {
           <CardContent className="p-5 space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-gray-500">Trạng thái đơn</p>
-              <OrderStatusBadge status={order.status} />
+              <OrderStatusBadge status={currentStatus} />
             </div>
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-gray-500">Thanh toán</p>
-              <PaymentStatusBadge status={order.paymentStatus} />
+              <PaymentStatusBadge status={currentPaymentStatus} />
             </div>
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-gray-500">Phương thức</p>

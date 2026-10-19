@@ -73,7 +73,12 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
         updateData.deliveredAt = new Date();
         if (!order.shippedAt) updateData.shippedAt = new Date();
       }
-      if (validStatus === "CANCELLED") updateData.cancelledAt = new Date();
+      if (validStatus === "CANCELLED") {
+        updateData.cancelledAt = new Date();
+      } else if (order.cancelledAt) {
+        updateData.cancelledAt = null;
+      }
+      if (validStatus === "FAILED") updateData.failedAt = new Date();
     }
 
     if (paymentStatus) updateData.paymentStatus = paymentStatus;

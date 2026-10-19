@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PaymentMethod } from "@prisma/client";
+import { OrderStatus, PaymentMethod } from "@prisma/client";
 
 export const createOrderSchema = z.object({
   addressId: z.string().cuid("Địa chỉ không hợp lệ"),
@@ -41,7 +41,7 @@ export const checkoutSchema = z.object({
 export type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 
 export const updateOrderStatusSchema = z.object({
-  status: z.enum(["CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"]),
+  status: z.nativeEnum(OrderStatus),
   note: z.string().optional(),
 });
 
